@@ -158,6 +158,42 @@ backend:
         agent: "testing"
         comment: "Article update API tested successfully. PUT /api/articles/{id} works correctly for articles without deposit_group_id (equivalent to frontend 'none' value). Updated 'Kaffee' article successfully with admin authentication."
 
+  - task: "Macher view - prominent article display with quantity"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/KuechePage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Improved Macher view with larger Bonnummer (w-20 h-20 to w-24 h-24), prominent article display with quantity in large boxes (font-mono text-2xl font-black), and bigger 'Gesamt Offen' section with text-3xl quantity display. Tested via screenshots on desktop and mobile."
+
+  - task: "Kurzer Prozess toggle without password"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/LandingPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "The Kurzer Prozess toggle on role selection page already works without any password or confirmation dialog. It's a simple Switch component that directly toggles the stand's short_process setting. Tested via screenshots."
+
+  - task: "Multiple logins for same role at same stand"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/LandingPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "The system already supports multiple simultaneous logins for the same role. There's no session locking or exclusive access. Multiple devices can open the same role at the same stand and process orders independently using the WebSocket-based real-time updates."
+
 frontend:
   - task: "Article editing dialog with Pfandgruppe select"
     implemented: true
