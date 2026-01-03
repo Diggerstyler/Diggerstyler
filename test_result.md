@@ -164,11 +164,14 @@ backend:
     file: "/app/frontend/src/pages/KuechePage.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Improved Macher view with larger Bonnummer (w-20 h-20 to w-24 h-24), prominent article display with quantity in large boxes (font-mono text-2xl font-black), and bigger 'Gesamt Offen' section with text-3xl quantity display. Tested via screenshots on desktop and mobile."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Macher view displays prominently with large Bonnummer boxes (01, 02) in w-20/w-24 h-20/h-24 containers. Article quantities shown in large text-2xl font-black displays (4x, 1x, 9x, 10x). 'Gesamt Offen' section shows extra large text-3xl quantities (13x, 11x). Mobile responsive on 390x844 viewport. All visual requirements met perfectly."
 
   - task: "Kurzer Prozess toggle without password"
     implemented: true
