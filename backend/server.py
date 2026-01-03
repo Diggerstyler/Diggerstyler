@@ -25,6 +25,37 @@ app = FastAPI()
 api_router = APIRouter(prefix="/api")
 security = HTTPBasic()
 
+# Performance: Create database indexes on startup
+async def create_indexes():
+    """Create indexes for better query performance with many concurrent users"""
+    try:
+        # Orders collection - most queried
+        await db.orders.create_index("stand_id")
+        await db.orders.create_index("status")
+        await db.orders.create_index([("stand_id", 1), ("status", 1)])
+        await db.orders.create_index("order_number")
+        await db.orders.create_index("created_at")
+        await db.orders.create_index([("stand_id", 1), ("created_at", -1)])
+        
+        # Articles collection
+        await db.articles.create_index("active")
+        await db.articles.create_index("category")
+        
+        # Stands collection
+        await db.stands.create_index("active")
+        
+        # Stations collection
+        await db.stations.create_index("stand_id")
+        await db.stations.create_index([("stand_id", 1), ("active", 1)])
+        
+        # Linked articles collection
+        await db.linked_articles.create_index("main_article_id")
+        await db.linked_articles.create_index("station_id")
+        
+        logging.info("Database indexes created successfully")
+    except Exception as e:
+        logging.error(f"Error creating indexes: {e}")
+
 # WebSocket Connection Manager
 class ConnectionManager:
     def __init__(self):
