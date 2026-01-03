@@ -403,3 +403,38 @@ agent_communication:
       ✅ MULTIPLE LOGINS: Opened Macher view in two tabs simultaneously - both show identical content (2 orders each). No session locking. Both tabs refresh independently. Data consistency maintained.
       
       All user requirements successfully implemented and tested. System ready for production use.
+  - agent: "testing"
+    message: |
+      🎯 COMPREHENSIVE TESTING COMPLETED - RECENT CHANGES VERIFIED
+      
+      ✅ WORKING FEATURES:
+      1. Back Button Navigation - ALL WORKING
+         - Bestellung → Landing page ✓
+         - Macher (with station selection) → Landing page ✓
+         - Ausgabe → Landing page ✓
+         - Role selection → Landing page ✓
+      
+      2. Macher Page - Clickable Articles - PERFECT
+         - Articles show green checkmark when clicked ✓
+         - Strikethrough text appears when marked ✓
+         - Green background/border visual feedback ✓
+         - Click again to unmark (removes all indicators) ✓
+         - Multiple articles can be marked simultaneously ✓
+         - "Fertig" button completes order regardless of marked items ✓
+         - Station selection dialog works correctly ✓
+      
+      3. Ausgabe Page - Large Bons - PERFECT
+         - Large Bonnummer displays (128x128px or bigger) ✓
+         - Only 2 orders visible at a time ✓
+         - "Übergeben" button available for completion ✓
+         - Proper layout and sizing verified ✓
+      
+      ❌ ISSUE FOUND:
+      4. Kurzer Prozess - NOT WORKING CORRECTLY
+         - Toggle appears but does not change state when clicked
+         - Macher role remains visible even when toggle should be ON
+         - Toggle stays in OFF position despite clicking
+         - No password/confirmation required (correct) ✓
+         - Immediate response (correct) ✓
+      
+      CRITICAL ISSUE: Kurzer Prozess toggle functionality is broken. The toggle UI responds but the actual state change and role visibility logic is not working. This needs immediate attention from main agent.
