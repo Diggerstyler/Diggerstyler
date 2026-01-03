@@ -196,53 +196,117 @@ export default function LandingPage() {
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="max-h-[60vh] pr-4">
-            <div className="space-y-4 py-2">
+            <div className="space-y-5 py-2">
+              {/* Ablauf */}
               <section>
-                <h3 className="font-bold text-primary mb-1">📋 Stand wählen</h3>
-                <p className="text-sm text-muted-foreground">
-                  Wähle deinen Stand. Bei "Kurzer Prozess" geht die Bestellung direkt zur Ausgabe.
-                </p>
+                <h3 className="font-bold text-primary mb-2 text-base">📋 So funktioniert's</h3>
+                <div className="bg-muted/30 rounded-lg p-3 text-sm space-y-2">
+                  <p><strong>1.</strong> Stand auswählen (z.B. "Getränke" oder "Speisen")</p>
+                  <p><strong>2.</strong> Rolle auswählen (je nach deiner Aufgabe)</p>
+                  <p><strong>3.</strong> Loslegen!</p>
+                </div>
               </section>
 
+              {/* Rollen erklärt */}
               <section>
-                <h3 className="font-bold text-primary mb-1">👥 Rollen</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="p-2 bg-primary/10 rounded">
-                    <p className="font-bold text-primary">🛒 Bestellung</p>
-                    <p className="text-muted-foreground text-xs">Kassiert Gäste, hat Archiv</p>
+                <h3 className="font-bold text-primary mb-2 text-base">👥 Die 4 Rollen</h3>
+                <div className="space-y-3 text-sm">
+                  <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                    <p className="font-bold text-primary mb-1">🛒 Bestellung</p>
+                    <ul className="text-muted-foreground text-xs space-y-1 ml-4 list-disc">
+                      <li>Nimmt Bestellungen der Gäste auf</li>
+                      <li>Artikel antippen = zum Warenkorb hinzufügen</li>
+                      <li>Pfand wird automatisch berechnet</li>
+                      <li>"Bestellung aufgeben" → Bon geht zum Macher</li>
+                      <li><strong>Restgeldrechner:</strong> Optional - berechnet Wechselgeld</li>
+                      <li><strong>Archiv:</strong> Zeigt alle bisherigen Bestellungen</li>
+                    </ul>
                   </div>
-                  <div className="p-2 bg-secondary/10 rounded">
-                    <p className="font-bold text-secondary">🔨 Macher</p>
-                    <p className="text-muted-foreground text-xs">Klickt "Fertig" wenn bereit</p>
+                  <div className="p-3 bg-secondary/10 rounded-lg border border-secondary/20">
+                    <p className="font-bold text-secondary mb-1">🔨 Macher</p>
+                    <ul className="text-muted-foreground text-xs space-y-1 ml-4 list-disc">
+                      <li>Sieht eingehende Bestellungen mit Bonnummer</li>
+                      <li>Bereitet die Bestellung zu</li>
+                      <li>"Fertig" klicken → Bon geht zur Ausgabe</li>
+                      <li><strong>Gesamt Offen:</strong> Zeigt alle offenen Artikel kumuliert</li>
+                      <li>Bei Stationen: Nur zugewiesene Artikel sichtbar</li>
+                    </ul>
                   </div>
-                  <div className="p-2 bg-accent/10 rounded">
-                    <p className="font-bold text-accent">📦 Ausgabe</p>
-                    <p className="text-muted-foreground text-xs">Übergibt an Gast</p>
+                  <div className="p-3 bg-accent/10 rounded-lg border border-accent/20">
+                    <p className="font-bold text-accent mb-1">📦 Ausgabe</p>
+                    <ul className="text-muted-foreground text-xs space-y-1 ml-4 list-disc">
+                      <li>Sieht alle fertigen Bestellungen</li>
+                      <li>Ruft Bonnummer aus und übergibt an Gast</li>
+                      <li>"Übergeben" klicken → Bestellung abgeschlossen</li>
+                    </ul>
                   </div>
-                  <div className="p-2 bg-green-500/10 rounded">
-                    <p className="font-bold text-green-500">⚡ OneMan</p>
-                    <p className="text-muted-foreground text-xs">Alles in einem Schritt</p>
+                  <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                    <p className="font-bold text-green-500 mb-1">⚡ OneMan</p>
+                    <ul className="text-muted-foreground text-xs space-y-1 ml-4 list-disc">
+                      <li>Alles in einem: Bestellen + Kassieren + Ausgeben</li>
+                      <li>Für kleine Stände oder einfache Artikel</li>
+                      <li>Bestellung wird sofort als "fertig" markiert</li>
+                    </ul>
                   </div>
                 </div>
               </section>
 
+              {/* Bonnummern */}
               <section>
-                <h3 className="font-bold text-primary mb-1">🔢 Bonnummern</h3>
-                <p className="text-sm text-muted-foreground">
-                  01-25, dann wieder 01. Große Anzeige für 5 Sek. nach Abschluss.
-                </p>
+                <h3 className="font-bold text-primary mb-2 text-base">🔢 Bonnummern</h3>
+                <div className="bg-muted/30 rounded-lg p-3 text-sm">
+                  <ul className="space-y-1 text-muted-foreground list-disc ml-4">
+                    <li>Nummern von <strong>01 bis 25</strong>, dann wieder bei 01</li>
+                    <li>Nach Bestellung: Große Anzeige mit "Weiter" Button</li>
+                    <li>Bonnummer dem Gast mitteilen</li>
+                  </ul>
+                </div>
               </section>
 
+              {/* Kurzer Prozess */}
               <section>
-                <h3 className="font-bold text-primary mb-1">⚡ Kurzer Prozess</h3>
-                <p className="text-sm text-muted-foreground">
-                  Aktivieren = Bestellung geht direkt zur Ausgabe (ohne Macher). Toggle bei Rollenauswahl.
-                </p>
+                <h3 className="font-bold text-primary mb-2 text-base">⚡ Kurzer Prozess</h3>
+                <div className="bg-blue-500/10 rounded-lg p-3 text-sm border border-blue-500/20">
+                  <p className="text-muted-foreground mb-2">
+                    Für Stände mit schneller Ausgabe (z.B. Getränke):
+                  </p>
+                  <ul className="space-y-1 text-muted-foreground list-disc ml-4">
+                    <li><strong>AN:</strong> Bestellung → direkt zur Ausgabe (ohne Macher)</li>
+                    <li><strong>AUS:</strong> Bestellung → Macher → Ausgabe</li>
+                    <li>Toggle bei Rollenauswahl oder in Standverwaltung</li>
+                  </ul>
+                </div>
+              </section>
+
+              {/* Pfand */}
+              <section>
+                <h3 className="font-bold text-primary mb-2 text-base">🍺 Pfand</h3>
+                <div className="bg-muted/30 rounded-lg p-3 text-sm">
+                  <ul className="space-y-1 text-muted-foreground list-disc ml-4">
+                    <li>Artikel mit Pfand zeigen "+X.XX€" Badge</li>
+                    <li>Pfand wird automatisch zum Preis addiert</li>
+                    <li><strong>Pfand zurück:</strong> Bei Glasrückgabe - wird abgezogen</li>
+                    <li>Nur sichtbar wenn Stand Pfand-Artikel hat</li>
+                  </ul>
+                </div>
+              </section>
+
+              {/* Tipps */}
+              <section>
+                <h3 className="font-bold text-primary mb-2 text-base">💡 Tipps</h3>
+                <div className="bg-green-500/10 rounded-lg p-3 text-sm border border-green-500/20">
+                  <ul className="space-y-1 text-muted-foreground list-disc ml-4">
+                    <li>Im Warenkorb: Wischen zum Entfernen</li>
+                    <li>Mehrere Geräte können gleichzeitig arbeiten</li>
+                    <li>App als PWA installierbar (Browser-Menü)</li>
+                    <li>Bei Problemen: Seite neu laden</li>
+                  </ul>
+                </div>
               </section>
             </div>
           </ScrollArea>
           <Button onClick={() => setShowHelp(false)} className="mt-2">
-            OK
+            Verstanden
           </Button>
         </DialogContent>
       </Dialog>
