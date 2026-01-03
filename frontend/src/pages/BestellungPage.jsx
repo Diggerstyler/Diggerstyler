@@ -58,6 +58,7 @@ export default function BestellungPage() {
   // Order completion overlay state
   const [completedOrderNumber, setCompletedOrderNumber] = useState(null);
   const [completedOrderTotal, setCompletedOrderTotal] = useState(0);
+  const [completedOrderItems, setCompletedOrderItems] = useState([]);
   const overlayTimeoutRef = useRef(null);
   
   // Change calculator state
@@ -68,11 +69,13 @@ export default function BestellungPage() {
   const [showArchive, setShowArchive] = useState(false);
   const [archiveOrders, setArchiveOrders] = useState([]);
   const [isLoadingArchive, setIsLoadingArchive] = useState(false);
+  const [selectedArchiveOrder, setSelectedArchiveOrder] = useState(null);
 
-  const showOrderCompletionOverlay = (orderNumber, orderTotal) => {
+  const showOrderCompletionOverlay = (orderNumber, orderTotal, items) => {
     console.log('Showing overlay:', orderNumber, orderTotal);
     setCompletedOrderNumber(orderNumber);
     setCompletedOrderTotal(orderTotal);
+    setCompletedOrderItems(items || []);
     setGivenAmount("");
     setShowChangeCalc(false);
     // No auto-hide - user must click "Weiter"
