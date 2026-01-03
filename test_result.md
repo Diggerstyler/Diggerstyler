@@ -207,7 +207,6 @@ test_plan:
   current_focus:
     - "Bestellung page - order creation workflow"
     - "Role/Stand switching - back button navigation"
-    - "POST /api/orders - create new order"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
