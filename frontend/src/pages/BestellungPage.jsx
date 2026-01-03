@@ -300,8 +300,11 @@ export default function BestellungPage() {
         direct_complete: false
       };
 
+      // Save cart items before clearing for display in overlay
+      const savedCartItems = [...cart];
+      
       const response = await axios.post(`${API}/orders`, order);
-      showOrderCompletionOverlay(response.data.order_number, total);
+      showOrderCompletionOverlay(response.data.order_number, total, savedCartItems);
       toast.success(`Bestellung #${response.data.order_number} erstellt!`);
       setCart([]);
     } catch (error) {
