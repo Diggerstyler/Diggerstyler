@@ -101,8 +101,34 @@ export default function LandingPage() {
     ? allRoles.filter(r => !r.hideOnShortProcess)
     : allRoles;
 
-  const handleRoleSelect = (role) => {
+  // Check if stand has linked articles (for station selection)
+  const checkStandLinkedArticles = async (standId) => {
+    try {
+      const res = await axios.get(`${API}/stands/${standId}/has-linked-articles`);
+      setHasLinkedArticles(res.data.has_linked_articles);
+      setStations(res.data.stations || []);
+      return res.data;
+    } catch (error) {
+      console.error("Error checking linked articles:", error);
+      return { has_linked_articles: false, stations: [] };
+    }
+  };
+
+  const handleRoleSelect = async (role) => {
+    // If Macher role and stand has linked articles, show station selection
+    if (role.id === "macher") {
+      const data = await checkStandLinkedArticles(selectedStand.id);
+      if (data.has_linked_articles && data.stations.length > 0) {
+        setShowStationDialog(true);
+        return;
+      }
+    }
     navigate(`/${role.path}/${selectedStand.id}/${selectedStand.stand_type}`);
+  };
+
+  const handleStationSelect = (stationId) => {
+    setShowStationDialog(false);
+    navigate(`/kueche/${selectedStand.id}/${selectedStand.stand_type}/${stationId}`);
   };
 
   const colorClasses = {
