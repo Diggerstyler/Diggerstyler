@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ShoppingCart, Hammer, Package, Settings, Zap, ArrowLeft, Store, UtensilsCrossed, Beer, Sparkles, HelpCircle, FastForward } from "lucide-react";
+import { ShoppingCart, Hammer, Package, Settings, Zap, ArrowLeft, Store, UtensilsCrossed, Beer, Sparkles, HelpCircle, FastForward, Star } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -18,6 +18,11 @@ export default function LandingPage() {
   const [stands, setStands] = useState([]);
   const [showHelp, setShowHelp] = useState(false);
   const [isTogglingShortProcess, setIsTogglingShortProcess] = useState(false);
+  
+  // Station selection state
+  const [showStationDialog, setShowStationDialog] = useState(false);
+  const [stations, setStations] = useState([]);
+  const [hasLinkedArticles, setHasLinkedArticles] = useState(false);
 
   useEffect(() => {
     const fetchStands = async () => {
