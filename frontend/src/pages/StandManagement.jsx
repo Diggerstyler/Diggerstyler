@@ -239,18 +239,21 @@ export default function StandManagement() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                 <div className="space-y-1">
-                  <Label htmlFor="skip_preparation">Zubereitung überspringen</Label>
+                  <Label htmlFor="short_process" className="flex items-center gap-2">
+                    <FastForward className="w-4 h-4 text-blue-500" />
+                    Kurzer Prozess
+                  </Label>
                   <p className="text-xs text-muted-foreground">
-                    Bestellungen gehen direkt auf "Fertig"
+                    Bestellung → direkt Ausgabe (ohne Macher)
                   </p>
                 </div>
                 <Switch
-                  id="skip_preparation"
-                  checked={formData.skip_preparation}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, skip_preparation: checked }))}
-                  data-testid="skip-prep-switch"
+                  id="short_process"
+                  checked={formData.short_process}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, short_process: checked }))}
+                  data-testid="short-process-switch"
                 />
               </div>
               <Button type="submit" className="w-full neon-primary" data-testid="save-stand-btn">
