@@ -70,11 +70,7 @@ export default function KuechePage() {
   };
 
   const createdOrders = orders.filter(o => o.status === "created");
-  const inProgressOrders = orders.filter(o => o.status === "in_progress");
-  const skipPreparation = standInfo?.skip_preparation || false;
-
-  // In skip_preparation mode: created orders show "Fertig" button directly
-  // In normal mode: created orders show "Zubereitung" button, then move to in_progress with "Fertig" button
+  // No more in_progress state needed - orders go directly from "created" to "ready"
 
   return (
     <div className="min-h-screen bg-background">
