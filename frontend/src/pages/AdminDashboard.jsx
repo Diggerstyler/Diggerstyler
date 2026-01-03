@@ -166,27 +166,28 @@ export default function AdminDashboard() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <LayoutDashboard className="w-5 sm:w-6 h-5 sm:h-6 text-primary" />
-            <h1 className="font-display text-lg sm:text-xl font-bold uppercase tracking-tight">
-              Admin Dashboard
+            <h1 className="font-display text-base sm:text-xl font-bold uppercase tracking-tight">
+              Karnbachs Admin
             </h1>
           </div>
-          <div className="flex flex-wrap items-center gap-2 sm:gap-4 sm:ml-auto">
+          <div className="flex flex-wrap items-center gap-1 sm:gap-2 sm:ml-auto">
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => navigate("/admin/stands")}
               data-testid="stands-nav-btn"
+              className="h-8 px-2"
             >
-              <Store className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Stände</span>
+              <Store className="w-4 h-4" />
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => navigate("/admin/articles")}
               data-testid="articles-nav-btn"
+              className="h-8 px-2"
             >
-              <Package className="w-4 h-4 sm:mr-2" />
+              <Package className="w-4 h-4" />
               <span className="hidden sm:inline">Artikel</span>
             </Button>
             <Button
