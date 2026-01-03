@@ -339,10 +339,9 @@ frontend:
 
 test_plan:
   current_focus:
-    - "Weiter Button in overlay instead of 5-second timer"
-    - "Station management and linked articles feature"
-    - "Detailed instructions (Anleitung)"
-  stuck_tasks: []
+    - "Kurzer Prozess toggle on role selection page"
+  stuck_tasks:
+    - "Kurzer Prozess toggle on role selection page"
   test_all: false
   test_priority: "high_first"
 
