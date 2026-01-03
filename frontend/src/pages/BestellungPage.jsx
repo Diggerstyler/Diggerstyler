@@ -831,37 +831,35 @@ export default function BestellungPage() {
       </div>
 
       {/* Mobile Cart - REDESIGNED with prominent order button */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 glass border-t border-border z-50">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 glass border-t-2 border-primary/50 z-50">
         {/* ALWAYS visible: Big order button + total */}
         {cart.length > 0 && (
-          <div className="p-2 flex items-center gap-2">
-            {/* Cart summary - tap to expand */}
-            <div 
-              className="flex-1 flex items-center gap-2 cursor-pointer min-w-0"
-              onClick={() => setShowMobileCart(!showMobileCart)}
-            >
-              <Badge className="bg-primary text-primary-foreground font-mono text-sm px-2">
-                {cart.reduce((sum, item) => sum + item.quantity, 0)}
-              </Badge>
-              <div className="min-w-0 flex-1">
-                <span className="text-xs text-muted-foreground block truncate">
-                  {cart.slice(0, 2).map(i => `${i.quantity}x ${i.article_name.split(' ')[0]}`).join(', ')}
-                  {cart.length > 2 && '...'}
-                </span>
-              </div>
-              {showMobileCart ? <ChevronDown className="w-4 h-4 shrink-0" /> : <ChevronUp className="w-4 h-4 shrink-0" />}
-            </div>
-            
-            {/* PROMINENT ORDER BUTTON */}
+          <div className="p-2 flex items-center gap-3">
+            {/* PROMINENT ORDER BUTTON - LEFT SIDE, ALWAYS VISIBLE */}
             <Button
-              className="h-12 px-6 font-bold uppercase neon-primary text-base shrink-0"
+              className="h-14 px-8 font-bold uppercase bg-primary hover:bg-primary/90 text-primary-foreground text-lg shadow-lg shadow-primary/30"
               onClick={submitOrder}
               disabled={cart.length === 0 || isSubmitting}
               data-testid="submit-order-mobile-btn"
             >
-              <span className="mr-2">{total.toFixed(2)}€</span>
-              {isSubmitting ? "..." : "✓"}
+              {isSubmitting ? "..." : `${total.toFixed(2)}€ ✓`}
             </Button>
+            
+            {/* Cart summary - tap to expand */}
+            <div 
+              className="flex-1 flex items-center gap-2 cursor-pointer min-w-0 p-2 rounded bg-muted/30"
+              onClick={() => setShowMobileCart(!showMobileCart)}
+            >
+              <Badge className="bg-muted text-foreground font-mono text-sm px-2 shrink-0">
+                {cart.reduce((sum, item) => sum + item.quantity, 0)}x
+              </Badge>
+              <div className="min-w-0 flex-1">
+                <span className="text-xs text-muted-foreground block truncate">
+                  {cart.slice(0, 3).map(i => i.article_name.split(' ')[0]).join(', ')}
+                </span>
+              </div>
+              {showMobileCart ? <ChevronDown className="w-4 h-4 shrink-0" /> : <ChevronUp className="w-4 h-4 shrink-0" />}
+            </div>
           </div>
         )}
         
