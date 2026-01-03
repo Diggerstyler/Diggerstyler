@@ -109,46 +109,7 @@
 
 /* Landscape mode utilities for mobile */
 @media (orientation: landscape) and (max-height: 500px) {
-    .landscape\:max-h-16 {
-        max-height: 4rem;
-    }
-    .landscape\:py-1 {
-        padding-top: 0.25rem;
-        padding-bottom: 0.25rem;
-    }
-    .landscape\:h-8 {
-        height: 2rem;
-    }
-    .landscape\:text-xs {
-        font-size: 0.75rem;
-        line-height: 1rem;
-    }
-    .landscape\:text-sm {
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-    }
-    .landscape\:flex {
-        display: flex;
-    }
-    .landscape\:space-y-0 > :not([hidden]) ~ :not([hidden]) {
-        margin-top: 0;
-    }
-    .landscape\:gap-2 {
-        gap: 0.5rem;
-    }
-    .landscape\:overflow-x-auto {
-        overflow-x: auto;
-    }
-    .landscape\:overflow-y-hidden {
-        overflow-y: hidden;
-    }
-    .landscape\:min-w-fit {
-        min-width: fit-content;
-    }
-    .landscape\:max-w-\[100px\] {
-        max-width: 100px;
-    }
-    .landscape\:hidden {
-        display: none;
+    .landscape\:grid-cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 }
