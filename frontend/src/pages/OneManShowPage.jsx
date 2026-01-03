@@ -28,10 +28,28 @@ export default function OneManShowPage() {
   const touchStartX = useRef(0);
   const wsRef = useRef(null);
   
+  // Order completion overlay state
+  const [completedOrderNumber, setCompletedOrderNumber] = useState(null);
+  const overlayTimeoutRef = useRef(null);
+  
   // Archive state
   const [showArchive, setShowArchive] = useState(false);
   const [archiveOrders, setArchiveOrders] = useState([]);
   const [isLoadingArchive, setIsLoadingArchive] = useState(false);
+
+  const showOrderCompletionOverlay = (orderNumber) => {
+    setCompletedOrderNumber(orderNumber);
+    overlayTimeoutRef.current = setTimeout(() => {
+      setCompletedOrderNumber(null);
+    }, 5000);
+  };
+
+  const dismissOverlay = () => {
+    if (overlayTimeoutRef.current) {
+      clearTimeout(overlayTimeoutRef.current);
+    }
+    setCompletedOrderNumber(null);
+  };
 
   const fetchArchive = async () => {
     setIsLoadingArchive(true);
