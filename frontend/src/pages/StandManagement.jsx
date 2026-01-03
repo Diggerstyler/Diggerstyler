@@ -89,7 +89,7 @@ export default function StandManagement() {
     setFormData({
       name: stand.name,
       stand_type: stand.stand_type || "gemischt",
-      skip_preparation: stand.skip_preparation || false
+      short_process: stand.short_process || false
     });
     setIsDialogOpen(true);
   };
