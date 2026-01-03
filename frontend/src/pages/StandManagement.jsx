@@ -362,7 +362,7 @@ export default function StandManagement() {
 
         {/* Article Assignment Dialog */}
         <Dialog open={isArticleDialogOpen} onOpenChange={setIsArticleDialogOpen}>
-          <DialogContent className="bg-card border-border max-w-lg max-h-[80vh]">
+          <DialogContent className="bg-card border-border max-w-lg max-h-[90vh]">
             <DialogHeader>
               <DialogTitle className="font-display uppercase">
                 Artikel für {selectedStandForArticles?.name}
@@ -372,41 +372,86 @@ export default function StandManagement() {
                 {selectedArticles.length === 0 && " • Alle Artikel werden angezeigt wenn nichts ausgewählt"}
               </p>
             </DialogHeader>
-            <ScrollArea className="max-h-[50vh] pr-4">
-              <div className="space-y-2">
-                {getFilteredArticles().map(article => (
-                  <div 
-                    key={article.id}
-                    className="flex items-center gap-3 p-3 rounded-sm bg-muted/50 hover:bg-muted cursor-pointer"
-                    onClick={() => toggleArticle(article.id)}
-                  >
-                    <Checkbox 
-                      checked={selectedArticles.includes(article.id)}
-                      onCheckedChange={() => toggleArticle(article.id)}
-                    />
-                    <div className="flex-1">
-                      <p className="font-medium">{article.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {article.price.toFixed(2)} € • {article.category === "getraenke" ? "Getränk" : "Speise"}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-            <div className="flex gap-2 pt-4">
+            
+            {/* Quick select buttons */}
+            <div className="flex gap-2 py-2 border-b border-border">
               <Button
                 variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => setSelectedArticles(getFilteredArticles().map(a => a.id))}
+              >
+                Alle auswählen
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 className="flex-1"
                 onClick={() => setSelectedArticles([])}
               >
                 Alle abwählen
               </Button>
+            </div>
+
+            <ScrollArea className="max-h-[50vh] pr-2">
+              <div className="space-y-2 py-2">
+                {getFilteredArticles().map(article => {
+                  const isSelected = selectedArticles.includes(article.id);
+                  return (
+                    <div 
+                      key={article.id}
+                      className={`
+                        flex items-center gap-4 p-4 rounded-lg cursor-pointer
+                        transition-all duration-150 active:scale-[0.98]
+                        ${isSelected 
+                          ? 'bg-primary/20 border-2 border-primary ring-2 ring-primary/20' 
+                          : 'bg-muted/50 border-2 border-transparent hover:bg-muted hover:border-muted-foreground/20'
+                        }
+                      `}
+                      onClick={() => toggleArticle(article.id)}
+                      data-testid={`article-select-${article.id}`}
+                    >
+                      {/* Large visual checkbox indicator */}
+                      <div className={`
+                        w-8 h-8 rounded-md flex items-center justify-center shrink-0
+                        transition-colors duration-150
+                        ${isSelected 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'bg-background border-2 border-muted-foreground/30'
+                        }
+                      `}>
+                        {isSelected && (
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      
+                      {/* Article info */}
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-semibold text-base truncate ${isSelected ? 'text-primary' : ''}`}>
+                          {article.name}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="font-mono text-sm">{article.price.toFixed(2)} €</span>
+                          <Badge variant="outline" className="text-xs">
+                            {article.category === "getraenke" ? "Getränk" : "Speise"}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+            
+            {/* Footer with save button */}
+            <div className="pt-4 border-t border-border">
               <Button
-                className="flex-1 neon-primary"
+                className="w-full h-12 text-base font-semibold neon-primary"
                 onClick={saveArticleAssignment}
               >
-                Speichern ({selectedArticles.length})
+                Speichern ({selectedArticles.length} Artikel ausgewählt)
               </Button>
             </div>
           </DialogContent>
