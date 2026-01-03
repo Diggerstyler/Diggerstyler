@@ -1,127 +1,93 @@
 # Festival Order Management System (FESTIVAL_OS)
 ## PRD - Product Requirements Document
 
-### Datum: 2025-01-03
+### Datum: 2025-01-03 (Update)
 
 ---
 
 ## Original Problem Statement
 Bestellmanagement-App für ein Stadtfest mit:
-- 10 Stände
+- Konfigurierbare Stände (hinzufügen, löschen, umbenennen)
 - 3 Standtypen: Speisestand, Getränkestand, Gemischter Stand
-- 4 Rollen pro Stand: Bestellung, Küche, Ausgabe, OneManShow
-- Admin-Bereich mit Artikelverwaltung und Statistiken
-- Filter nach Tag, Stunde, Stand, Rolle
+- 4 Rollen: Bestellung, Küche, Ausgabe, OneManShow
+- Artikel-Zuweisung pro Stand
+- Küchen-Einstellung: Zubereitung überspringen ja/nein
+- Küche mit Gesamt-Übersicht aller offenen Artikel
+- Admin-Bereich mit Statistiken
 
 ---
 
-## User Personas
+## Aktualisierungen/Erweiterungen
 
-### 1. Mitarbeiter "Bestellung" (Rolle 1)
-- Bucht Artikel für Gäste
-- Erstellt Bestellungen
-- Verrechnet mit Gast
+### Echtzeit-Aktualisierung
+- Polling alle 3 Sekunden zwischen Rollen
+- Wenn Rolle 1 bestellt → Rolle 2 sieht es nach max. 3 Sekunden
+- Küchen-Summary aktualisiert sich automatisch
 
-### 2. Mitarbeiter "Küche" (Rolle 2)  
-- Sieht eingehende Bestellungen
-- Markiert Bestellungen als "In Bearbeitung"
-- Meldet fertige Bestellungen
-
-### 3. Mitarbeiter "Ausgabe" (Rolle 3)
-- Sieht fertige Bestellungen
-- Übergibt Bestellung an Gast
-- Markiert als "Abgeholt"
-
-### 4. Mitarbeiter "OneManShow" (Rolle 4) - NEU
-- Macht alles in einer Rolle
-- Tippen, Abrechnen, Zubereiten, Ausgeben
-- Ideal für kleine Stände
-
-### 5. Administrator
-- Verwaltet Artikel (CRUD)
-- Sieht Statistiken mit Filtern
-- Login erforderlich (admin/admin)
+### Sortierung
+- Bestellungen werden nach Eingang sortiert (FIFO - First In, First Out)
+- Älteste Bestellung ist immer oben/vorn
 
 ---
 
-## Core Requirements (Static)
-
-### Must Have
-- [x] 10 Stände konfiguriert
-- [x] 3 Standtypen: Speisestand, Getränkestand, Gemischter Stand
-- [x] 4 Rollen ohne Authentifizierung
-- [x] Artikelfilter basierend auf Standtyp
-- [x] Artikelverwaltung im Admin-Bereich
-- [x] Order-Status-Flow: Created → In Progress → Ready → Completed
-- [x] Order-Nummer pro Stand/Tag
-- [x] Deutsche Benutzeroberfläche
-- [x] Admin-Authentifizierung
-
-### Nice to Have
-- [x] Statistiken mit Filtern
-- [x] CSV-Export
-- [x] Top-Artikel-Ranking
-- [x] Bestellungen pro Stunde
-
----
-
-## What's Been Implemented
+## Implementierte Features
 
 ### Backend (FastAPI + MongoDB)
-- [x] `/api/stands` - Liste aller 10 Stände
-- [x] `/api/stand-types` - Liste der Standtypen (Speise, Getränke, Gemischt)
-- [x] `/api/roles` - Liste aller 4 Rollen (inkl. OneManShow)
+- [x] `/api/stands` - CRUD für Stände
+- [x] `/api/stands/{id}/articles` - Artikel für einen Stand (gefiltert)
+- [x] `/api/stands/{id}/kitchen-summary` - Gesamt offene Artikel
+- [x] `/api/stand-types` - Standtypen
+- [x] `/api/roles` - 4 Rollen inkl. OneManShow
 - [x] `/api/articles` - CRUD für Artikel
-- [x] `/api/orders` - CRUD für Bestellungen
-- [x] `/api/orders/{id}/status` - Status-Updates
-- [x] `/api/auth/login` - Admin-Login (Basic Auth)
-- [x] `/api/stats/overview` - Übersichts-Statistiken
-- [x] `/api/stats/orders` - Gefilterte Bestellliste
-- [x] `/api/seed` - Initial-Daten (17 Artikel)
+- [x] `/api/orders` - CRUD, sortiert nach Eingang (FIFO)
+- [x] `skip_preparation` - Bestellungen direkt auf "Fertig"
+- [x] Admin Auth für geschützte Endpoints
 
-### Frontend (React + Shadcn UI)
-- [x] Landing Page mit Stand-, Standtyp- und Rollen-Auswahl
-- [x] Bestellungs-Seite (POS-System) mit Artikel-Filterung
-- [x] Küche-Seite (Kanban-Board)
-- [x] Ausgabe-Seite (Grid mit fertigen Bestellungen)
-- [x] OneManShow-Seite (Tabs für alle Workflows)
-- [x] Admin-Login
-- [x] Admin-Dashboard
+### Frontend (React + Shadcn UI) - RESPONSIVE
+- [x] Landing Page - Stand + Rolle Auswahl
+- [x] Bestellungs-Seite (POS) - Artikelfilter nach Stand
+- [x] Küche-Seite mit "GESAMT OFFEN" Übersicht
+- [x] Ausgabe-Seite
+- [x] OneManShow (alles in einer Ansicht)
+- [x] Admin Dashboard
+- [x] **Standverwaltung** (NEU) - Stände CRUD
+- [x] **Artikel-Zuweisung** (NEU) - Artikel zu Ständen
+- [x] **Zubereitung überspringen** (NEU) - Pro Stand einstellbar
 - [x] Artikelverwaltung
-- [x] Statistik-Seite mit Filtern und CSV-Export
+- [x] Statistiken mit Filtern
 
-### Design
-- Dark Theme mit Neon-Akzenten
-- Festival-Hintergrund auf Landing Page
-- Responsives Layout
-- Sonner Toasts für Feedback
-
----
-
-## Standtyp-Logik
-
-| Standtyp | Angezeigte Artikel |
-|----------|-------------------|
-| Speisestand | Nur Speisen |
-| Getränkestand | Nur Getränke |
-| Gemischter Stand | Speisen + Getränke |
+### Admin-Funktionen
+| Feature | Beschreibung |
+|---------|-------------|
+| Stände verwalten | Hinzufügen, Bearbeiten, Löschen von Ständen |
+| Standtyp ändern | Speisestand, Getränkestand, Gemischt |
+| Artikel zuweisen | Welche Artikel an welchem Stand |
+| Zubereitung | Normal oder Überspringen (direkt fertig) |
 
 ---
 
-## Prioritized Backlog
+## Küchen-Übersicht "GESAMT OFFEN"
 
-### P0 (Kritisch) - Erledigt
-- Alle Kernfunktionen implementiert
+Die Küche zeigt rechts eine Zusammenfassung aller offenen Artikel:
+```
+ZU PRODUZIEREN
+- Bratwurst    4x
+- Pommes       2x
+- Bier 0,5l   3x
+```
+Diese Übersicht aktualisiert sich alle 3 Sekunden.
 
-### P1 (Wichtig) - Für Zukunft
-- [ ] Echtzeit-Updates via WebSockets
-- [ ] Sound-Benachrichtigungen für neue Bestellungen
-- [ ] Druckfunktion für Bon/Ticket
+---
 
-### P2 (Nice to Have)
-- [ ] Offline-Modus mit Sync
-- [ ] Tischzuordnung zu Bestellungen
-- [ ] Mitarbeiter-Namen bei Rollenauswahl
+## Polling/Updates zwischen Rollen
+
+| Aktion | Update-Zeit |
+|--------|------------|
+| Neue Bestellung | ~3 Sekunden bis Küche sieht |
+| Küche → Fertig | ~3 Sekunden bis Ausgabe sieht |
+| Ausgabe → Übergeben | ~3 Sekunden bis Summary aktualisiert |
+
+Für echte Echtzeit wären WebSockets nötig.
 
 ---
 
@@ -133,7 +99,8 @@ Bestellmanagement-App für ein Stadtfest mit:
 
 ---
 
-## Next Tasks
-1. Optional: WebSocket für Live-Updates
-2. Optional: Druckfunktion für Bons
-3. Optional: Mitarbeiter-Tracking
+## Next Tasks (Optional)
+1. WebSockets für echte Echtzeit-Updates
+2. Druckfunktion für Bons
+3. Sound bei neuen Bestellungen
+4. Mitarbeiter-Namen bei Rollenauswahl
