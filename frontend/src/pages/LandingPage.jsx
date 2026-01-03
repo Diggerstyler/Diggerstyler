@@ -67,6 +67,11 @@ export default function LandingPage() {
     }
   ];
 
+  // Filter roles based on stand settings
+  const roles = selectedStand?.short_process 
+    ? allRoles.filter(r => !r.hideOnShortProcess)  // Hide Macher when short_process is enabled
+    : allRoles;
+
   const handleRoleSelect = (role) => {
     navigate(`/${role.path}/${selectedStand.id}/${selectedStand.stand_type}`);
   };
