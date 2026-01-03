@@ -188,6 +188,10 @@ class OrderItem(BaseModel):
     price: float
     deposit_amount: float = 0
     is_deposit_return: bool = False
+    is_linked_article: bool = False  # True if this is a linked/side article
+    linked_to_article_id: Optional[str] = None  # Main article this is linked to
+    station_id: Optional[str] = None  # Station responsible for this item
+    station_completed: bool = False  # Whether station has marked this item as done
 
 class Order(BaseModel):
     model_config = ConfigDict(extra="ignore")
