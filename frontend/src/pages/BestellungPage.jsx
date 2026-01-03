@@ -116,14 +116,21 @@ export default function BestellungPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [articlesRes, standRes, typesRes, depositsRes] = await Promise.all([
+        const [articlesRes, standRes, typesRes, depositsRes, linkedRes] = await Promise.all([
           axios.get(`${API}/stands/${standId}/articles`),
           axios.get(`${API}/stands/${standId}`),
           axios.get(`${API}/stand-types`),
-          axios.get(`${API}/deposit-groups`)
+          axios.get(`${API}/deposit-groups`),
+          axios.get(`${API}/stands/${standId}/linked-articles`)
         ]);
         
-        setArticles(articlesRes.data);
+        // Add linked article info to articles
+        const articlesWithLinked = articlesRes.data.map(article => ({
+          ...article,
+          linkedArticles: linkedRes.data.filter(l => l.main_article_id === article.id)
+        }));
+        
+        setArticles(articlesWithLinked);
         setStandInfo(standRes.data);
         setDepositGroups(depositsRes.data.filter(d => d.active));
         
