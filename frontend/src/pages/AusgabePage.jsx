@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Package, CheckCircle, RefreshCw } from "lucide-react";
+import { ArrowLeft, Package, CheckCircle, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -15,6 +15,8 @@ export default function AusgabePage() {
   const [orders, setOrders] = useState([]);
   const [standInfo, setStandInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [visibleStartIndex, setVisibleStartIndex] = useState(0);
+  const VISIBLE_COUNT = 2; // Show only 2 bons at a time
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -25,10 +27,15 @@ export default function AusgabePage() {
       
       setOrders(ordersRes.data);
       setStandInfo(standRes.data);
+      
+      // Reset index if it's out of bounds
+      if (visibleStartIndex >= ordersRes.data.length && ordersRes.data.length > 0) {
+        setVisibleStartIndex(Math.max(0, ordersRes.data.length - VISIBLE_COUNT));
+      }
     } catch (error) {
       console.error("Error fetching orders:", error);
     }
-  }, [standId]);
+  }, [standId, visibleStartIndex]);
 
   useEffect(() => {
     fetchOrders();
@@ -51,6 +58,12 @@ export default function AusgabePage() {
       setIsLoading(false);
     }
   };
+
+  // Get visible orders (only 2 at a time)
+  const visibleOrders = orders.slice(visibleStartIndex, visibleStartIndex + VISIBLE_COUNT);
+  const hasMore = orders.length > VISIBLE_COUNT;
+  const canGoBack = visibleStartIndex > 0;
+  const canGoForward = visibleStartIndex + VISIBLE_COUNT < orders.length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -91,51 +104,108 @@ export default function AusgabePage() {
         </div>
       </header>
 
-      <main className="p-4 sm:p-6">
+      <main className="p-4 sm:p-6 h-[calc(100vh-80px)] flex flex-col">
         {orders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-            <Package className="w-12 sm:w-16 h-12 sm:h-16 text-muted-foreground mb-4" />
-            <h2 className="font-display text-xl sm:text-2xl font-bold mb-2">Keine fertigen Bestellungen</h2>
-            <p className="text-muted-foreground text-sm sm:text-base">
+          <div className="flex flex-col items-center justify-center flex-1 text-center px-4">
+            <Package className="w-16 sm:w-24 h-16 sm:h-24 text-muted-foreground mb-4" />
+            <h2 className="font-display text-2xl sm:text-3xl font-bold mb-2">Keine fertigen Bestellungen</h2>
+            <p className="text-muted-foreground text-base sm:text-lg">
               Warte auf fertige Bestellungen aus der Küche
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
-            {orders.map(order => (
-              <Card
-                key={order.id}
-                className="bg-card border-2 border-green-500/50 pulse-ready cursor-pointer hover:border-green-500 transition-colors"
-                onClick={() => completeOrder(order.id, order.order_number)}
-                data-testid={`order-ready-${order.id}`}
-              >
-                <CardContent className="p-4 sm:p-6 flex flex-col items-center text-center">
-                  <div className="font-mono text-3xl sm:text-5xl font-bold text-green-500 mb-3 sm:mb-4">
-                    #{order.order_number}
-                  </div>
-                  <ul className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 w-full">
-                    {order.items.slice(0, 3).map((item, idx) => (
-                      <li key={idx} className="truncate">
-                        {item.quantity}x {item.article_name}
-                      </li>
-                    ))}
-                    {order.items.length > 3 && (
-                      <li className="text-xs">+{order.items.length - 3} weitere</li>
-                    )}
-                  </ul>
-                  <Button
-                    className="w-full bg-green-600 hover:bg-green-700 text-sm"
-                    disabled={isLoading}
-                    data-testid={`complete-order-${order.id}`}
-                  >
-                    <CheckCircle className="w-4 h-4 mr-1 sm:mr-2" />
-                    <span className="hidden sm:inline">Übergeben</span>
-                    <span className="sm:hidden">OK</span>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <>
+            {/* Navigation for more orders */}
+            {hasMore && (
+              <div className="flex items-center justify-between mb-4">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => setVisibleStartIndex(Math.max(0, visibleStartIndex - VISIBLE_COUNT))}
+                  disabled={!canGoBack}
+                  className="h-12"
+                >
+                  <ChevronLeft className="w-6 h-6 mr-2" />
+                  Vorherige
+                </Button>
+                <div className="text-center">
+                  <span className="text-lg font-medium">
+                    {visibleStartIndex + 1}-{Math.min(visibleStartIndex + VISIBLE_COUNT, orders.length)} von {orders.length}
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => setVisibleStartIndex(visibleStartIndex + VISIBLE_COUNT)}
+                  disabled={!canGoForward}
+                  className="h-12"
+                >
+                  Nächste
+                  <ChevronRight className="w-6 h-6 ml-2" />
+                </Button>
+              </div>
+            )}
+
+            {/* Large Bon Cards - only 2 at a time */}
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              {visibleOrders.map(order => (
+                <Card
+                  key={order.id}
+                  className="bg-card border-4 border-green-500/50 pulse-ready cursor-pointer hover:border-green-500 transition-all hover:scale-[1.02] flex flex-col"
+                  onClick={() => completeOrder(order.id, order.order_number)}
+                  data-testid={`order-ready-${order.id}`}
+                >
+                  <CardContent className="p-6 sm:p-8 flex flex-col items-center text-center flex-1 justify-center">
+                    {/* Large Bonnummer */}
+                    <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl bg-green-500/20 border-4 border-green-500 flex items-center justify-center mb-6">
+                      <span className="font-mono text-6xl sm:text-7xl font-black text-green-500">
+                        {order.order_number.toString().padStart(2, '0')}
+                      </span>
+                    </div>
+                    
+                    {/* Items list */}
+                    <div className="w-full max-w-sm space-y-2 mb-6">
+                      {order.items.filter(i => !i.is_deposit_return).map((item, idx) => (
+                        <div 
+                          key={idx} 
+                          className={`flex items-center justify-between p-3 rounded-lg ${item.is_linked_article ? 'bg-muted/30 text-muted-foreground text-sm' : 'bg-green-500/10'}`}
+                        >
+                          <span className={item.is_linked_article ? '' : 'font-medium text-lg'}>{item.article_name}</span>
+                          <span className={`font-mono ${item.is_linked_article ? '' : 'text-lg font-bold'}`}>{item.quantity}x</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Total */}
+                    <div className="mb-6">
+                      <span className="text-muted-foreground text-sm">Gesamt:</span>
+                      <span className="font-mono text-2xl sm:text-3xl font-bold text-green-500 ml-2">
+                        {order.total.toFixed(2)} €
+                      </span>
+                    </div>
+                    
+                    <Button
+                      className="w-full max-w-sm h-16 bg-green-600 hover:bg-green-700 text-xl font-bold"
+                      disabled={isLoading}
+                      data-testid={`complete-order-${order.id}`}
+                    >
+                      <CheckCircle className="w-6 h-6 mr-3" />
+                      Übergeben
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Hidden orders indicator */}
+            {orders.length > VISIBLE_COUNT && (
+              <div className="mt-4 text-center text-muted-foreground">
+                <Badge variant="outline" className="text-base px-4 py-2">
+                  +{orders.length - VISIBLE_COUNT} weitere Bestellungen warten
+                </Badge>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>
