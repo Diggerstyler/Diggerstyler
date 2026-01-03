@@ -250,10 +250,7 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus:
-    - "Macher view - prominent article display with quantity"
-    - "Kurzer Prozess toggle without password"
-    - "Multiple logins for same role at same stand"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -312,3 +309,18 @@ agent_communication:
       Bug fix verification: 10/10 tests passed (100% success rate)
       
       Ready for frontend testing if needed.
+  - agent: "testing"
+    message: |
+      🎉 FRONTEND TESTING COMPLETED - ALL 3 NEW FEATURES VERIFIED WORKING
+      
+      ✅ KURZER PROZESS TOGGLE: Works perfectly without password/confirmation. When ON, Macher role hidden (only Bestellung, Ausgabe, OneMan visible). When OFF, all 4 roles visible. Tested on Getränke stand.
+      
+      ✅ MACHER VIEW - PROMINENT DISPLAY: 
+         - Large Bonnummer boxes (01, 02) in w-20/w-24 h-20/h-24 containers (~80-96px)
+         - Article quantities in large text-2xl font-black displays (4x, 1x, 9x, 10x)
+         - "Gesamt Offen" section with extra large text-3xl quantities (13x, 11x)
+         - Mobile responsive on 390x844 viewport - all elements visible
+      
+      ✅ MULTIPLE LOGINS: Opened Macher view in two tabs simultaneously - both show identical content (2 orders each). No session locking. Both tabs refresh independently. Data consistency maintained.
+      
+      All user requirements successfully implemented and tested. System ready for production use.
