@@ -118,6 +118,7 @@ export default function OrdersManagement() {
   };
 
   const formatOrderNumber = (num) => {
+    if (num === null || num === undefined) return '--';
     return num.toString().padStart(2, '0');
   };
 
