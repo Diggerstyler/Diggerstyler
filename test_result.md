@@ -203,6 +203,54 @@ backend:
         agent: "testing"
         comment: "✅ VERIFIED: Multiple logins work perfectly. Opened Macher view in two separate tabs simultaneously - both loaded identical content with same orders (2 orders visible in each). No session locking detected. Both tabs can refresh independently. Data consistency maintained across sessions. System supports multiple devices accessing same role without conflicts."
 
+  - task: "GET /api/stands/{stand_id}/completed-orders - return completed orders"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: GET /api/stands/{stand_id}/completed-orders endpoint working perfectly. Returns completed orders for a stand sorted by updated_at descending. Found 8 completed orders in test. Includes backward compatibility for missing fields (subtotal, deposit_total, deposit_return_total). API response structure correct."
+
+  - task: "PUT /api/orders/{order_id}/reclaim - change status from completed to ready"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: PUT /api/orders/{order_id}/reclaim endpoint working perfectly. Successfully changes order status from 'completed' to 'ready' and clears completed_by field. Validates that only completed orders can be reclaimed (returns 400 for non-completed orders). WebSocket broadcast working for real-time updates."
+
+  - task: "GET /api/admin/orders - return paginated orders with total count"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: GET /api/admin/orders endpoint working perfectly with admin authentication. Returns paginated response with orders array, total count, limit, and offset. Supports optional stand_id filtering. Requires admin auth (admin/admin) - correctly returns 401 for unauthorized access. Pagination structure complete and correct."
+
+  - task: "DELETE /api/admin/orders/{order_id} - delete an order"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: DELETE /api/admin/orders/{order_id} endpoint working perfectly with admin authentication. Successfully deletes orders and returns confirmation message. Requires admin auth - correctly returns 401 for unauthorized access. Deleted order correctly returns 404 on subsequent GET requests. Order deletion is permanent and complete."
+
 frontend:
   - task: "Article editing dialog with Pfandgruppe select"
     implemented: true
