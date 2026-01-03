@@ -153,6 +153,9 @@ backend:
       - working: true
         agent: "main"
         comment: "Backend endpoint works correctly. Issue was on frontend with Select component."
+      - working: true
+        agent: "testing"
+        comment: "Article update API tested successfully. PUT /api/articles/{id} works correctly for articles without deposit_group_id (equivalent to frontend 'none' value). Updated 'Kaffee' article successfully with admin authentication."
 
 frontend:
   - task: "Article editing dialog with Pfandgruppe select"
