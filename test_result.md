@@ -123,6 +123,9 @@ backend:
       - working: true
         agent: "main"
         comment: "Fixed by removing response_model validation and adding backward compatibility for missing fields (subtotal, deposit_total, deposit_return_total) in GET /orders endpoint."
+      - working: true
+        agent: "testing"
+        comment: "Bug fix verified successfully. GET /api/orders?stand_id=stand_1 and stand_2 both return orders without 500 errors. Backward compatibility working - all orders have required fields (subtotal, deposit_total, deposit_return_total). Retrieved 5 orders from stand_1 and 4 orders from stand_2 without issues."
 
   - task: "POST /api/orders - create new order"
     implemented: true
