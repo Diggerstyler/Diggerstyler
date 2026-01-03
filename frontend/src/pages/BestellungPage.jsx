@@ -157,7 +157,7 @@ export default function BestellungPage() {
         </aside>
 
         {/* Mobile Category Tabs */}
-        <div className="md:hidden fixed bottom-[180px] left-0 right-0 glass px-4 py-2 flex gap-2 z-40">
+        <div className="md:hidden fixed bottom-[140px] left-0 right-0 glass px-4 py-2 flex gap-2 z-30">
           {categories.map(cat => (
             <Button
               key={cat.id}
@@ -172,7 +172,7 @@ export default function BestellungPage() {
         </div>
 
         {/* Articles Grid */}
-        <main className="flex-1 p-6 overflow-auto pb-48 md:pb-6">
+        <main className="flex-1 p-6 overflow-auto pb-52 md:pb-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredArticles.map(article => (
               <Card
@@ -278,7 +278,7 @@ export default function BestellungPage() {
       </div>
 
       {/* Mobile Cart */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 glass p-4 space-y-3">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 glass p-4 space-y-3 z-50">
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground">
             {cart.reduce((sum, item) => sum + item.quantity, 0)} Artikel
@@ -288,7 +288,7 @@ export default function BestellungPage() {
           </span>
         </div>
         <Button
-          className="w-full h-12 font-semibold uppercase neon-primary"
+          className="w-full h-12 font-semibold uppercase neon-primary relative z-50"
           onClick={submitOrder}
           disabled={cart.length === 0 || isSubmitting}
           data-testid="submit-order-mobile-btn"
