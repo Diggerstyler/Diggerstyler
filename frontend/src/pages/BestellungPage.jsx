@@ -43,15 +43,17 @@ export default function BestellungPage() {
   const [isLoadingArchive, setIsLoadingArchive] = useState(false);
 
   const showOrderCompletionOverlay = (orderNumber, orderTotal) => {
+    console.log('Showing overlay:', orderNumber, orderTotal);
     setCompletedOrderNumber(orderNumber);
     setCompletedOrderTotal(orderTotal);
     setGivenAmount("");
     setShowChangeCalc(false);
-    // Auto-hide after 5 seconds (only if change calc is not open)
+    // Auto-hide after 5 seconds
+    if (overlayTimeoutRef.current) {
+      clearTimeout(overlayTimeoutRef.current);
+    }
     overlayTimeoutRef.current = setTimeout(() => {
-      if (!showChangeCalc) {
-        setCompletedOrderNumber(null);
-      }
+      setCompletedOrderNumber(null);
     }, 5000);
   };
 
