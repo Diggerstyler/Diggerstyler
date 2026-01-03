@@ -288,7 +288,7 @@ export default function StandManagement() {
                       <TableHead>Name</TableHead>
                       <TableHead className="hidden sm:table-cell">Typ</TableHead>
                       <TableHead className="hidden md:table-cell">Artikel</TableHead>
-                      <TableHead className="text-center">Zubereitung</TableHead>
+                      <TableHead className="text-center">Kurzer Prozess</TableHead>
                       <TableHead className="text-right">Aktionen</TableHead>
                     </TableRow>
                   </TableHeader>
