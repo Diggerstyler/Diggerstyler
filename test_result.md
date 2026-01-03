@@ -101,3 +101,118 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Festival OS - A festival order management app with 4 roles (Bestellung, Küche, Ausgabe, OneManShow).
+  User reported two bugs:
+  1. Orders not saving (500 error due to missing 'subtotal' field in old orders)
+  2. Article editing not working (empty string value in Select component for Pfandgruppe)
+
+backend:
+  - task: "GET /api/orders - fetch orders with backward compatibility"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "User reported orders not saving. Backend returning 500 error due to missing 'subtotal' field in old orders stored in DB."
+      - working: true
+        agent: "main"
+        comment: "Fixed by removing response_model validation and adding backward compatibility for missing fields (subtotal, deposit_total, deposit_return_total) in GET /orders endpoint."
+
+  - task: "POST /api/orders - create new order"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Tested via curl - order creation works with order_number returned correctly."
+
+  - task: "PUT /api/articles/{id} - update article"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Backend endpoint works correctly. Issue was on frontend with Select component."
+
+frontend:
+  - task: "Article editing dialog with Pfandgruppe select"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/ArticleManagement.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "User reported error when editing articles. Error: 'A Select.Item must have a value prop that is not an empty string'."
+      - working: true
+        agent: "main"
+        comment: "Fixed by changing empty string '' to 'none' for 'Kein Pfand' option in Select component. Tested via screenshot - dialog opens and updates successfully."
+
+  - task: "Bestellung page - order creation workflow"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/BestellungPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Tested via screenshots - can add items to cart, see deposit info, and submit orders."
+
+  - task: "Role/Stand switching - back button navigation"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/BestellungPage.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Back button (ArrowLeft) navigates to landing page for role/stand reselection."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Bestellung page - order creation workflow"
+    - "Role/Stand switching - back button navigation"
+    - "POST /api/orders - create new order"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Fixed two user-reported bugs:
+      1. Orders 500 error: Added backward compatibility in GET /api/orders to handle old orders missing subtotal, deposit_total, deposit_return_total fields.
+      2. Article edit error: Changed SelectItem value from empty string "" to "none" for "Kein Pfand" option.
+      
+      Please test:
+      - Full order creation workflow (Bestellung role > select stand > add items > submit)
+      - Article editing in admin (especially articles without Pfand)
+      - Role/stand switching via back button
+      
+      Admin credentials: admin/admin
