@@ -359,7 +359,7 @@ async def get_stand_articles(stand_id: str):
 
 # Order Routes
 async def get_next_order_number(stand_id: str) -> int:
-    """Get next order number (1-20, then cycles back to 1)"""
+    """Get next order number (1-25, then cycles back to 1)"""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     counter = await db.order_counters.find_one_and_update(
         {"stand_id": stand_id, "date": today},
@@ -367,8 +367,8 @@ async def get_next_order_number(stand_id: str) -> int:
         upsert=True,
         return_document=True
     )
-    # Cycle 1-20: when count reaches 21, reset to 1
-    number = ((counter["count"] - 1) % 20) + 1
+    # Cycle 1-25: when count reaches 26, reset to 1
+    number = ((counter["count"] - 1) % 25) + 1
     return number
 
 @api_router.get("/orders")
