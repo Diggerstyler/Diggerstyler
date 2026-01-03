@@ -328,74 +328,102 @@ export default function BestellungPage() {
           className="fixed inset-0 z-[100] bg-black/80"
           onClick={!showChangeCalc ? dismissOverlay : undefined}
         >
-          {/* Bottom Sheet Container */}
+          {/* Bottom Sheet Container - full height on mobile */}
           <div 
-            className="absolute bottom-0 left-0 right-0 bg-card rounded-t-3xl animate-in slide-in-from-bottom duration-300 max-h-[90vh] overflow-hidden flex flex-col"
+            className="absolute bottom-0 left-0 right-0 bg-card rounded-t-3xl animate-in slide-in-from-bottom duration-300 max-h-[95vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Handle bar */}
-            <div className="flex justify-center pt-3 pb-2">
+            {/* Handle bar - fixed */}
+            <div className="flex justify-center pt-3 pb-2 shrink-0">
               <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
             </div>
             
             {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4">
-              {/* Header with Bonnummer */}
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-primary/20 border-4 border-primary flex items-center justify-center shrink-0">
-                    <span className="font-mono text-4xl sm:text-5xl font-black text-primary">
-                      {completedOrderNumber.toString().padStart(2, '0')}
-                    </span>
+            <div className="flex-1 overflow-y-auto px-4 pb-6">
+              {/* Header with Bonnummer - sticky */}
+              <div className="sticky top-0 bg-card pb-4 z-10">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-primary/20 border-4 border-primary flex items-center justify-center shrink-0">
+                      <span className="font-mono text-3xl sm:text-4xl font-black text-primary">
+                        {completedOrderNumber.toString().padStart(2, '0')}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider">Bon</p>
+                      <p className="font-mono text-xl sm:text-2xl font-bold text-primary">
+                        {completedOrderTotal.toFixed(2)} €
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground uppercase tracking-wider">Bon Nummer</p>
-                    <p className="font-mono text-2xl sm:text-3xl font-bold text-primary">
-                      {completedOrderTotal.toFixed(2)} €
-                    </p>
-                  </div>
+                  <Button
+                    className="h-12 sm:h-14 px-4 sm:px-6 text-base font-bold bg-primary hover:bg-primary/90 shrink-0"
+                    onClick={dismissOverlay}
+                  >
+                    Weiter →
+                  </Button>
                 </div>
-                {/* Weiter Button - always visible */}
-                <Button
-                  className="h-16 px-6 text-lg font-bold bg-primary hover:bg-primary/90 shrink-0"
-                  onClick={dismissOverlay}
-                >
-                  Weiter →
-                </Button>
               </div>
 
-              {/* Change Calculator Toggle */}
+              {/* Order Items - scrollable */}
+              <div className="space-y-2 mb-4">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Artikel im Bon</p>
+                <div className="bg-muted/20 rounded-xl p-3 space-y-2">
+                  {completedOrderItems.filter(i => !i.is_deposit_return).map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                      <div className="flex items-center gap-3">
+                        <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center font-mono font-bold text-primary">
+                          {item.quantity}x
+                        </span>
+                        <span className="font-medium">{item.article_name}</span>
+                      </div>
+                      <span className="font-mono text-muted-foreground">
+                        {(item.price * item.quantity).toFixed(2)} €
+                      </span>
+                    </div>
+                  ))}
+                  {completedOrderItems.filter(i => i.is_deposit_return).length > 0 && (
+                    <>
+                      <p className="text-xs text-muted-foreground pt-2">Pfand zurück:</p>
+                      {completedOrderItems.filter(i => i.is_deposit_return).map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between py-1 text-green-500">
+                          <span className="text-sm">{item.quantity}x {item.article_name}</span>
+                          <span className="font-mono text-sm">-{Math.abs(item.price * item.quantity).toFixed(2)} €</span>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Change Calculator */}
               {!showChangeCalc ? (
                 <Button
                   variant="outline"
-                  className="w-full h-14 border-green-500/50 text-green-500 hover:bg-green-500/10"
+                  className="w-full h-12 border-green-500/50 text-green-500 hover:bg-green-500/10"
                   onClick={openChangeCalculator}
                 >
                   <Calculator className="w-5 h-5 mr-2" />
-                  Restgeldrechner öffnen
+                  Restgeldrechner
                 </Button>
               ) : (
                 <div className="space-y-4 bg-muted/30 rounded-xl p-4">
                   <div className="flex items-center justify-between">
                     <p className="font-medium">Restgeldrechner</p>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowChangeCalc(false)}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => setShowChangeCalc(false)}>
                       <X className="w-4 h-4" />
                     </Button>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">Zu zahlen</p>
-                      <p className="font-mono text-2xl font-bold text-primary">
+                      <p className="text-sm text-muted-foreground mb-1">Zu zahlen</p>
+                      <p className="font-mono text-xl font-bold text-primary">
                         {completedOrderTotal.toFixed(2)} €
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">Gast gibt</p>
+                      <p className="text-sm text-muted-foreground mb-1">Gast gibt</p>
                       <Input
                         type="number"
                         step="0.01"
@@ -404,25 +432,25 @@ export default function BestellungPage() {
                         value={givenAmount}
                         onChange={(e) => setGivenAmount(e.target.value)}
                         placeholder="0.00"
-                        className="font-mono text-xl h-12 bg-background"
+                        className="font-mono text-lg h-10 bg-background"
                         autoFocus
                       />
                     </div>
                   </div>
                   
                   {givenAmount && parseFloat(givenAmount) > 0 && (
-                    <div className={`rounded-xl p-4 ${parseFloat(givenAmount) >= completedOrderTotal ? 'bg-green-500/20 border border-green-500/50' : 'bg-red-500/20 border border-red-500/50'}`}>
-                      <p className={`text-sm mb-1 ${parseFloat(givenAmount) >= completedOrderTotal ? 'text-green-400' : 'text-red-400'}`}>
+                    <div className={`rounded-xl p-3 ${parseFloat(givenAmount) >= completedOrderTotal ? 'bg-green-500/20 border border-green-500/50' : 'bg-red-500/20 border border-red-500/50'}`}>
+                      <p className={`text-xs mb-1 ${parseFloat(givenAmount) >= completedOrderTotal ? 'text-green-400' : 'text-red-400'}`}>
                         {parseFloat(givenAmount) >= completedOrderTotal ? 'Rückgeld' : 'Fehlbetrag'}
                       </p>
-                      <p className={`font-mono text-3xl font-bold ${parseFloat(givenAmount) >= completedOrderTotal ? 'text-green-500' : 'text-red-500'}`}>
+                      <p className={`font-mono text-2xl font-bold ${parseFloat(givenAmount) >= completedOrderTotal ? 'text-green-500' : 'text-red-500'}`}>
                         {Math.abs(calculateChange()).toFixed(2)} €
                       </p>
                     </div>
                   )}
 
                   <Button
-                    className="w-full h-12 bg-green-600 hover:bg-green-700"
+                    className="w-full h-10 bg-green-600 hover:bg-green-700"
                     onClick={finishWithChange}
                   >
                     Abschließen
@@ -433,6 +461,38 @@ export default function BestellungPage() {
           </div>
         </div>
       )}
+
+      {/* Archive Order Detail Dialog */}
+      <Dialog open={selectedArchiveOrder !== null} onOpenChange={() => setSelectedArchiveOrder(null)}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                <span className="font-mono text-xl font-bold">#{selectedArchiveOrder?.order_number}</span>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Bon Details</p>
+                <p className="font-mono text-lg">{selectedArchiveOrder?.total?.toFixed(2)} €</p>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            {selectedArchiveOrder?.items?.filter(i => !i.is_deposit_return).map((item, idx) => (
+              <div key={idx} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">{item.quantity}x</Badge>
+                  <span>{item.article_name}</span>
+                </div>
+                <span className="font-mono text-muted-foreground">{(item.price * item.quantity).toFixed(2)} €</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>Status: {selectedArchiveOrder?.status}</span>
+            <span>{selectedArchiveOrder?.created_at && new Date(selectedArchiveOrder.created_at).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}</span>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
         <Button 
