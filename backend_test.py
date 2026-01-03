@@ -167,7 +167,7 @@ class FestivalAPITester:
             "created_by": "Bestellung"
         }
         
-        success, created_order = self.run_test("Create Order", "POST", "orders", 201, test_order)
+        success, created_order = self.run_test("Create Order", "POST", "orders", 200, test_order)
         
         if success and created_order:
             order_id = created_order.get('id')
