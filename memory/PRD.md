@@ -8,7 +8,8 @@
 ## Original Problem Statement
 Bestellmanagement-App für ein Stadtfest mit:
 - 10 Stände
-- 3 Rollen pro Stand: Bestellung, Küche, Ausgabe
+- 3 Standtypen: Speisestand, Getränkestand, Gemischter Stand
+- 4 Rollen pro Stand: Bestellung, Küche, Ausgabe, OneManShow
 - Admin-Bereich mit Artikelverwaltung und Statistiken
 - Filter nach Tag, Stunde, Stand, Rolle
 
@@ -31,7 +32,12 @@ Bestellmanagement-App für ein Stadtfest mit:
 - Übergibt Bestellung an Gast
 - Markiert als "Abgeholt"
 
-### 4. Administrator
+### 4. Mitarbeiter "OneManShow" (Rolle 4) - NEU
+- Macht alles in einer Rolle
+- Tippen, Abrechnen, Zubereiten, Ausgeben
+- Ideal für kleine Stände
+
+### 5. Administrator
 - Verwaltet Artikel (CRUD)
 - Sieht Statistiken mit Filtern
 - Login erforderlich (admin/admin)
@@ -42,7 +48,9 @@ Bestellmanagement-App für ein Stadtfest mit:
 
 ### Must Have
 - [x] 10 Stände konfiguriert
-- [x] 3 Rollen ohne Authentifizierung
+- [x] 3 Standtypen: Speisestand, Getränkestand, Gemischter Stand
+- [x] 4 Rollen ohne Authentifizierung
+- [x] Artikelfilter basierend auf Standtyp
 - [x] Artikelverwaltung im Admin-Bereich
 - [x] Order-Status-Flow: Created → In Progress → Ready → Completed
 - [x] Order-Nummer pro Stand/Tag
@@ -61,7 +69,8 @@ Bestellmanagement-App für ein Stadtfest mit:
 
 ### Backend (FastAPI + MongoDB)
 - [x] `/api/stands` - Liste aller 10 Stände
-- [x] `/api/roles` - Liste aller 3 Rollen
+- [x] `/api/stand-types` - Liste der Standtypen (Speise, Getränke, Gemischt)
+- [x] `/api/roles` - Liste aller 4 Rollen (inkl. OneManShow)
 - [x] `/api/articles` - CRUD für Artikel
 - [x] `/api/orders` - CRUD für Bestellungen
 - [x] `/api/orders/{id}/status` - Status-Updates
@@ -71,10 +80,11 @@ Bestellmanagement-App für ein Stadtfest mit:
 - [x] `/api/seed` - Initial-Daten (17 Artikel)
 
 ### Frontend (React + Shadcn UI)
-- [x] Landing Page mit Stand- und Rollen-Auswahl
-- [x] Bestellungs-Seite (POS-System)
+- [x] Landing Page mit Stand-, Standtyp- und Rollen-Auswahl
+- [x] Bestellungs-Seite (POS-System) mit Artikel-Filterung
 - [x] Küche-Seite (Kanban-Board)
 - [x] Ausgabe-Seite (Grid mit fertigen Bestellungen)
+- [x] OneManShow-Seite (Tabs für alle Workflows)
 - [x] Admin-Login
 - [x] Admin-Dashboard
 - [x] Artikelverwaltung
@@ -85,6 +95,16 @@ Bestellmanagement-App für ein Stadtfest mit:
 - Festival-Hintergrund auf Landing Page
 - Responsives Layout
 - Sonner Toasts für Feedback
+
+---
+
+## Standtyp-Logik
+
+| Standtyp | Angezeigte Artikel |
+|----------|-------------------|
+| Speisestand | Nur Speisen |
+| Getränkestand | Nur Getränke |
+| Gemischter Stand | Speisen + Getränke |
 
 ---
 
