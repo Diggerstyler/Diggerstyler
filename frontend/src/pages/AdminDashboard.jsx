@@ -220,6 +220,16 @@ export default function AdminDashboard() {
               <span className="hidden sm:inline">Reset</span>
             </Button>
             <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowHelp(true)}
+              data-testid="help-btn"
+              className="border-muted-foreground/30"
+            >
+              <HelpCircle className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Anleitung</span>
+            </Button>
+            <Button
               variant="ghost"
               size="sm"
               onClick={handleLogout}
@@ -231,6 +241,91 @@ export default function AdminDashboard() {
           </div>
         </div>
       </header>
+
+      {/* Admin Help Dialog */}
+      <Dialog open={showHelp} onOpenChange={setShowHelp}>
+        <DialogContent className="bg-card border-border max-w-2xl max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-primary" />
+              Admin-Anleitung
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh] pr-4">
+            <div className="space-y-6 py-4">
+              <section>
+                <h3 className="font-display text-lg font-bold text-primary mb-2">🏪 Standverwaltung</h3>
+                <ul className="text-sm text-muted-foreground space-y-2">
+                  <li>• <strong>Stand erstellen:</strong> Klicke auf "+ Neuer Stand" und gib Name und Typ ein</li>
+                  <li>• <strong>Standtypen:</strong> Speisestand, Getränkestand oder Gemischt</li>
+                  <li>• <strong>Kurzer Prozess:</strong> Wenn aktiviert, überspringt die Bestellung den Macher und geht direkt zur Ausgabe</li>
+                  <li>• <strong>Artikel zuweisen:</strong> Klicke auf "X Artikel" um festzulegen welche Artikel am Stand verfügbar sind</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-display text-lg font-bold text-primary mb-2">📦 Artikelverwaltung</h3>
+                <ul className="text-sm text-muted-foreground space-y-2">
+                  <li>• <strong>Artikel erstellen:</strong> Name, Preis und Kategorie (Speise/Getränk) festlegen</li>
+                  <li>• <strong>Pfandgruppe:</strong> Optional eine Pfandgruppe zuweisen (z.B. Becher 2€)</li>
+                  <li>• <strong>Aktiv/Inaktiv:</strong> Artikel können vorübergehend deaktiviert werden</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-display text-lg font-bold text-primary mb-2">💰 Pfandgruppen</h3>
+                <ul className="text-sm text-muted-foreground space-y-2">
+                  <li>• Erstelle Pfandgruppen wie "Becher 0,5l" mit dem jeweiligen Pfandbetrag</li>
+                  <li>• Weise die Pfandgruppe dann den Artikeln zu</li>
+                  <li>• Der Pfand wird automatisch zum Preis addiert</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-display text-lg font-bold text-primary mb-2">📊 Statistiken</h3>
+                <ul className="text-sm text-muted-foreground space-y-2">
+                  <li>• <strong>Übersicht:</strong> Gesamtzahl Bestellungen, Umsatz, Abschlussrate</li>
+                  <li>• <strong>Stündliche Auswertung:</strong> Bestellungen und Umsatz pro Stunde</li>
+                  <li>• Hilfreich für Personal- und Warenplanung</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-display text-lg font-bold text-primary mb-2">📥 Export</h3>
+                <ul className="text-sm text-muted-foreground space-y-2">
+                  <li>• Lädt alle Daten als JSON-Datei herunter</li>
+                  <li>• Enthält: Bestellungen, Artikel, Stände, Pfandgruppen</li>
+                  <li>• Ideal für Buchhaltung und Auswertungen</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-display text-lg font-bold text-primary mb-2">🗑️ Reset</h3>
+                <ul className="text-sm text-muted-foreground space-y-2">
+                  <li>• Löscht alle Bestellungen aus der Datenbank</li>
+                  <li>• Artikel, Stände und Pfandgruppen bleiben erhalten</li>
+                  <li>• Erfordert PIN-Eingabe und Bestätigung</li>
+                  <li>• Ideal für den Start eines neuen Festival-Tages</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-display text-lg font-bold text-primary mb-2">🔢 Bonnummern</h3>
+                <ul className="text-sm text-muted-foreground space-y-2">
+                  <li>• Jede Bestellung erhält eine Nummer von 01-25</li>
+                  <li>• Nach 25 beginnt die Nummerierung wieder bei 01</li>
+                  <li>• Nummerierung ist pro Stand getrennt</li>
+                </ul>
+              </section>
+            </div>
+          </ScrollArea>
+          <div className="pt-4 border-t border-border flex justify-end">
+            <Button onClick={() => setShowHelp(false)}>
+              Verstanden
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <main className="p-4 sm:p-6 max-w-7xl mx-auto">
         {isLoading ? (
