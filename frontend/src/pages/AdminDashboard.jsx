@@ -191,24 +191,23 @@ export default function AdminDashboard() {
               <span className="hidden sm:inline">Artikel</span>
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => navigate("/admin/stats")}
               data-testid="stats-nav-btn"
+              className="h-8 px-2"
             >
-              <BarChart3 className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Statistiken</span>
+              <BarChart3 className="w-4 h-4" />
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={handleExport}
               disabled={isExporting}
               data-testid="export-btn"
-              className="border-green-500/50 text-green-500 hover:bg-green-500/10"
+              className="h-8 px-2 text-green-500"
             >
-              <Download className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">{isExporting ? "..." : "Export"}</span>
+              <Download className="w-4 h-4" />
             </Button>
             <Button
               variant="outline"
