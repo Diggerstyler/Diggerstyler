@@ -258,6 +258,182 @@ class FestivalAPITester:
         # Test unauthorized access to stats
         self.run_test("Get Stats (No Auth)", "POST", "stats/overview", 401, stats_filter)
 
+    def test_new_features_message_456(self):
+        """Test newly implemented features from user message #456"""
+        print("\n=== TESTING NEW FEATURES (Message #456) ===")
+        
+        # First, ensure we have test data
+        self.run_test("Seed Data for New Features", "POST", "seed", 200)
+        
+        # Get stands and articles for testing
+        success, stands = self.run_test("Get Stands for New Features", "GET", "stands", 200)
+        if not success or not stands:
+            print("❌ Cannot test new features without stands")
+            return
+            
+        success, articles = self.run_test("Get Articles for New Features", "GET", "articles?active_only=true", 200)
+        if not success or not articles:
+            print("❌ Cannot test new features without articles")
+            return
+            
+        test_stand = stands[0]
+        test_article = articles[0] if articles else None
+        
+        if not test_article:
+            print("❌ No articles available for testing new features")
+            return
+        
+        # Create a test order that we can complete and then reclaim
+        test_order = {
+            "stand_id": test_stand["id"],
+            "stand_name": test_stand["name"],
+            "items": [
+                {
+                    "article_id": test_article["id"],
+                    "article_name": test_article["name"],
+                    "quantity": 1,
+                    "price": test_article["price"],
+                    "deposit_amount": 0,
+                    "is_deposit_return": False
+                }
+            ],
+            "subtotal": test_article["price"],
+            "deposit_total": 0,
+            "deposit_return_total": 0,
+            "total": test_article["price"],
+            "created_by": "TestUser"
+        }
+        
+        success, created_order = self.run_test("Create Test Order for New Features", "POST", "orders", 200, test_order)
+        
+        if not success or not created_order:
+            print("❌ Cannot test new features without creating test order")
+            return
+            
+        order_id = created_order.get('id')
+        print(f"   Created test order with ID: {order_id}")
+        
+        # Complete the order so we can test reclaim functionality
+        complete_update = {
+            "status": "completed",
+            "updated_by": "TestAusgabe"
+        }
+        success, completed_order = self.run_test("Complete Test Order", "PUT", f"orders/{order_id}/status", 200, complete_update)
+        
+        if success:
+            print("   Order completed successfully")
+            
+            # TEST 1: GET /api/stands/{stand_id}/completed-orders
+            success, completed_orders = self.run_test(
+                "Get Completed Orders for Stand", 
+                "GET", 
+                f"stands/{test_stand['id']}/completed-orders", 
+                200
+            )
+            
+            if success and completed_orders:
+                print(f"   Found {len(completed_orders)} completed orders")
+                # Verify our test order is in the list
+                found_order = any(order.get('id') == order_id for order in completed_orders)
+                if found_order:
+                    print("   ✅ Test order found in completed orders list")
+                else:
+                    print("   ❌ Test order not found in completed orders list")
+                    self.failed_tests.append({
+                        "test": "Verify Test Order in Completed List",
+                        "error": "Created order not found in completed orders"
+                    })
+            
+            # TEST 2: PUT /api/orders/{order_id}/reclaim
+            success, reclaimed_order = self.run_test(
+                "Reclaim Completed Order", 
+                "PUT", 
+                f"orders/{order_id}/reclaim", 
+                200
+            )
+            
+            if success and reclaimed_order:
+                if reclaimed_order.get('status') == 'ready':
+                    print("   ✅ Order successfully reclaimed (status changed to 'ready')")
+                else:
+                    print(f"   ❌ Order reclaim failed - status is '{reclaimed_order.get('status')}', expected 'ready'")
+                    self.failed_tests.append({
+                        "test": "Verify Reclaim Status Change",
+                        "expected": "ready",
+                        "actual": reclaimed_order.get('status')
+                    })
+        
+        # TEST 3: GET /api/admin/orders (with admin auth)
+        success, admin_orders_response = self.run_test(
+            "Get Admin Orders (Paginated)", 
+            "GET", 
+            "admin/orders?limit=10&offset=0", 
+            200, 
+            auth=True
+        )
+        
+        if success and admin_orders_response:
+            orders_list = admin_orders_response.get('orders', [])
+            total_count = admin_orders_response.get('total', 0)
+            limit = admin_orders_response.get('limit', 0)
+            offset = admin_orders_response.get('offset', 0)
+            
+            print(f"   ✅ Admin orders endpoint returned {len(orders_list)} orders")
+            print(f"   Total count: {total_count}, Limit: {limit}, Offset: {offset}")
+            
+            # Verify pagination structure
+            if 'orders' in admin_orders_response and 'total' in admin_orders_response:
+                print("   ✅ Pagination structure correct (orders, total, limit, offset)")
+            else:
+                print("   ❌ Pagination structure incorrect")
+                self.failed_tests.append({
+                    "test": "Admin Orders Pagination Structure",
+                    "error": "Missing required pagination fields"
+                })
+        
+        # Test unauthorized access to admin orders
+        self.run_test("Get Admin Orders (No Auth)", "GET", "admin/orders", 401)
+        
+        # TEST 4: DELETE /api/admin/orders/{order_id} (with admin auth)
+        if order_id:
+            success, delete_response = self.run_test(
+                "Delete Order (Admin)", 
+                "DELETE", 
+                f"admin/orders/{order_id}", 
+                200, 
+                auth=True
+            )
+            
+            if success and delete_response:
+                if delete_response.get('message') and 'gelöscht' in delete_response.get('message', ''):
+                    print("   ✅ Order successfully deleted")
+                else:
+                    print("   ❌ Order deletion response unexpected")
+                    self.failed_tests.append({
+                        "test": "Verify Order Deletion Response",
+                        "error": "Unexpected deletion response message"
+                    })
+                
+                # Verify order is actually deleted
+                success, get_deleted = self.run_test(
+                    "Verify Order Deleted", 
+                    "GET", 
+                    f"orders/{order_id}", 
+                    404
+                )
+                
+                if success:
+                    print("   ✅ Deleted order correctly returns 404")
+        
+        # Test unauthorized access to delete orders
+        # Create another order for unauthorized delete test
+        success, another_order = self.run_test("Create Order for Unauthorized Delete Test", "POST", "orders", 200, test_order)
+        if success and another_order:
+            another_order_id = another_order.get('id')
+            self.run_test("Delete Order (No Auth)", "DELETE", f"admin/orders/{another_order_id}", 401)
+        
+        print("   🎯 New features testing completed")
+
     def run_all_tests(self):
         """Run all test suites"""
         print("🚀 Starting Festival Order Management API Tests")
