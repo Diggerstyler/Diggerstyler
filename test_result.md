@@ -250,7 +250,10 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Pfand zurück button visibility based on stand articles"
+    - "Order completion overlay with total and change calculator"
+    - "Kurzer Prozess toggle in StandManagement without password"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -258,21 +261,30 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      Implemented 3 user requests:
+      Implemented 4 user requests:
       
-      1. KURZER PROZESS TOGGLE: Already works without password/confirmation. Simple Switch on role selection screen.
+      1. PFAND ZURÜCK BUTTON: Now only shown if the stand has articles with deposit configured.
+         - Speisestand (Test): NO deposit articles -> "Pfand zurück" NOT shown ✓
+         - Getränkestand: HAS deposit articles -> "Pfand zurück" IS shown ✓
       
-      2. MACHER VIEW IMPROVED: 
-         - Bonnummer now larger (w-20 h-20 / w-24 h-24 on desktop) with border
-         - Articles displayed in prominent boxes with big quantity badges (text-2xl font-black)
-         - "Gesamt Offen" section with even larger quantity display (text-3xl)
+      2. BONNUMMER OVERLAY IMPROVED:
+         - Now shows "Zu zahlen" (total amount) below the Bonnummer
+         - Added "Restgeldrechner" (change calculator) button
          
-      3. MULTIPLE LOGINS: System already supports this - no session locking. Multiple devices can access same role at same stand via WebSocket updates.
+      3. RESTGELDRECHNER:
+         - Employee enters what guest gave
+         - Calculates and shows change (green) or shortfall (red)
+         - "Abschließen" button to complete
+         - The order is already forwarded when overlay appears
+      
+      4. KURZER PROZESS IN STANDMANAGEMENT:
+         - Already works without password/confirmation (simple toggle switch)
       
       Please test:
-      - Macher view on desktop and mobile (check article/quantity visibility)
-      - Kurzer Prozess toggle (enable/disable and verify it affects workflow)
-      - Open same role (e.g., Macher) on two browser tabs and verify both can see/process orders
+      - Bestellung at Speisestand (stand_1) - verify NO "Pfand zurück" button
+      - Bestellung at Getränkestand - verify "Pfand zurück" button IS shown
+      - Create order and check overlay with total and calculator button
+      - Test change calculator: enter amount, see change/shortfall, click Abschließen
   - agent: "main"
     message: |
       Implemented workflow logic fix per user request:
