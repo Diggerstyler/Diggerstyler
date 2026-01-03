@@ -609,6 +609,77 @@ async def create_order(order: OrderCreate):
     order_dict = order.model_dump()
     del order_dict["direct_complete"]
     
+    # Process items for linked articles
+    items = order_dict["items"]
+    new_items = []
+    station_status = {}
+    has_linked_articles = False
+    
+    # Get main station for this stand
+    main_station = await db.stations.find_one({"stand_id": order.stand_id, "is_main": True, "active": True}, {"_id": 0})
+    
+    for item in items:
+        if item.get("is_deposit_return"):
+            new_items.append(item)
+            continue
+        
+        # Check if this article has linked articles
+        linked_articles = await db.linked_articles.find({"main_article_id": item["article_id"]}, {"_id": 0}).to_list(100)
+        
+        if linked_articles:
+            has_linked_articles = True
+            # Main article goes to main station
+            if main_station:
+                item["station_id"] = main_station["id"]
+                station_status[main_station["id"]] = False
+            item["is_linked_article"] = False
+            new_items.append(item)
+            
+            # Add linked articles to items
+            for linked in linked_articles:
+                linked_article_data = await db.articles.find_one({"id": linked["linked_article_id"]}, {"_id": 0})
+                if linked_article_data:
+                    station_status[linked["station_id"]] = False
+                    for _ in range(item["quantity"]):  # Add linked article for each quantity of main
+                        new_items.append({
+                            "article_id": linked["linked_article_id"],
+                            "article_name": linked["linked_article_name"],
+                            "quantity": 1,
+                            "price": 0,  # Linked articles don't add price (included in main)
+                            "deposit_amount": 0,
+                            "is_deposit_return": False,
+                            "is_linked_article": True,
+                            "linked_to_article_id": item["article_id"],
+                            "station_id": linked["station_id"],
+                            "station_completed": False
+                        })
+        else:
+            # No linked articles - assign to main station if exists
+            if main_station:
+                item["station_id"] = main_station["id"]
+                station_status[main_station["id"]] = False
+            item["is_linked_article"] = False
+            new_items.append(item)
+    
+    # Consolidate linked articles (sum quantities)
+    if has_linked_articles:
+        consolidated = {}
+        main_items = []
+        for item in new_items:
+            if item.get("is_linked_article"):
+                key = f"{item['article_id']}_{item.get('station_id', '')}"
+                if key in consolidated:
+                    consolidated[key]["quantity"] += item["quantity"]
+                else:
+                    consolidated[key] = item.copy()
+            else:
+                main_items.append(item)
+        new_items = main_items + list(consolidated.values())
+    
+    order_dict["items"] = new_items
+    order_dict["station_status"] = station_status
+    order_dict["has_linked_articles"] = has_linked_articles
+    
     order_obj = Order(
         order_number=order_number,
         status=initial_status,
