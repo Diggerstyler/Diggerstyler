@@ -93,9 +93,52 @@ export default function KuechePage() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 3000); // Update every 3 seconds
-    return () => clearInterval(interval);
-  }, [fetchData]);
+    
+    // WebSocket for real-time updates (primary)
+    const wsUrl = `${process.env.REACT_APP_BACKEND_URL?.replace('http', 'ws')}/api/ws/${standId}`;
+    let ws = null;
+    let reconnectTimeout = null;
+    
+    const connectWebSocket = () => {
+      try {
+        ws = new WebSocket(wsUrl);
+        
+        ws.onopen = () => {
+          console.log('WebSocket connected');
+        };
+        
+        ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          if (data.type === 'order_created' || data.type === 'order_updated') {
+            // Refresh data when order changes
+            fetchData();
+          }
+        };
+        
+        ws.onclose = () => {
+          // Reconnect after 5 seconds
+          reconnectTimeout = setTimeout(connectWebSocket, 5000);
+        };
+        
+        ws.onerror = () => {
+          ws?.close();
+        };
+      } catch (e) {
+        console.log('WebSocket not available, using polling');
+      }
+    };
+    
+    connectWebSocket();
+    
+    // Fallback polling every 10 seconds (reduced from 3s)
+    const interval = setInterval(fetchData, 10000);
+    
+    return () => {
+      clearInterval(interval);
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      ws?.close();
+    };
+  }, [fetchData, standId]);
 
   // Handle completing order for a station
   const handleStationComplete = async (orderId) => {
