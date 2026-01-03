@@ -334,34 +334,31 @@ export default function LandingPage() {
               <h2 className="font-display text-2xl sm:text-4xl font-black uppercase tracking-tight mb-2 sm:mb-3">
                 Wähle Rolle
               </h2>
-              <p className="text-muted-foreground text-base sm:text-lg">
-                Was machst du heute?
-              </p>
               {selectedStand.short_process && (
-                <p className="text-sm text-blue-500 mt-2">
-                  Hinweis: Macher-Rolle ist bei diesem Stand deaktiviert
+                <p className="text-xs text-blue-500">
+                  Macher-Rolle deaktiviert (Kurzer Prozess)
                 </p>
               )}
             </div>
 
-            <div className={`grid gap-3 sm:gap-6 w-full max-w-6xl ${roles.length === 3 ? 'grid-cols-3' : 'grid-cols-2 lg:grid-cols-4'}`}>
+            <div className={`grid gap-2 sm:gap-4 w-full max-w-md sm:max-w-2xl px-2 ${roles.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
               {roles.map((role) => {
                 const Icon = role.icon;
                 return (
                   <Card
                     key={role.id}
-                    className={`bg-card/80 backdrop-blur border-2 cursor-pointer transition-all duration-200 hover:-translate-y-1 ${colorClasses[role.color]}`}
+                    className={`bg-card/80 backdrop-blur border-2 cursor-pointer transition-all active:scale-95 ${colorClasses[role.color]}`}
                     onClick={() => handleRoleSelect(role)}
                     data-testid={`role-card-${role.id}`}
                   >
-                    <CardContent className="p-4 sm:p-6 flex flex-col items-center text-center">
-                      <div className={`w-14 sm:w-20 h-14 sm:h-20 rounded-sm flex items-center justify-center mb-3 sm:mb-4 bg-muted ${iconColorClasses[role.color]}`}>
-                        <Icon className="w-7 sm:w-10 h-7 sm:h-10" />
+                    <CardContent className="p-3 sm:p-5 flex flex-col items-center text-center">
+                      <div className={`w-10 sm:w-14 h-10 sm:h-14 rounded-lg flex items-center justify-center mb-2 sm:mb-3 bg-muted ${iconColorClasses[role.color]}`}>
+                        <Icon className="w-5 sm:w-7 h-5 sm:h-7" />
                       </div>
-                      <h3 className="font-display text-lg sm:text-2xl font-bold uppercase mb-1 sm:mb-2">
+                      <h3 className="font-display text-xs sm:text-lg font-bold uppercase">
                         {role.name}
                       </h3>
-                      <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 hidden sm:block">
                         {role.description}
                       </p>
                     </CardContent>
@@ -373,8 +370,8 @@ export default function LandingPage() {
         )}
       </main>
 
-      <footer className="glass px-4 sm:px-8 py-3 sm:py-4 text-center text-xs sm:text-sm text-muted-foreground">
-        Festival Order Management System
+      <footer className="glass px-4 py-2 text-center text-[10px] sm:text-xs text-muted-foreground">
+        Karnbachs Event OS
       </footer>
     </div>
   );
