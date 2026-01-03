@@ -43,10 +43,15 @@ export default function OneManShowPage() {
   const [archiveOrders, setArchiveOrders] = useState([]);
   const [isLoadingArchive, setIsLoadingArchive] = useState(false);
 
-  const showOrderCompletionOverlay = (orderNumber) => {
+  const showOrderCompletionOverlay = (orderNumber, orderTotal) => {
     setCompletedOrderNumber(orderNumber);
+    setCompletedOrderTotal(orderTotal);
+    setGivenAmount("");
+    setShowChangeCalc(false);
     overlayTimeoutRef.current = setTimeout(() => {
-      setCompletedOrderNumber(null);
+      if (!showChangeCalc) {
+        setCompletedOrderNumber(null);
+      }
     }, 5000);
   };
 
@@ -55,6 +60,26 @@ export default function OneManShowPage() {
       clearTimeout(overlayTimeoutRef.current);
     }
     setCompletedOrderNumber(null);
+    setShowChangeCalc(false);
+    setGivenAmount("");
+  };
+
+  const openChangeCalculator = (e) => {
+    e.stopPropagation();
+    if (overlayTimeoutRef.current) {
+      clearTimeout(overlayTimeoutRef.current);
+    }
+    setShowChangeCalc(true);
+  };
+
+  const calculateChange = () => {
+    const given = parseFloat(givenAmount) || 0;
+    return given - completedOrderTotal;
+  };
+
+  const finishWithChange = () => {
+    dismissOverlay();
+    toast.success("Bestellung abgeschlossen!");
   };
 
   const fetchArchive = async () => {
