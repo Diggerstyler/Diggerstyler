@@ -130,11 +130,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Tested via curl - order creation works with order_number returned correctly."
+      - working: true
+        agent: "testing"
+        comment: "Comprehensive testing completed. Order creation works correctly with proper field validation (subtotal, deposit_total, deposit_return_total). Orders are persisted and retrievable. Full workflow tested: create -> in_progress -> ready -> completed. All backend APIs working as expected."
 
   - task: "PUT /api/articles/{id} - update article"
     implemented: true
