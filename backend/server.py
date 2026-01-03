@@ -725,6 +725,52 @@ async def update_order_status(order_id: str, status_update: OrderStatusUpdate):
     
     return Order(**updated)
 
+# Station-based order completion (for multi-station workflow)
+class StationCompleteRequest(BaseModel):
+    station_id: str
+    updated_by: str
+
+@api_router.put("/orders/{order_id}/station-complete")
+async def station_complete_order(order_id: str, request: StationCompleteRequest):
+    """Mark a station's items as complete. Order goes to 'ready' when all stations are done."""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Bestellung nicht gefunden")
+    
+    station_status = order.get("station_status", {})
+    station_status[request.station_id] = True
+    
+    # Mark items for this station as completed
+    items = order.get("items", [])
+    for item in items:
+        if item.get("station_id") == request.station_id:
+            item["station_completed"] = True
+    
+    # Check if all stations are done
+    all_complete = all(station_status.values()) if station_status else True
+    
+    update_data = {
+        "station_status": station_status,
+        "items": items,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    if all_complete:
+        update_data["status"] = "ready"
+        update_data["processed_by"] = request.updated_by
+    
+    await db.orders.update_one({"id": order_id}, {"$set": update_data})
+    
+    updated = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    
+    # Broadcast update
+    await manager.broadcast_to_stand(order["stand_id"], {
+        "type": "order_updated",
+        "order": updated
+    })
+    
+    return updated
+
 @api_router.get("/orders/{order_id}", response_model=Order)
 async def get_order(order_id: str):
     order = await db.orders.find_one({"id": order_id}, {"_id": 0})
