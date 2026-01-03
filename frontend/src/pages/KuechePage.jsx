@@ -135,20 +135,21 @@ export default function KuechePage() {
                     >
                       <CardHeader className="pb-2 p-3 sm:p-4">
                         <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-3">
-                            <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center">
-                              <span className="font-mono text-2xl font-bold text-primary">
+                          <div className="flex items-center gap-4">
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-primary/30 border-4 border-primary flex items-center justify-center">
+                              <span className="font-mono text-4xl sm:text-5xl font-black text-primary">
                                 {order.order_number.toString().padStart(2, '0')}
                               </span>
                             </div>
                             <div>
+                              <p className="text-sm text-muted-foreground mb-1">Bonnummer</p>
                               <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
                                 <Clock className="w-3 sm:w-4 h-3 sm:h-4" />
                                 <span>{getTimeDiff(order.created_at)} Min.</span>
                               </div>
                             </div>
                           </div>
-                          <Badge variant="outline" className="text-xs">Neu</Badge>
+                          <Badge variant="outline" className="text-xs bg-yellow-500/20 text-yellow-500 border-yellow-500">Neu</Badge>
                         </div>
                       </CardHeader>
                       <CardContent className="p-3 sm:p-4 pt-0">
