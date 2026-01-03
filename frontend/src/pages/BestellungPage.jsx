@@ -418,20 +418,31 @@ export default function BestellungPage() {
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground truncate">{standInfo?.name}</p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={openArchive}
-          className="shrink-0"
-          data-testid="archive-btn"
-        >
-          <Archive className="w-4 h-4 sm:mr-2" />
-          <span className="hidden sm:inline">Archiv</span>
-        </Button>
-        <Badge variant="outline" className="border-primary text-primary shrink-0">
-          <ShoppingCart className="w-4 h-4 mr-1" />
-          {cart.reduce((sum, item) => sum + item.quantity, 0)}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={openArchive}
+            className="shrink-0"
+            data-testid="archive-btn"
+          >
+            <Archive className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Archiv</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleFullscreen}
+            className="shrink-0 w-9 h-9"
+            title={isFullscreen ? "Vollbild beenden" : "Vollbild"}
+          >
+            {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+          </Button>
+          <Badge variant="outline" className="border-primary text-primary shrink-0">
+            <ShoppingCart className="w-4 h-4 mr-1" />
+            {cart.reduce((sum, item) => sum + item.quantity, 0)}
+          </Badge>
+        </div>
       </header>
 
       {/* Archive Dialog */}
