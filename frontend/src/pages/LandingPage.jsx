@@ -252,11 +252,11 @@ export default function LandingPage() {
           // Step 1: Stand Selection
           <>
             <div className="text-center mb-8 sm:mb-12">
-              <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight mb-3 sm:mb-4">
-                Wähle deinen Stand
+              <h2 className="font-display text-2xl sm:text-4xl font-black uppercase tracking-tight mb-2 sm:mb-4">
+                Wähle Stand
               </h2>
-              <p className="text-muted-foreground text-base sm:text-lg">
-                An welchem Stand arbeitest du heute?
+              <p className="text-muted-foreground text-sm sm:text-lg">
+                An welchem Stand arbeitest du?
               </p>
             </div>
 
@@ -269,34 +269,34 @@ export default function LandingPage() {
                   className="mt-4"
                   onClick={() => navigate("/admin/login")}
                 >
-                  Im Admin-Bereich anlegen
+                  Im Admin anlegen
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 w-full max-w-5xl">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6 w-full max-w-4xl px-2">
                 {stands.map((stand) => {
                   const typeConfig = standTypeConfig[stand.stand_type] || standTypeConfig.gemischt;
                   const TypeIcon = typeConfig.icon;
                   return (
                     <Card
                       key={stand.id}
-                      className={`bg-card/80 backdrop-blur border-2 cursor-pointer transition-all duration-200 hover:-translate-y-1 ${typeConfig.borderClass}`}
+                      className={`bg-card/80 backdrop-blur border-2 cursor-pointer transition-all duration-200 active:scale-95 ${typeConfig.borderClass}`}
                       onClick={() => setSelectedStand(stand)}
                       data-testid={`stand-card-${stand.id}`}
                     >
-                      <CardContent className="p-4 sm:p-6 flex flex-col items-center text-center">
-                        <div className={`w-14 sm:w-20 h-14 sm:h-20 rounded-lg flex items-center justify-center mb-3 sm:mb-4 bg-muted ${typeConfig.textClass}`}>
-                          <TypeIcon className="w-7 sm:w-10 h-7 sm:h-10" />
+                      <CardContent className="p-3 sm:p-6 flex flex-col items-center text-center">
+                        <div className={`w-12 sm:w-16 h-12 sm:h-16 rounded-lg flex items-center justify-center mb-2 sm:mb-4 bg-muted ${typeConfig.textClass}`}>
+                          <TypeIcon className="w-6 sm:w-8 h-6 sm:h-8" />
                         </div>
-                        <h3 className="font-display text-lg sm:text-xl font-bold mb-2">
+                        <h3 className="font-display text-sm sm:text-xl font-bold mb-1 sm:mb-2 truncate w-full">
                           {stand.name}
                         </h3>
-                        <Badge variant="outline" className={`${typeConfig.textClass} border-current`}>
+                        <Badge variant="outline" className={`${typeConfig.textClass} border-current text-xs`}>
                           {typeConfig.label}
                         </Badge>
                         {stand.short_process && (
-                          <span className="text-xs text-blue-500 mt-2 flex items-center gap-1">
-                            <FastForward className="w-3 h-3" /> Kurzer Prozess
+                          <span className="text-[10px] sm:text-xs text-blue-500 mt-1 flex items-center gap-1">
+                            <FastForward className="w-3 h-3" /> Kurz
                           </span>
                         )}
                       </CardContent>
@@ -309,24 +309,30 @@ export default function LandingPage() {
         ) : (
           // Step 2: Role Selection
           <>
-            <div className="text-center mb-8 sm:mb-12">
-              <div className="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2 rounded-full mb-4 bg-card/50 border border-border">
-                <Store className="w-5 h-5 text-primary" />
-                <span className="font-display uppercase font-bold text-primary">
+            <div className="text-center mb-4 sm:mb-8 px-2">
+              <div className="inline-flex flex-wrap items-center justify-center gap-1 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full mb-3 bg-card/50 border border-border">
+                <Store className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                <span className="font-display uppercase font-bold text-primary text-sm sm:text-base">
                   {selectedStand.name}
                 </span>
-                <Badge variant="outline" className="text-xs">
-                  {standTypeConfig[selectedStand.stand_type]?.label || "Gemischt"}
-                </Badge>
-                {selectedStand.short_process && (
-                  <Badge variant="outline" className="text-xs text-blue-500 border-blue-500">
-                    <FastForward className="w-3 h-3 mr-1" />
-                    Kurzer Prozess
-                  </Badge>
-                )}
               </div>
-              <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight mb-3 sm:mb-4">
-                Wähle deine Rolle
+              
+              {/* Kurzer Prozess Toggle */}
+              <div className="flex items-center justify-center gap-3 mb-4 p-3 bg-card/50 rounded-lg border border-border max-w-xs mx-auto">
+                <div className="flex items-center gap-2">
+                  <FastForward className={`w-4 h-4 ${selectedStand.short_process ? 'text-blue-500' : 'text-muted-foreground'}`} />
+                  <Label htmlFor="short-toggle" className="text-sm">Kurzer Prozess</Label>
+                </div>
+                <Switch
+                  id="short-toggle"
+                  checked={selectedStand.short_process || false}
+                  onCheckedChange={toggleShortProcess}
+                  disabled={isTogglingShortProcess}
+                />
+              </div>
+              
+              <h2 className="font-display text-2xl sm:text-4xl font-black uppercase tracking-tight mb-2 sm:mb-3">
+                Wähle Rolle
               </h2>
               <p className="text-muted-foreground text-base sm:text-lg">
                 Was machst du heute?
