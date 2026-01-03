@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { 
   LayoutDashboard, 
   Package, 
@@ -12,7 +16,10 @@ import {
   Euro,
   CheckCircle,
   TrendingUp,
-  Store
+  Store,
+  Download,
+  Trash2,
+  AlertTriangle
 } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -21,9 +28,16 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pinInput, setPinInput] = useState("");
+  const [pinError, setPinError] = useState("");
+  const [isResetting, setIsResetting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const auth = sessionStorage.getItem("adminAuth");
 
   useEffect(() => {
-    const auth = sessionStorage.getItem("adminAuth");
     if (!auth) {
       navigate("/admin/login");
       return;
@@ -46,11 +60,72 @@ export default function AdminDashboard() {
     };
 
     fetchStats();
-  }, [navigate]);
+  }, [navigate, auth]);
 
   const handleLogout = () => {
     sessionStorage.removeItem("adminAuth");
     navigate("/");
+  };
+
+  // Export all data
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const response = await axios.get(`${API}/admin/export`, {
+        headers: { Authorization: `Basic ${auth}` }
+      });
+      
+      // Create downloadable JSON file
+      const dataStr = JSON.stringify(response.data, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `festival_export_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast.success("Export erfolgreich heruntergeladen");
+    } catch (error) {
+      toast.error("Fehler beim Exportieren");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Verify PIN and show confirmation
+  const handlePinSubmit = async () => {
+    setPinError("");
+    try {
+      await axios.post(`${API}/admin/verify-pin`, { pin: pinInput }, {
+        headers: { Authorization: `Basic ${auth}` }
+      });
+      setShowResetDialog(false);
+      setShowConfirmDialog(true);
+    } catch (error) {
+      setPinError("Falscher PIN");
+    }
+  };
+
+  // Confirm and execute reset
+  const handleConfirmReset = async () => {
+    setIsResetting(true);
+    try {
+      const response = await axios.post(`${API}/admin/reset`, { pin: pinInput }, {
+        headers: { Authorization: `Basic ${auth}` }
+      });
+      toast.success(`${response.data.orders_deleted} Bestellungen gelöscht`);
+      setShowConfirmDialog(false);
+      setPinInput("");
+      // Refresh stats
+      window.location.reload();
+    } catch (error) {
+      toast.error("Fehler beim Zurücksetzen");
+    } finally {
+      setIsResetting(false);
+    }
   };
 
   const statCards = stats ? [
