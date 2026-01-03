@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ArrowLeft, BarChart3, CalendarIcon, Filter, Download } from "lucide-react";
+import { ArrowLeft, BarChart3, CalendarIcon, Filter, Download, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -93,12 +93,14 @@ export default function StatsPage() {
   };
 
   const exportCSV = () => {
-    const headers = ["Bestellnummer", "Stand", "Artikel", "Gesamt", "Status", "Erstellt"];
+    const headers = ["Bestellnummer", "Stand", "Artikel", "Gesamt", "Pfand", "Pfand zurück", "Status", "Erstellt"];
     const rows = orders.map(order => [
       order.order_number,
       order.stand_name,
-      order.items.map(i => `${i.quantity}x ${i.article_name}`).join("; "),
+      order.items.filter(i => !i.is_deposit_return).map(i => `${i.quantity}x ${i.article_name}`).join("; "),
       order.total.toFixed(2),
+      (order.deposit_total || 0).toFixed(2),
+      (order.deposit_return_total || 0).toFixed(2),
       order.status,
       format(new Date(order.created_at), "dd.MM.yyyy HH:mm")
     ]);
@@ -121,24 +123,26 @@ export default function StatsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="glass sticky top-0 z-50 px-6 py-4 flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => navigate("/admin")}
-          data-testid="back-btn"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div className="flex items-center gap-3">
-          <BarChart3 className="w-6 h-6 text-primary" />
-          <h1 className="font-display text-xl font-bold uppercase tracking-tight">
-            Statistiken
-          </h1>
+      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate("/admin")}
+            data-testid="back-btn"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div className="flex items-center gap-3">
+            <BarChart3 className="w-6 h-6 text-primary" />
+            <h1 className="font-display text-lg sm:text-xl font-bold uppercase tracking-tight">
+              Statistiken
+            </h1>
+          </div>
         </div>
         <Button
           variant="outline"
-          className="ml-auto"
+          className="sm:ml-auto"
           onClick={exportCSV}
           disabled={orders.length === 0}
           data-testid="export-btn"
@@ -148,26 +152,26 @@ export default function StatsPage() {
         </Button>
       </header>
 
-      <main className="p-6 max-w-7xl mx-auto">
+      <main className="p-4 sm:p-6 max-w-7xl mx-auto">
         {/* Filters */}
         <Card className="bg-card border-border mb-6">
-          <CardHeader>
-            <CardTitle className="font-display uppercase flex items-center gap-2">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="font-display uppercase flex items-center gap-2 text-sm sm:text-base">
               <Filter className="w-5 h-5" />
               Filter
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <CardContent className="p-4 sm:p-6 pt-0">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               <div className="space-y-2">
-                <Label>Startdatum</Label>
+                <Label className="text-xs sm:text-sm">Startdatum</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start" data-testid="start-date-btn">
+                    <Button variant="outline" className="w-full justify-start text-sm" data-testid="start-date-btn">
                       <CalendarIcon className="w-4 h-4 mr-2" />
                       {filters.start_date 
-                        ? format(filters.start_date, "dd.MM.yyyy") 
-                        : "Auswählen..."}
+                        ? format(filters.start_date, "dd.MM.yy") 
+                        : "Wählen"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -182,14 +186,14 @@ export default function StatsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Enddatum</Label>
+                <Label className="text-xs sm:text-sm">Enddatum</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start" data-testid="end-date-btn">
+                    <Button variant="outline" className="w-full justify-start text-sm" data-testid="end-date-btn">
                       <CalendarIcon className="w-4 h-4 mr-2" />
                       {filters.end_date 
-                        ? format(filters.end_date, "dd.MM.yyyy") 
-                        : "Auswählen..."}
+                        ? format(filters.end_date, "dd.MM.yy") 
+                        : "Wählen"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -204,16 +208,16 @@ export default function StatsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Stand</Label>
+                <Label className="text-xs sm:text-sm">Stand</Label>
                 <Select 
                   value={filters.stand_id} 
                   onValueChange={(value) => setFilters(prev => ({ ...prev, stand_id: value }))}
                 >
-                  <SelectTrigger data-testid="stand-filter">
+                  <SelectTrigger className="text-sm" data-testid="stand-filter">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Alle Stände</SelectItem>
+                    <SelectItem value="all">Alle</SelectItem>
                     {stands.map(stand => (
                       <SelectItem key={stand.id} value={stand.id}>
                         {stand.name}
@@ -224,16 +228,16 @@ export default function StatsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Status</Label>
+                <Label className="text-xs sm:text-sm">Status</Label>
                 <Select 
                   value={filters.status} 
                   onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
                 >
-                  <SelectTrigger data-testid="status-filter">
+                  <SelectTrigger className="text-sm" data-testid="status-filter">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Alle Status</SelectItem>
+                    <SelectItem value="all">Alle</SelectItem>
                     <SelectItem value="created">Erstellt</SelectItem>
                     <SelectItem value="in_progress">In Arbeit</SelectItem>
                     <SelectItem value="ready">Fertig</SelectItem>
@@ -243,66 +247,118 @@ export default function StatsPage() {
               </div>
             </div>
 
-            <div className="flex gap-2 mt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setFilters({
-                  stand_id: "all",
-                  status: "all",
-                  start_date: null,
-                  end_date: null
-                })}
-                data-testid="reset-filters-btn"
-              >
-                Filter zurücksetzen
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4"
+              onClick={() => setFilters({
+                stand_id: "all",
+                status: "all",
+                start_date: null,
+                end_date: null
+              })}
+              data-testid="reset-filters-btn"
+            >
+              Filter zurücksetzen
+            </Button>
           </CardContent>
         </Card>
 
         {/* Summary Stats */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
             <Card className="bg-card border-border">
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground">Bestellungen</p>
-                <p className="font-mono text-2xl font-bold text-secondary">{stats.total_orders}</p>
+              <CardContent className="p-3 sm:p-4">
+                <p className="text-xs sm:text-sm text-muted-foreground">Bestellungen</p>
+                <p className="font-mono text-xl sm:text-2xl font-bold text-secondary">{stats.total_orders}</p>
               </CardContent>
             </Card>
             <Card className="bg-card border-border">
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground">Umsatz</p>
-                <p className="font-mono text-2xl font-bold text-primary">{stats.total_revenue.toFixed(2)} €</p>
+              <CardContent className="p-3 sm:p-4">
+                <p className="text-xs sm:text-sm text-muted-foreground">Umsatz</p>
+                <p className="font-mono text-xl sm:text-2xl font-bold text-primary">{stats.total_revenue.toFixed(2)} €</p>
               </CardContent>
             </Card>
             <Card className="bg-card border-border">
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground">Abgeschlossen</p>
-                <p className="font-mono text-2xl font-bold text-green-500">{stats.completed_orders}</p>
+              <CardContent className="p-3 sm:p-4">
+                <p className="text-xs sm:text-sm text-muted-foreground">Pfand erhalten</p>
+                <p className="font-mono text-xl sm:text-2xl font-bold text-green-500">{(stats.total_deposit || 0).toFixed(2)} €</p>
               </CardContent>
             </Card>
             <Card className="bg-card border-border">
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground">Durchschn. Bestellung</p>
-                <p className="font-mono text-2xl font-bold text-accent">
-                  {stats.total_orders > 0 
-                    ? (stats.total_revenue / stats.total_orders).toFixed(2) 
-                    : "0.00"} €
-                </p>
+              <CardContent className="p-3 sm:p-4">
+                <p className="text-xs sm:text-sm text-muted-foreground">Pfand zurück</p>
+                <p className="font-mono text-xl sm:text-2xl font-bold text-accent">-{(stats.total_deposit_return || 0).toFixed(2)} €</p>
               </CardContent>
             </Card>
           </div>
         )}
 
+        {/* Hourly Breakdown */}
+        {stats?.orders_by_hour && Object.keys(stats.orders_by_hour).length > 0 && (
+          <Card className="bg-card border-border mb-6">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="font-display uppercase flex items-center gap-2 text-sm sm:text-base">
+                <Clock className="w-5 h-5 text-secondary" />
+                Bestellungen pro Stunde
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Uhrzeit</TableHead>
+                      <TableHead className="text-right">Anzahl</TableHead>
+                      <TableHead className="text-right">Umsatz</TableHead>
+                      <TableHead className="text-right">Ø pro Bestellung</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Object.entries(stats.orders_by_hour).map(([hour, data]) => (
+                      <TableRow key={hour}>
+                        <TableCell className="font-mono">
+                          {hour.toString().padStart(2, "0")}:00 - {hour.toString().padStart(2, "0")}:59
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-secondary">
+                          {data.count}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-primary">
+                          {data.revenue.toFixed(2)} €
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-muted-foreground">
+                          {data.count > 0 ? (data.revenue / data.count).toFixed(2) : "0.00"} €
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {/* Total row */}
+                    <TableRow className="border-t-2 font-bold">
+                      <TableCell>GESAMT</TableCell>
+                      <TableCell className="text-right font-mono text-secondary">
+                        {Object.values(stats.orders_by_hour).reduce((sum, d) => sum + d.count, 0)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-primary">
+                        {Object.values(stats.orders_by_hour).reduce((sum, d) => sum + d.revenue, 0).toFixed(2)} €
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {stats.total_orders > 0 ? (stats.total_revenue / stats.total_orders).toFixed(2) : "0.00"} €
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Orders Table */}
         <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="font-display uppercase">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="font-display uppercase text-sm sm:text-base">
               Bestellungen ({orders.length})
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0">
             {isLoading ? (
               <div className="text-center py-8 text-muted-foreground">Laden...</div>
             ) : orders.length === 0 ? (
@@ -316,26 +372,26 @@ export default function StatsPage() {
                     <TableRow>
                       <TableHead>#</TableHead>
                       <TableHead>Stand</TableHead>
-                      <TableHead>Artikel</TableHead>
+                      <TableHead className="hidden md:table-cell">Artikel</TableHead>
                       <TableHead className="text-right">Gesamt</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Erstellt</TableHead>
+                      <TableHead className="hidden sm:table-cell">Status</TableHead>
+                      <TableHead className="hidden sm:table-cell">Erstellt</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {orders.map(order => (
+                    {orders.slice(0, 100).map(order => (
                       <TableRow key={order.id} data-testid={`order-row-${order.id}`}>
                         <TableCell className="font-mono font-bold">
                           {order.order_number}
                         </TableCell>
-                        <TableCell>{order.stand_name}</TableCell>
-                        <TableCell className="max-w-xs truncate">
-                          {order.items.map(i => `${i.quantity}x ${i.article_name}`).join(", ")}
+                        <TableCell className="text-sm">{order.stand_name}</TableCell>
+                        <TableCell className="max-w-xs truncate hidden md:table-cell text-sm">
+                          {order.items.filter(i => !i.is_deposit_return).map(i => `${i.quantity}x ${i.article_name}`).join(", ")}
                         </TableCell>
                         <TableCell className="text-right font-mono">
                           {order.total.toFixed(2)} €
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden sm:table-cell">
                           <Badge 
                             variant={statusMap[order.status]?.color || "outline"}
                             className={order.status === "completed" ? "bg-green-600" : ""}
@@ -343,50 +399,22 @@ export default function StatsPage() {
                             {statusMap[order.status]?.label || order.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
+                        <TableCell className="text-muted-foreground text-sm hidden sm:table-cell">
                           {format(new Date(order.created_at), "dd.MM. HH:mm")}
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
+                {orders.length > 100 && (
+                  <p className="text-center text-sm text-muted-foreground mt-4">
+                    Zeige 100 von {orders.length} Bestellungen
+                  </p>
+                )}
               </div>
             )}
           </CardContent>
         </Card>
-
-        {/* Hourly Breakdown */}
-        {stats?.orders_by_hour && Object.keys(stats.orders_by_hour).length > 0 && (
-          <Card className="bg-card border-border mt-6">
-            <CardHeader>
-              <CardTitle className="font-display uppercase">Bestellungen pro Stunde</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-6 md:grid-cols-12 gap-2">
-                {Array.from({ length: 24 }, (_, i) => {
-                  const data = stats.orders_by_hour[i] || { count: 0, revenue: 0 };
-                  const maxCount = Math.max(...Object.values(stats.orders_by_hour).map(d => d.count));
-                  const intensity = maxCount > 0 ? data.count / maxCount : 0;
-                  
-                  return (
-                    <div
-                      key={i}
-                      className="text-center p-2 rounded-sm"
-                      style={{
-                        backgroundColor: `rgba(217, 70, 239, ${intensity * 0.5})`
-                      }}
-                    >
-                      <div className="font-mono text-xs text-muted-foreground">
-                        {i.toString().padStart(2, "0")}h
-                      </div>
-                      <div className="font-bold">{data.count}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </main>
     </div>
   );
