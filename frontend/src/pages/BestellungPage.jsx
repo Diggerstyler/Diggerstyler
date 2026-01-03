@@ -552,8 +552,8 @@ export default function BestellungPage() {
             ))}
           </div>
 
-          {/* Mobile Deposit Return */}
-          {depositGroups.length > 0 && (
+          {/* Mobile Deposit Return - only show if stand has articles with deposit */}
+          {standHasDepositArticles && depositGroups.length > 0 && (
             <div className="md:hidden flex gap-2 mb-4 overflow-x-auto pb-2">
               {depositGroups.map(deposit => (
                 <Button
