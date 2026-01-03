@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, ChefHat, Package, Settings, Zap, ArrowLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ShoppingCart, Hammer, Package, Settings, Zap, ArrowLeft, Store, UtensilsCrossed, Beer, Sparkles } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [selectedRole, setSelectedRole] = useState(null);
+  const [selectedStand, setSelectedStand] = useState(null);
   const [stands, setStands] = useState([]);
 
   useEffect(() => {
@@ -37,10 +38,10 @@ export default function LandingPage() {
       path: "bestellung"
     },
     {
-      id: "kueche",
-      name: "Küche",
+      id: "macher",
+      name: "Macher",
       description: "Bestellungen zubereiten",
-      icon: ChefHat,
+      icon: Hammer,
       color: "secondary",
       path: "kueche"
     },
@@ -62,8 +63,8 @@ export default function LandingPage() {
     }
   ];
 
-  const handleStandSelect = (stand) => {
-    navigate(`/${selectedRole.path}/${stand.id}/${stand.stand_type}`);
+  const handleRoleSelect = (role) => {
+    navigate(`/${role.path}/${selectedStand.id}/${selectedStand.stand_type}`);
   };
 
   const colorClasses = {
@@ -80,16 +81,28 @@ export default function LandingPage() {
     success: "text-green-500"
   };
 
-  const standTypeColors = {
-    speisestand: "border-orange-500/50 text-orange-500",
-    getraenkestand: "border-blue-500/50 text-blue-500",
-    gemischt: "border-purple-500/50 text-purple-500"
-  };
-
-  const standTypeNames = {
-    speisestand: "Speisen",
-    getraenkestand: "Getränke",
-    gemischt: "Gemischt"
+  const standTypeConfig = {
+    speisestand: { 
+      icon: UtensilsCrossed, 
+      color: "orange",
+      borderClass: "border-orange-500/50 hover:border-orange-500 hover:bg-orange-500/10",
+      textClass: "text-orange-500",
+      label: "Speisen"
+    },
+    getraenkestand: { 
+      icon: Beer, 
+      color: "blue",
+      borderClass: "border-blue-500/50 hover:border-blue-500 hover:bg-blue-500/10",
+      textClass: "text-blue-500",
+      label: "Getränke"
+    },
+    gemischt: { 
+      icon: Sparkles, 
+      color: "purple",
+      borderClass: "border-purple-500/50 hover:border-purple-500 hover:bg-purple-500/10",
+      textClass: "text-purple-500",
+      label: "Gemischt"
+    }
   };
 
   return (
@@ -103,11 +116,11 @@ export default function LandingPage() {
     >
       <header className="glass sticky top-0 z-50 px-4 sm:px-8 py-3 sm:py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          {selectedRole && (
+          {selectedStand && (
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => setSelectedRole(null)}
+              onClick={() => setSelectedStand(null)}
               data-testid="back-btn"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -130,10 +143,77 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-8 sm:py-16">
-        {!selectedRole ? (
-          // Step 1: Role Selection
+        {!selectedStand ? (
+          // Step 1: Stand Selection
           <>
             <div className="text-center mb-8 sm:mb-12">
+              <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight mb-3 sm:mb-4">
+                Wähle deinen Stand
+              </h2>
+              <p className="text-muted-foreground text-base sm:text-lg">
+                An welchem Stand arbeitest du heute?
+              </p>
+            </div>
+
+            {stands.length === 0 ? (
+              <div className="text-center py-12">
+                <Store className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground">Keine Stände vorhanden.</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={() => navigate("/admin/login")}
+                >
+                  Im Admin-Bereich anlegen
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 w-full max-w-5xl">
+                {stands.map((stand) => {
+                  const typeConfig = standTypeConfig[stand.stand_type] || standTypeConfig.gemischt;
+                  const TypeIcon = typeConfig.icon;
+                  return (
+                    <Card
+                      key={stand.id}
+                      className={`bg-card/80 backdrop-blur border-2 cursor-pointer transition-all duration-200 hover:-translate-y-1 ${typeConfig.borderClass}`}
+                      onClick={() => setSelectedStand(stand)}
+                      data-testid={`stand-card-${stand.id}`}
+                    >
+                      <CardContent className="p-4 sm:p-6 flex flex-col items-center text-center">
+                        <div className={`w-14 sm:w-20 h-14 sm:h-20 rounded-lg flex items-center justify-center mb-3 sm:mb-4 bg-muted ${typeConfig.textClass}`}>
+                          <TypeIcon className="w-7 sm:w-10 h-7 sm:h-10" />
+                        </div>
+                        <h3 className="font-display text-lg sm:text-xl font-bold mb-2">
+                          {stand.name}
+                        </h3>
+                        <Badge variant="outline" className={`${typeConfig.textClass} border-current`}>
+                          {typeConfig.label}
+                        </Badge>
+                        {stand.skip_preparation && (
+                          <span className="text-xs text-yellow-500 mt-2 flex items-center gap-1">
+                            <Zap className="w-3 h-3" /> Schnellmodus
+                          </span>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        ) : (
+          // Step 2: Role Selection
+          <>
+            <div className="text-center mb-8 sm:mb-12">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 bg-card/50 border border-border">
+                <Store className="w-5 h-5 text-primary" />
+                <span className="font-display uppercase font-bold text-primary">
+                  {selectedStand.name}
+                </span>
+                <Badge variant="outline" className="text-xs ml-2">
+                  {standTypeConfig[selectedStand.stand_type]?.label || "Gemischt"}
+                </Badge>
+              </div>
               <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight mb-3 sm:mb-4">
                 Wähle deine Rolle
               </h2>
@@ -149,7 +229,7 @@ export default function LandingPage() {
                   <Card
                     key={role.id}
                     className={`bg-card/80 backdrop-blur border-2 cursor-pointer transition-all duration-200 hover:-translate-y-1 ${colorClasses[role.color]}`}
-                    onClick={() => setSelectedRole(role)}
+                    onClick={() => handleRoleSelect(role)}
                     data-testid={`role-card-${role.id}`}
                   >
                     <CardContent className="p-4 sm:p-6 flex flex-col items-center text-center">
@@ -167,53 +247,6 @@ export default function LandingPage() {
                 );
               })}
             </div>
-          </>
-        ) : (
-          // Step 2: Stand Selection
-          <>
-            <div className="text-center mb-8 sm:mb-12">
-              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 ${colorClasses[selectedRole.color].split(' ')[0]} bg-card/50`}>
-                <selectedRole.icon className={`w-5 h-5 ${iconColorClasses[selectedRole.color]}`} />
-                <span className={`font-display uppercase font-bold ${iconColorClasses[selectedRole.color]}`}>
-                  {selectedRole.name}
-                </span>
-              </div>
-              <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight mb-3 sm:mb-4">
-                Wähle deinen Stand
-              </h2>
-              <p className="text-muted-foreground text-base sm:text-lg">
-                An welchem Stand arbeitest du?
-              </p>
-            </div>
-
-            {stands.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">Keine Stände vorhanden. Bitte im Admin-Bereich anlegen.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 w-full max-w-6xl">
-                {stands.map((stand) => (
-                  <Card
-                    key={stand.id}
-                    className="bg-card/80 backdrop-blur border-2 border-border hover:border-primary/50 cursor-pointer transition-all duration-200 hover:-translate-y-1"
-                    onClick={() => handleStandSelect(stand)}
-                    data-testid={`stand-card-${stand.id}`}
-                  >
-                    <CardContent className="p-4 sm:p-6 flex flex-col items-center text-center">
-                      <h3 className="font-display text-lg sm:text-xl font-bold mb-2">
-                        {stand.name}
-                      </h3>
-                      <span className={`text-xs px-2 py-1 rounded border ${standTypeColors[stand.stand_type] || standTypeColors.gemischt}`}>
-                        {standTypeNames[stand.stand_type] || "Gemischt"}
-                      </span>
-                      {stand.skip_preparation && (
-                        <span className="text-xs text-accent mt-2">⚡ Schnellmodus</span>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
           </>
         )}
       </main>
