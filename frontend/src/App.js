@@ -9,6 +9,7 @@ import AdminLoginPage from "@/pages/AdminLoginPage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import ArticleManagement from "@/pages/ArticleManagement";
 import StandManagement from "@/pages/StandManagement";
+import StationManagement from "@/pages/StationManagement";
 import StatsPage from "@/pages/StatsPage";
 
 function App() {
@@ -19,12 +20,14 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/bestellung/:standId/:standType" element={<BestellungPage />} />
           <Route path="/kueche/:standId/:standType" element={<KuechePage />} />
+          <Route path="/kueche/:standId/:standType/:stationId" element={<KuechePage />} />
           <Route path="/ausgabe/:standId/:standType" element={<AusgabePage />} />
           <Route path="/onemanshow/:standId/:standType" element={<OneManShowPage />} />
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/articles" element={<ArticleManagement />} />
           <Route path="/admin/stands" element={<StandManagement />} />
+          <Route path="/admin/stations" element={<StationManagement />} />
           <Route path="/admin/stats" element={<StatsPage />} />
         </Routes>
       </BrowserRouter>
