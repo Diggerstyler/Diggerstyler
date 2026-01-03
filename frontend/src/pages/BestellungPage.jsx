@@ -512,8 +512,8 @@ export default function BestellungPage() {
               })}
             </nav>
             
-            {/* Deposit Return Buttons */}
-            {depositGroups.length > 0 && (
+            {/* Deposit Return Buttons - only show if stand has articles with deposit */}
+            {standHasDepositArticles && depositGroups.length > 0 && (
               <div className="mt-6 pt-6 border-t border-border">
                 <p className="text-xs text-muted-foreground mb-3 uppercase font-semibold">Pfand zurück</p>
                 <div className="space-y-2">
