@@ -139,10 +139,10 @@ export default function StandManagement() {
     }
   };
 
-  const toggleSkipPreparation = async (stand) => {
+  const toggleShortProcess = async (stand) => {
     try {
       await axios.put(`${API}/stands/${stand.id}`, {
-        skip_preparation: !stand.skip_preparation
+        short_process: !stand.short_process
       }, {
         headers: { Authorization: `Basic ${auth}` }
       });
@@ -157,7 +157,7 @@ export default function StandManagement() {
     setFormData({
       name: "",
       stand_type: "gemischt",
-      skip_preparation: false
+      short_process: false
     });
   };
 
