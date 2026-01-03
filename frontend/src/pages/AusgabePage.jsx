@@ -10,27 +10,32 @@ import { ArrowLeft, Package, CheckCircle, RefreshCw } from "lucide-react";
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function AusgabePage() {
-  const { standId } = useParams();
+  const { standId, standType } = useParams();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [standName, setStandName] = useState("");
+  const [standTypeName, setStandTypeName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     try {
-      const [ordersRes, standsRes] = await Promise.all([
+      const [ordersRes, standsRes, typesRes] = await Promise.all([
         axios.get(`${API}/orders?stand_id=${standId}&status=ready`),
-        axios.get(`${API}/stands`)
+        axios.get(`${API}/stands`),
+        axios.get(`${API}/stand-types`)
       ]);
       
       setOrders(ordersRes.data);
       
       const stand = standsRes.data.find(s => s.id === standId);
       if (stand) setStandName(stand.name);
+      
+      const type = typesRes.data.find(t => t.id === standType);
+      if (type) setStandTypeName(type.name);
     } catch (error) {
       console.error("Error fetching orders:", error);
     }
-  }, [standId]);
+  }, [standId, standType]);
 
   useEffect(() => {
     fetchOrders();
@@ -71,7 +76,7 @@ export default function AusgabePage() {
             <h1 className="font-display text-xl font-bold uppercase tracking-tight">
               Ausgabe
             </h1>
-            <p className="text-sm text-muted-foreground">{standName}</p>
+            <p className="text-sm text-muted-foreground">{standName} • {standTypeName}</p>
           </div>
         </div>
         <div className="ml-auto flex items-center gap-4">

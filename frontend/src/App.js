@@ -4,6 +4,7 @@ import LandingPage from "@/pages/LandingPage";
 import BestellungPage from "@/pages/BestellungPage";
 import KuechePage from "@/pages/KuechePage";
 import AusgabePage from "@/pages/AusgabePage";
+import OneManShowPage from "@/pages/OneManShowPage";
 import AdminLoginPage from "@/pages/AdminLoginPage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import ArticleManagement from "@/pages/ArticleManagement";
@@ -15,9 +16,10 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/bestellung/:standId" element={<BestellungPage />} />
-          <Route path="/kueche/:standId" element={<KuechePage />} />
-          <Route path="/ausgabe/:standId" element={<AusgabePage />} />
+          <Route path="/bestellung/:standId/:standType" element={<BestellungPage />} />
+          <Route path="/kueche/:standId/:standType" element={<KuechePage />} />
+          <Route path="/ausgabe/:standId/:standType" element={<AusgabePage />} />
+          <Route path="/onemanshow/:standId/:standType" element={<OneManShowPage />} />
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/articles" element={<ArticleManagement />} />
