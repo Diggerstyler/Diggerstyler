@@ -250,30 +250,58 @@ export default function KuechePage() {
                         </div>
                       </CardHeader>
                       <CardContent className="p-3 sm:p-4 pt-0">
-                        {/* Hauptartikel - groß dargestellt */}
+                        {/* Hauptartikel - groß und klickbar */}
                         <div className="space-y-2 mb-2">
                           {getDisplayItems(order).map((item, idx) => (
                             <div 
                               key={idx} 
-                              className="flex items-center justify-between p-3 rounded-lg bg-secondary/20 border border-secondary/30"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleItemMarked(order.id, `main-${idx}`);
+                              }}
+                              className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all
+                                ${isItemMarked(order.id, `main-${idx}`) 
+                                  ? 'bg-green-500/30 border-2 border-green-500' 
+                                  : 'bg-secondary/20 border border-secondary/30 hover:bg-secondary/30'}`}
                             >
-                              <span className="font-bold text-base sm:text-lg">{item.article_name}</span>
-                              <div className="flex items-center justify-center min-w-[60px] h-12 rounded-lg bg-secondary text-secondary-foreground">
+                              <div className="flex items-center gap-2">
+                                {isItemMarked(order.id, `main-${idx}`) && (
+                                  <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+                                )}
+                                <span className={`font-bold text-base sm:text-lg ${isItemMarked(order.id, `main-${idx}`) ? 'line-through text-muted-foreground' : ''}`}>
+                                  {item.article_name}
+                                </span>
+                              </div>
+                              <div className={`flex items-center justify-center min-w-[60px] h-12 rounded-lg ${isItemMarked(order.id, `main-${idx}`) ? 'bg-green-500/50' : 'bg-secondary'} text-secondary-foreground`}>
                                 <span className="font-mono text-2xl font-black">{item.quantity}x</span>
                               </div>
                             </div>
                           ))}
                         </div>
-                        {/* Verknüpfte Artikel - klein dargestellt */}
+                        {/* Verknüpfte Artikel - klein und klickbar */}
                         {getLinkedItems(order).length > 0 && (
                           <div className="space-y-1 mb-4 pl-4 border-l-2 border-muted">
                             <p className="text-xs text-muted-foreground uppercase tracking-wide">+ Beilagen</p>
                             {getLinkedItems(order).map((item, idx) => (
                               <div 
-                                key={idx} 
-                                className="flex items-center justify-between py-1 px-2 rounded bg-muted/30 text-sm"
+                                key={idx}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleItemMarked(order.id, `linked-${idx}`);
+                                }}
+                                className={`flex items-center justify-between py-1 px-2 rounded text-sm cursor-pointer transition-all
+                                  ${isItemMarked(order.id, `linked-${idx}`) 
+                                    ? 'bg-green-500/20 border border-green-500/50' 
+                                    : 'bg-muted/30 hover:bg-muted/50'}`}
                               >
-                                <span className="text-muted-foreground">{item.article_name}</span>
+                                <div className="flex items-center gap-1">
+                                  {isItemMarked(order.id, `linked-${idx}`) && (
+                                    <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0" />
+                                  )}
+                                  <span className={`${isItemMarked(order.id, `linked-${idx}`) ? 'line-through text-muted-foreground' : 'text-muted-foreground'}`}>
+                                    {item.article_name}
+                                  </span>
+                                </div>
                                 <span className="font-mono text-muted-foreground">{item.quantity}x</span>
                               </div>
                             ))}
@@ -281,12 +309,12 @@ export default function KuechePage() {
                         )}
                         {/* "Fertig" button */}
                         <Button
-                          className="w-full bg-green-600 hover:bg-green-700 neon-success text-sm"
+                          className="w-full h-14 bg-green-600 hover:bg-green-700 neon-success text-base font-bold"
                           onClick={() => updateOrderStatus(order.id, "ready")}
                           disabled={isLoading}
                           data-testid={`finish-order-${order.id}`}
                         >
-                          <Check className="w-4 h-4 mr-2" />
+                          <Check className="w-5 h-5 mr-2" />
                           {stationId ? "Station Fertig" : "Fertig"}
                         </Button>
                       </CardContent>
