@@ -224,6 +224,28 @@ agent_communication:
       - Role/stand switching via back button
       
       Admin credentials: admin/admin
+  - agent: "main"
+    message: |
+      Implemented workflow logic fix per user request:
+      
+      WORKFLOW NOW WORKS AS FOLLOWS:
+      
+      1. BESTELLUNG (Role 1): Creates order, handles payment → Order goes to Küche with status "created"
+      
+      2. KÜCHE (Role 2):
+         - Normal mode: "Zubereitung" button → status "in_progress" → "Fertig" button → status "ready" → goes to Ausgabe
+         - Skip mode: "Fertig" button directly → status "ready" → goes to Ausgabe (no "Zubereitung" step)
+      
+      3. AUSGABE (Role 3): Shows ready orders → "Übergeben" button → status "completed" → order disappears
+      
+      4. ONEMANSHOW (Role 4): Creates order with direct_complete=true → status "completed" immediately (no Küche/Ausgabe)
+      
+      TESTED VIA API:
+      - Normal workflow: created → in_progress → ready → completed ✓
+      - Skip preparation: created → ready → completed ✓  
+      - OneManShow: completed directly ✓
+      
+      Please run full regression test on all roles and workflows.
   - agent: "testing"
     message: |
       ✅ BACKEND TESTING COMPLETED - ALL BUG FIXES VERIFIED
