@@ -1149,6 +1149,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@app.on_event("startup")
+async def startup_db_client():
+    """Initialize database indexes on startup for better performance"""
+    await create_indexes()
+    logger.info("Database initialized with performance indexes")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
