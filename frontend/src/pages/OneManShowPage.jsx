@@ -310,88 +310,114 @@ export default function OneManShowPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Order Completion Overlay with Change Calculator */}
+      {/* Order Completion Bottom Sheet */}
       {completedOrderNumber !== null && (
         <div 
-          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center"
+          className="fixed inset-0 z-[100] bg-black/80"
           onClick={!showChangeCalc ? dismissOverlay : undefined}
         >
-          <div className="text-center animate-in zoom-in-50 duration-300 p-4 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-            <p className="text-xl sm:text-2xl text-muted-foreground mb-4 uppercase tracking-wider">Bon Nummer</p>
-            <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-2xl bg-green-500/20 border-4 border-green-500 flex items-center justify-center mx-auto mb-4">
-              <span className="font-mono text-7xl sm:text-8xl font-black text-green-500">
-                {completedOrderNumber.toString().padStart(2, '0')}
-              </span>
+          {/* Bottom Sheet Container */}
+          <div 
+            className="absolute bottom-0 left-0 right-0 bg-card rounded-t-3xl animate-in slide-in-from-bottom duration-300 max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Handle bar */}
+            <div className="flex justify-center pt-3 pb-2">
+              <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
             </div>
             
-            {/* Order Total */}
-            <div className="bg-card/80 rounded-xl p-4 mb-4 border border-border">
-              <p className="text-sm text-muted-foreground mb-1">Kassiert</p>
-              <p className="font-mono text-3xl sm:text-4xl font-bold text-green-500">
-                {completedOrderTotal.toFixed(2)} €
-              </p>
-            </div>
-
-            {/* Change Calculator */}
-            {!showChangeCalc ? (
-              <div className="space-y-3">
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4">
+              {/* Header with Bonnummer */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-green-500/20 border-4 border-green-500 flex items-center justify-center shrink-0">
+                    <span className="font-mono text-4xl sm:text-5xl font-black text-green-500">
+                      {completedOrderNumber.toString().padStart(2, '0')}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground uppercase tracking-wider">Bon Nummer</p>
+                    <p className="font-mono text-2xl sm:text-3xl font-bold text-green-500">
+                      {completedOrderTotal.toFixed(2)} €
+                    </p>
+                  </div>
+                </div>
+                {/* Weiter Button - always visible */}
                 <Button
-                  variant="outline"
-                  className="w-full h-12 border-green-500/50 text-green-500 hover:bg-green-500/10"
-                  onClick={openChangeCalculator}
-                >
-                  <Calculator className="w-5 h-5 mr-2" />
-                  Restgeldrechner
-                </Button>
-                <Button
-                  className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700"
+                  className="h-16 px-6 text-lg font-bold bg-green-600 hover:bg-green-700 shrink-0"
                   onClick={dismissOverlay}
                 >
                   Weiter →
                 </Button>
               </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="bg-card/80 rounded-xl p-4 border border-border">
-                  <p className="text-sm text-muted-foreground mb-2">Gast gibt</p>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={givenAmount}
-                    onChange={(e) => setGivenAmount(e.target.value)}
-                    placeholder="0.00"
-                    className="text-center font-mono text-2xl h-14 bg-background"
-                    autoFocus
-                  />
-                </div>
-                
-                {givenAmount && parseFloat(givenAmount) >= completedOrderTotal && (
-                  <div className="bg-green-500/20 rounded-xl p-4 border border-green-500/50">
-                    <p className="text-sm text-green-400 mb-1">Rückgeld</p>
-                    <p className="font-mono text-4xl font-bold text-green-500">
-                      {calculateChange().toFixed(2)} €
-                    </p>
-                  </div>
-                )}
-                
-                {givenAmount && parseFloat(givenAmount) < completedOrderTotal && (
-                  <div className="bg-red-500/20 rounded-xl p-4 border border-red-500/50">
-                    <p className="text-sm text-red-400 mb-1">Fehlbetrag</p>
-                    <p className="font-mono text-3xl font-bold text-red-500">
-                      {Math.abs(calculateChange()).toFixed(2)} €
-                    </p>
-                  </div>
-                )}
 
+              {/* Change Calculator Toggle */}
+              {!showChangeCalc ? (
                 <Button
-                  className="w-full h-12 bg-green-600 hover:bg-green-700"
-                  onClick={finishWithChange}
+                  variant="outline"
+                  className="w-full h-14 border-green-500/50 text-green-500 hover:bg-green-500/10"
+                  onClick={openChangeCalculator}
                 >
-                  Abschließen
+                  <Calculator className="w-5 h-5 mr-2" />
+                  Restgeldrechner öffnen
                 </Button>
-              </div>
-            )}
+              ) : (
+                <div className="space-y-4 bg-muted/30 rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium">Restgeldrechner</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowChangeCalc(false)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Kassiert</p>
+                      <p className="font-mono text-2xl font-bold text-green-500">
+                        {completedOrderTotal.toFixed(2)} €
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Gast gibt</p>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        inputMode="decimal"
+                        value={givenAmount}
+                        onChange={(e) => setGivenAmount(e.target.value)}
+                        placeholder="0.00"
+                        className="font-mono text-xl h-12 bg-background"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+                  
+                  {givenAmount && parseFloat(givenAmount) > 0 && (
+                    <div className={`rounded-xl p-4 ${parseFloat(givenAmount) >= completedOrderTotal ? 'bg-green-500/20 border border-green-500/50' : 'bg-red-500/20 border border-red-500/50'}`}>
+                      <p className={`text-sm mb-1 ${parseFloat(givenAmount) >= completedOrderTotal ? 'text-green-400' : 'text-red-400'}`}>
+                        {parseFloat(givenAmount) >= completedOrderTotal ? 'Rückgeld' : 'Fehlbetrag'}
+                      </p>
+                      <p className={`font-mono text-3xl font-bold ${parseFloat(givenAmount) >= completedOrderTotal ? 'text-green-500' : 'text-red-500'}`}>
+                        {Math.abs(calculateChange()).toFixed(2)} €
+                      </p>
+                    </div>
+                  )}
+
+                  <Button
+                    className="w-full h-12 bg-green-600 hover:bg-green-700"
+                    onClick={finishWithChange}
+                  >
+                    Abschließen
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
