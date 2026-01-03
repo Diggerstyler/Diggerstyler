@@ -265,7 +265,7 @@ export default function BestellungPage() {
       };
 
       const response = await axios.post(`${API}/orders`, order);
-      showOrderCompletionOverlay(response.data.order_number);
+      showOrderCompletionOverlay(response.data.order_number, total);
       toast.success(`Bestellung #${response.data.order_number} erstellt!`);
       setCart([]);
     } catch (error) {
