@@ -95,11 +95,6 @@ export default function KuechePage() {
           </div>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
-          {skipPreparation && (
-            <Badge variant="outline" className="text-accent border-accent text-xs">
-              Schnellmodus
-            </Badge>
-          )}
           <Button
             variant="outline"
             size="sm"
@@ -114,11 +109,11 @@ export default function KuechePage() {
       </header>
 
       <main className="p-4 sm:p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Incoming Orders - Always visible */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {/* Incoming Orders - Show "Fertig" button directly */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <h2 className="font-display text-base sm:text-lg font-bold uppercase">Eingehend</h2>
+              <h2 className="font-display text-base sm:text-lg font-bold uppercase">Bestellungen</h2>
               <Badge variant="secondary" className="neon-secondary">
                 {createdOrders.length}
               </Badge>
@@ -140,13 +135,17 @@ export default function KuechePage() {
                     >
                       <CardHeader className="pb-2 p-3 sm:p-4">
                         <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="font-mono text-xl sm:text-2xl">
-                              #{order.order_number}
-                            </CardTitle>
-                            <div className="flex items-center gap-2 mt-1 text-xs sm:text-sm text-muted-foreground">
-                              <Clock className="w-3 sm:w-4 h-3 sm:h-4" />
-                              <span>{getTimeDiff(order.created_at)} Min.</span>
+                          <div className="flex items-center gap-3">
+                            <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center">
+                              <span className="font-mono text-2xl font-bold text-primary">
+                                {order.order_number.toString().padStart(2, '0')}
+                              </span>
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                                <Clock className="w-3 sm:w-4 h-3 sm:h-4" />
+                                <span>{getTimeDiff(order.created_at)} Min.</span>
+                              </div>
                             </div>
                           </div>
                           <Badge variant="outline" className="text-xs">Neu</Badge>
@@ -160,24 +159,15 @@ export default function KuechePage() {
                             </li>
                           ))}
                         </ul>
-                        {skipPreparation ? (
-                          /* Skip mode: Show "Fertig" button directly */
-                          <Button
-                            className="w-full bg-green-600 hover:bg-green-700 neon-success text-sm"
-                            onClick={() => updateOrderStatus(order.id, "ready")}
-                            disabled={isLoading}
-                            data-testid={`finish-order-${order.id}`}
-                          >
-                            <Check className="w-4 h-4 mr-2" />
-                            Fertig
-                          </Button>
-                        ) : (
-                          /* Normal mode: Show "Zubereitung" button */
-                          <Button
-                            className="w-full neon-secondary bg-secondary text-sm"
-                            onClick={() => updateOrderStatus(order.id, "in_progress")}
-                            disabled={isLoading}
-                            data-testid={`start-order-${order.id}`}
+                        {/* Always show "Fertig" button - no more "Zubereitung" step */}
+                        <Button
+                          className="w-full bg-green-600 hover:bg-green-700 neon-success text-sm"
+                          onClick={() => updateOrderStatus(order.id, "ready")}
+                          disabled={isLoading}
+                          data-testid={`finish-order-${order.id}`}
+                        >
+                          <Check className="w-4 h-4 mr-2" />
+                          Fertig
                           >
                             Zubereitung
                           </Button>
