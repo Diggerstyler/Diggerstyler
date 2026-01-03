@@ -34,11 +34,32 @@ export default function LandingPage() {
     axios.post(`${API}/seed`).catch(() => {});
   }, []);
 
+  // Toggle short_process directly from frontend
+  const toggleShortProcess = async () => {
+    if (!selectedStand) return;
+    setIsTogglingShortProcess(true);
+    try {
+      await axios.put(`${API}/stands/${selectedStand.id}`, {
+        short_process: !selectedStand.short_process
+      });
+      // Update local state
+      setSelectedStand(prev => ({ ...prev, short_process: !prev.short_process }));
+      // Update stands list
+      setStands(prev => prev.map(s => 
+        s.id === selectedStand.id ? { ...s, short_process: !s.short_process } : s
+      ));
+    } catch (error) {
+      console.error("Error toggling short process:", error);
+    } finally {
+      setIsTogglingShortProcess(false);
+    }
+  };
+
   const allRoles = [
     {
       id: "bestellung",
       name: "Bestellung",
-      description: "Artikel buchen & abrechnen",
+      description: "Buchen & kassieren",
       icon: ShoppingCart,
       color: "primary",
       path: "bestellung"
@@ -46,24 +67,24 @@ export default function LandingPage() {
     {
       id: "macher",
       name: "Macher",
-      description: "Bestellungen fertigstellen",
+      description: "Fertig melden",
       icon: Hammer,
       color: "secondary",
       path: "kueche",
-      hideOnShortProcess: true  // Hide this role when stand has short_process enabled
+      hideOnShortProcess: true
     },
     {
       id: "ausgabe",
       name: "Ausgabe",
-      description: "Bestellungen übergeben",
+      description: "Übergeben",
       icon: Package,
       color: "accent",
       path: "ausgabe"
     },
     {
       id: "onemanshow",
-      name: "OneManShow",
-      description: "Direkt buchen & fertig",
+      name: "OneMan",
+      description: "Alles in einem",
       icon: Zap,
       color: "success",
       path: "onemanshow"
@@ -72,7 +93,7 @@ export default function LandingPage() {
 
   // Filter roles based on stand settings
   const roles = selectedStand?.short_process 
-    ? allRoles.filter(r => !r.hideOnShortProcess)  // Hide Macher when short_process is enabled
+    ? allRoles.filter(r => !r.hideOnShortProcess)
     : allRoles;
 
   const handleRoleSelect = (role) => {
