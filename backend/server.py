@@ -142,6 +142,45 @@ class ArticleUpdate(BaseModel):
     deposit_group_id: Optional[str] = None
     active: Optional[bool] = None
 
+# Station Models (for Macher role)
+class Station(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    stand_id: str
+    name: str
+    is_main: bool = False  # Hauptstation - receives main articles without linked articles
+    active: bool = True
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class StationCreate(BaseModel):
+    stand_id: str
+    name: str
+    is_main: bool = False
+
+class StationUpdate(BaseModel):
+    name: Optional[str] = None
+    is_main: Optional[bool] = None
+    active: Optional[bool] = None
+
+# Linked Article Models (Verknüpfte Artikel)
+class LinkedArticle(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    main_article_id: str  # Hauptartikel
+    linked_article_id: str  # Verknüpfter Artikel (Beilage)
+    linked_article_name: str  # Cache name for display
+    station_id: str  # Station where this linked article appears
+    station_name: str  # Cache name for display
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class LinkedArticleCreate(BaseModel):
+    main_article_id: str
+    linked_article_id: str
+    station_id: str
+
+class LinkedArticleUpdate(BaseModel):
+    station_id: Optional[str] = None
+
 class OrderItem(BaseModel):
     article_id: str
     article_name: str
