@@ -210,6 +210,9 @@ class Order(BaseModel):
     updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     processed_by: Optional[str] = None
     completed_by: Optional[str] = None
+    # Station tracking for multi-station workflow
+    station_status: Dict[str, bool] = {}  # station_id -> completed (True/False)
+    has_linked_articles: bool = False  # Whether this order has linked articles
 
 class OrderCreate(BaseModel):
     stand_id: str
