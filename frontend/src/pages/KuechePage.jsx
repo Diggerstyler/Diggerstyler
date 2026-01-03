@@ -204,20 +204,20 @@ export default function KuechePage() {
               <CardContent className="p-3 sm:p-4 pt-0">
                 {Object.keys(kitchenSummary.total_items).length === 0 ? (
                   <p className="text-muted-foreground text-center py-6 text-sm">
-                    Alles erledigt!
+                    Alles erledigt! 🎉
                   </p>
                 ) : (
                   <ScrollArea className="h-[calc(100vh-350px)] sm:h-[calc(100vh-300px)]">
-                    <div className="space-y-2 pr-2">
+                    <div className="space-y-3 pr-2">
                       {Object.entries(kitchenSummary.total_items).map(([name, qty]) => (
                         <div 
                           key={name}
-                          className="flex items-center justify-between p-3 rounded-sm bg-muted/50"
+                          className="flex items-center justify-between p-4 rounded-lg bg-accent/20 border-2 border-accent/40"
                         >
-                          <span className="font-medium text-sm sm:text-base">{name}</span>
-                          <Badge className="bg-accent text-accent-foreground font-mono text-lg px-3">
-                            {qty}x
-                          </Badge>
+                          <span className="font-bold text-lg sm:text-xl">{name}</span>
+                          <div className="flex items-center justify-center min-w-[80px] h-14 rounded-lg bg-accent text-accent-foreground">
+                            <span className="font-mono text-3xl font-black">{qty}x</span>
+                          </div>
                         </div>
                       ))}
                     </div>
