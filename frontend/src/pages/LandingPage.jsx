@@ -4,25 +4,31 @@ import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, ChefHat, Package, Settings } from "lucide-react";
+import { ShoppingCart, ChefHat, Package, Settings, Zap, UtensilsCrossed, Beer, Layers } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [stands, setStands] = useState([]);
+  const [standTypes, setStandTypes] = useState([]);
   const [selectedStand, setSelectedStand] = useState("");
+  const [selectedStandType, setSelectedStandType] = useState("");
 
   useEffect(() => {
-    const fetchStands = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${API}/stands`);
-        setStands(response.data);
+        const [standsRes, typesRes] = await Promise.all([
+          axios.get(`${API}/stands`),
+          axios.get(`${API}/stand-types`)
+        ]);
+        setStands(standsRes.data);
+        setStandTypes(typesRes.data);
       } catch (error) {
-        console.error("Error fetching stands:", error);
+        console.error("Error fetching data:", error);
       }
     };
-    fetchStands();
+    fetchData();
     
     // Seed initial data
     axios.post(`${API}/seed`).catch(() => {});
@@ -52,25 +58,43 @@ export default function LandingPage() {
       icon: Package,
       color: "accent",
       path: "ausgabe"
+    },
+    {
+      id: "onemanshow",
+      name: "OneManShow",
+      description: "Alles in einer Rolle: Tippen, Abrechnen, Ausgeben",
+      icon: Zap,
+      color: "success",
+      path: "onemanshow"
     }
   ];
 
   const handleRoleSelect = (role) => {
-    if (!selectedStand) return;
-    navigate(`/${role.path}/${selectedStand}`);
+    if (!selectedStand || !selectedStandType) return;
+    navigate(`/${role.path}/${selectedStand}/${selectedStandType}`);
   };
 
   const colorClasses = {
     primary: "border-primary/50 hover:border-primary hover:bg-primary/10 neon-primary",
     secondary: "border-secondary/50 hover:border-secondary hover:bg-secondary/10 neon-secondary",
-    accent: "border-accent/50 hover:border-accent hover:bg-accent/10 neon-accent"
+    accent: "border-accent/50 hover:border-accent hover:bg-accent/10 neon-accent",
+    success: "border-green-500/50 hover:border-green-500 hover:bg-green-500/10 neon-success"
   };
 
   const iconColorClasses = {
     primary: "text-primary",
     secondary: "text-secondary",
-    accent: "text-accent"
+    accent: "text-accent",
+    success: "text-green-500"
   };
+
+  const standTypeIcons = {
+    speisestand: UtensilsCrossed,
+    getraenkestand: Beer,
+    gemischt: Layers
+  };
+
+  const isSelectionComplete = selectedStand && selectedStandType;
 
   return (
     <div 
@@ -103,50 +127,97 @@ export default function LandingPage() {
             Willkommen
           </h2>
           <p className="text-muted-foreground text-lg">
-            Wähle deinen Stand und deine Rolle
+            Wähle deinen Stand, Standtyp und deine Rolle
           </p>
         </div>
 
-        <div className="w-full max-w-md mb-12">
-          <Select value={selectedStand} onValueChange={setSelectedStand}>
-            <SelectTrigger 
-              className="h-14 text-lg bg-card border-border"
-              data-testid="stand-select"
-            >
-              <SelectValue placeholder="Stand auswählen..." />
-            </SelectTrigger>
-            <SelectContent>
-              {stands.map((stand) => (
-                <SelectItem 
-                  key={stand.id} 
-                  value={stand.id}
-                  data-testid={`stand-option-${stand.id}`}
-                >
-                  {stand.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Selection Row */}
+        <div className="w-full max-w-3xl mb-12 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm text-muted-foreground">Stand</label>
+            <Select value={selectedStand} onValueChange={setSelectedStand}>
+              <SelectTrigger 
+                className="h-14 text-lg bg-card border-border"
+                data-testid="stand-select"
+              >
+                <SelectValue placeholder="Stand auswählen..." />
+              </SelectTrigger>
+              <SelectContent>
+                {stands.map((stand) => (
+                  <SelectItem 
+                    key={stand.id} 
+                    value={stand.id}
+                    data-testid={`stand-option-${stand.id}`}
+                  >
+                    {stand.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm text-muted-foreground">Standtyp</label>
+            <Select value={selectedStandType} onValueChange={setSelectedStandType}>
+              <SelectTrigger 
+                className="h-14 text-lg bg-card border-border"
+                data-testid="stand-type-select"
+              >
+                <SelectValue placeholder="Standtyp auswählen..." />
+              </SelectTrigger>
+              <SelectContent>
+                {standTypes.map((type) => {
+                  const Icon = standTypeIcons[type.id];
+                  return (
+                    <SelectItem 
+                      key={type.id} 
+                      value={type.id}
+                      data-testid={`stand-type-option-${type.id}`}
+                    >
+                      <span className="flex items-center gap-2">
+                        {Icon && <Icon className="w-4 h-4" />}
+                        {type.name}
+                      </span>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
+        {/* Selected Info */}
+        {isSelectionComplete && (
+          <div className="mb-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              Gewählt: <span className="text-foreground font-medium">
+                {stands.find(s => s.id === selectedStand)?.name}
+              </span> • <span className="text-foreground font-medium">
+                {standTypes.find(t => t.id === selectedStandType)?.name}
+              </span>
+            </p>
+          </div>
+        )}
+
+        {/* Role Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">
           {roles.map((role) => {
             const Icon = role.icon;
             return (
               <Card
                 key={role.id}
-                className={`bg-card/80 backdrop-blur border-2 cursor-pointer transition-all duration-200 hover:-translate-y-1 ${colorClasses[role.color]} ${!selectedStand ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`bg-card/80 backdrop-blur border-2 cursor-pointer transition-all duration-200 hover:-translate-y-1 ${colorClasses[role.color]} ${!isSelectionComplete ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={() => handleRoleSelect(role)}
                 data-testid={`role-card-${role.id}`}
               >
-                <CardContent className="p-8 flex flex-col items-center text-center">
-                  <div className={`w-20 h-20 rounded-sm flex items-center justify-center mb-6 bg-muted ${iconColorClasses[role.color]}`}>
-                    <Icon className="w-10 h-10" />
+                <CardContent className="p-6 flex flex-col items-center text-center">
+                  <div className={`w-16 h-16 rounded-sm flex items-center justify-center mb-4 bg-muted ${iconColorClasses[role.color]}`}>
+                    <Icon className="w-8 h-8" />
                   </div>
-                  <h3 className="font-display text-2xl font-bold uppercase mb-2">
+                  <h3 className="font-display text-xl font-bold uppercase mb-2">
                     {role.name}
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {role.description}
                   </p>
                 </CardContent>

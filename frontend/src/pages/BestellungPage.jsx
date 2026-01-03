@@ -2,40 +2,54 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Plus, Minus, Trash2, ShoppingCart, Beer, UtensilsCrossed } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function BestellungPage() {
-  const { standId } = useParams();
+  const { standId, standType } = useParams();
   const navigate = useNavigate();
   const [articles, setArticles] = useState([]);
   const [cart, setCart] = useState([]);
   const [activeCategory, setActiveCategory] = useState("all");
   const [standName, setStandName] = useState("");
+  const [standTypeName, setStandTypeName] = useState("");
+  const [allowedCategories, setAllowedCategories] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [articlesRes, standsRes] = await Promise.all([
+        const [articlesRes, standsRes, typesRes] = await Promise.all([
           axios.get(`${API}/articles?active_only=true`),
-          axios.get(`${API}/stands`)
+          axios.get(`${API}/stands`),
+          axios.get(`${API}/stand-types`)
         ]);
-        setArticles(articlesRes.data);
+        
         const stand = standsRes.data.find(s => s.id === standId);
         if (stand) setStandName(stand.name);
+        
+        const type = typesRes.data.find(t => t.id === standType);
+        if (type) {
+          setStandTypeName(type.name);
+          setAllowedCategories(type.categories);
+          
+          // Filter articles based on stand type
+          const filteredArticles = articlesRes.data.filter(
+            article => type.categories.includes(article.category)
+          );
+          setArticles(filteredArticles);
+        }
       } catch (error) {
         toast.error("Fehler beim Laden der Daten");
       }
     };
     fetchData();
-  }, [standId]);
+  }, [standId, standType]);
 
   const filteredArticles = articles.filter(
     article => activeCategory === "all" || article.category === activeCategory
@@ -105,10 +119,11 @@ export default function BestellungPage() {
     }
   };
 
+  // Build categories based on allowed categories
   const categories = [
     { id: "all", name: "Alle", icon: null },
-    { id: "getraenke", name: "Getränke", icon: Beer },
-    { id: "speisen", name: "Speisen", icon: UtensilsCrossed }
+    ...(allowedCategories.includes("getraenke") ? [{ id: "getraenke", name: "Getränke", icon: Beer }] : []),
+    ...(allowedCategories.includes("speisen") ? [{ id: "speisen", name: "Speisen", icon: UtensilsCrossed }] : [])
   ];
 
   return (
@@ -126,7 +141,7 @@ export default function BestellungPage() {
           <h1 className="font-display text-xl font-bold uppercase tracking-tight">
             Bestellung
           </h1>
-          <p className="text-sm text-muted-foreground">{standName}</p>
+          <p className="text-sm text-muted-foreground">{standName} • {standTypeName}</p>
         </div>
         <Badge variant="outline" className="ml-auto border-primary text-primary">
           <ShoppingCart className="w-4 h-4 mr-1" />
@@ -136,43 +151,47 @@ export default function BestellungPage() {
 
       <div className="flex h-[calc(100vh-73px)]">
         {/* Categories Sidebar */}
-        <aside className="w-48 border-r border-border p-4 hidden md:block">
-          <nav className="space-y-2">
-            {categories.map(cat => {
-              const Icon = cat.icon;
-              return (
-                <Button
-                  key={cat.id}
-                  variant={activeCategory === cat.id ? "secondary" : "ghost"}
-                  className="w-full justify-start"
-                  onClick={() => setActiveCategory(cat.id)}
-                  data-testid={`category-${cat.id}`}
-                >
-                  {Icon && <Icon className="w-4 h-4 mr-2" />}
-                  {cat.name}
-                </Button>
-              );
-            })}
-          </nav>
-        </aside>
+        {categories.length > 1 && (
+          <aside className="w-48 border-r border-border p-4 hidden md:block">
+            <nav className="space-y-2">
+              {categories.map(cat => {
+                const Icon = cat.icon;
+                return (
+                  <Button
+                    key={cat.id}
+                    variant={activeCategory === cat.id ? "secondary" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => setActiveCategory(cat.id)}
+                    data-testid={`category-${cat.id}`}
+                  >
+                    {Icon && <Icon className="w-4 h-4 mr-2" />}
+                    {cat.name}
+                  </Button>
+                );
+              })}
+            </nav>
+          </aside>
+        )}
 
         {/* Mobile Category Tabs */}
-        <div className="md:hidden fixed bottom-[140px] left-0 right-0 glass px-4 py-2 flex gap-2 z-30">
-          {categories.map(cat => (
-            <Button
-              key={cat.id}
-              variant={activeCategory === cat.id ? "secondary" : "ghost"}
-              size="sm"
-              className="flex-1"
-              onClick={() => setActiveCategory(cat.id)}
-            >
-              {cat.name}
-            </Button>
-          ))}
-        </div>
+        {categories.length > 1 && (
+          <div className="md:hidden fixed bottom-[140px] left-0 right-0 glass px-4 py-2 flex gap-2 z-30">
+            {categories.map(cat => (
+              <Button
+                key={cat.id}
+                variant={activeCategory === cat.id ? "secondary" : "ghost"}
+                size="sm"
+                className="flex-1"
+                onClick={() => setActiveCategory(cat.id)}
+              >
+                {cat.name}
+              </Button>
+            ))}
+          </div>
+        )}
 
         {/* Articles Grid */}
-        <main className="flex-1 p-6 overflow-auto pb-52 md:pb-6">
+        <main className={`flex-1 p-6 overflow-auto ${categories.length > 1 ? 'pb-52' : 'pb-32'} md:pb-6`}>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredArticles.map(article => (
               <Card
