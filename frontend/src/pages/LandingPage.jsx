@@ -316,14 +316,20 @@ export default function LandingPage() {
           // Step 2: Role Selection
           <>
             <div className="text-center mb-8 sm:mb-12">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 bg-card/50 border border-border">
+              <div className="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2 rounded-full mb-4 bg-card/50 border border-border">
                 <Store className="w-5 h-5 text-primary" />
                 <span className="font-display uppercase font-bold text-primary">
                   {selectedStand.name}
                 </span>
-                <Badge variant="outline" className="text-xs ml-2">
+                <Badge variant="outline" className="text-xs">
                   {standTypeConfig[selectedStand.stand_type]?.label || "Gemischt"}
                 </Badge>
+                {selectedStand.short_process && (
+                  <Badge variant="outline" className="text-xs text-blue-500 border-blue-500">
+                    <FastForward className="w-3 h-3 mr-1" />
+                    Kurzer Prozess
+                  </Badge>
+                )}
               </div>
               <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight mb-3 sm:mb-4">
                 Wähle deine Rolle
@@ -331,9 +337,14 @@ export default function LandingPage() {
               <p className="text-muted-foreground text-base sm:text-lg">
                 Was machst du heute?
               </p>
+              {selectedStand.short_process && (
+                <p className="text-sm text-blue-500 mt-2">
+                  Hinweis: Macher-Rolle ist bei diesem Stand deaktiviert
+                </p>
+              )}
             </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 w-full max-w-6xl">
+            <div className={`grid gap-3 sm:gap-6 w-full max-w-6xl ${roles.length === 3 ? 'grid-cols-3' : 'grid-cols-2 lg:grid-cols-4'}`}>
               {roles.map((role) => {
                 const Icon = role.icon;
                 return (
