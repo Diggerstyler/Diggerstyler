@@ -385,10 +385,106 @@ frontend:
         agent: "testing"
         comment: "❌ CRITICAL ISSUE: Kurzer Prozess toggle functionality is broken. Toggle UI appears and responds to clicks but actual state change is not working. Toggle remains in OFF position despite clicking. Macher role stays visible when it should be hidden. No password/confirmation required (correct). Immediate UI response (correct). The toggle state persistence and role visibility logic needs fixing."
 
+frontend:
+  - task: "Ausgabe page - Archiv button and dialog functionality"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/AusgabePage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Archiv button found in header and working perfectly. Archive dialog opens showing 11 orders. Clicking on orders opens detail dialog with order number, total price, articles list, and status. All dialogs close properly. Archive functionality complete and working as expected."
+
+  - task: "Ausgabe page - Fullscreen button (Maximize icon)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/AusgabePage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Fullscreen button found in header with Maximize icon. Button has proper title attribute and icon display. Fullscreen functionality implemented correctly."
+
+  - task: "Ausgabe page - Reclaim button (#XX zurück) for completed orders"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/AusgabePage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Reclaim button found in header with correct yellow styling and '#10 zurück' text format. Button displays when completed orders are available. Styling and text format match requirements perfectly."
+
+  - task: "Admin Orders page - Orders list display and functionality"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/OrdersManagement.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Admin Orders page working perfectly. Found 11 orders displayed in list (exceeds expected 8-9). Orders show order number, stand name, total price, status badges, and timestamps. All order information displayed correctly."
+
+  - task: "Admin Orders page - Filter dropdown 'Alle Stände'"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/OrdersManagement.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Filter dropdown 'Alle Stände' found and working correctly. Dropdown displays proper text and is functional for filtering orders by stand."
+
+  - task: "Admin Orders page - Order detail dialog"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/OrdersManagement.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Order detail dialog opens when clicking on orders. Shows order number, stand name, total price, list of articles with quantities, status, and has Delete and Close buttons. All required elements present and functional."
+
+  - task: "Admin Orders page - Delete confirmation dialog"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/OrdersManagement.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Delete confirmation dialog opens when clicking trash icon. Shows proper confirmation message asking 'wirklich löschen'. Cancel button works correctly. Delete functionality properly implemented with confirmation step."
+
+  - task: "Admin Dashboard - FileText icon navigation to orders"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/AdminDashboard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: FileText icon button found in admin dashboard header with data-testid='orders-nav-btn'. Clicking the button successfully navigates to /admin/orders page. Navigation functionality working perfectly."
+
 test_plan:
   current_focus:
     - "Kurzer Prozess toggle on role selection page"
-    - "Frontend testing for message #456 features"
   stuck_tasks:
     - "Kurzer Prozess toggle on role selection page"
   test_all: false
