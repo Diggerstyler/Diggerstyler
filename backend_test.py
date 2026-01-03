@@ -445,6 +445,7 @@ class FestivalAPITester:
             self.test_order_workflow()
             self.test_admin_authentication()
             self.test_statistics()
+            self.test_new_features_message_456()  # Add new features test
             
         except KeyboardInterrupt:
             print("\n⚠️ Tests interrupted by user")
