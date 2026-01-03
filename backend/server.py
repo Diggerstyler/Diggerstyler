@@ -101,7 +101,7 @@ class Stand(BaseModel):
     name: str
     stand_type: str = "gemischt"
     articles: List[str] = []
-    skip_preparation: bool = False
+    short_process: bool = False  # Kurzer Prozess: Bestellung -> direkt Ausgabe (ohne Macher)
     active: bool = True
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
@@ -109,13 +109,13 @@ class StandCreate(BaseModel):
     name: str
     stand_type: str = "gemischt"
     articles: List[str] = []
-    skip_preparation: bool = False
+    short_process: bool = False
 
 class StandUpdate(BaseModel):
     name: Optional[str] = None
     stand_type: Optional[str] = None
     articles: Optional[List[str]] = None
-    skip_preparation: Optional[bool] = None
+    short_process: Optional[bool] = None
     active: Optional[bool] = None
 
 class Article(BaseModel):
