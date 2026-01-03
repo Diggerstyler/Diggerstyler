@@ -236,7 +236,8 @@ export default function OneManShowPage() {
 
       const response = await axios.post(`${API}/orders`, order);
       setLastOrder(response.data);
-      toast.success(`Bestellung #${response.data.order_number} abgeschlossen! Kassiert: ${total.toFixed(2)} €`);
+      showOrderCompletionOverlay(response.data.order_number);
+      toast.success(`Bestellung #${response.data.order_number} abgeschlossen!`);
       setCart([]);
     } catch (error) {
       toast.error("Fehler beim Erstellen der Bestellung");
