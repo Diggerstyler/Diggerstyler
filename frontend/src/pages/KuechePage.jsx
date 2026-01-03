@@ -106,6 +106,7 @@ export default function KuechePage() {
         updated_by: stationInfo?.name || "Macher"
       });
       toast.success("Station fertig!");
+      clearMarkedItems(orderId);
       fetchData();
     } catch (error) {
       toast.error("Fehler beim Aktualisieren");
@@ -131,6 +132,7 @@ export default function KuechePage() {
           ? "Bestellung wird zubereitet" 
           : "Bestellung ist fertig!"
       );
+      clearMarkedItems(orderId);
       fetchData();
     } catch (error) {
       toast.error("Fehler beim Aktualisieren");
