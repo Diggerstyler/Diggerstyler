@@ -248,11 +248,112 @@ export default function BestellungPage() {
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground truncate">{standInfo?.name}</p>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={openArchive}
+          className="shrink-0"
+          data-testid="archive-btn"
+        >
+          <Archive className="w-4 h-4 sm:mr-2" />
+          <span className="hidden sm:inline">Archiv</span>
+        </Button>
         <Badge variant="outline" className="border-primary text-primary shrink-0">
           <ShoppingCart className="w-4 h-4 mr-1" />
           {cart.reduce((sum, item) => sum + item.quantity, 0)}
         </Badge>
       </header>
+
+      {/* Archive Dialog */}
+      <Dialog open={showArchive} onOpenChange={setShowArchive}>
+        <DialogContent className="bg-card border-border max-w-2xl max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase flex items-center gap-2">
+              <Archive className="w-5 h-5" />
+              Bestellungsarchiv - {standInfo?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh] pr-4">
+            {isLoadingArchive ? (
+              <div className="text-center py-8 text-muted-foreground">Laden...</div>
+            ) : archiveOrders.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Keine Bestellungen im Archiv
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {archiveOrders.map(order => (
+                  <Card key={order.id} className="bg-muted/30 border-border">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center">
+                            <span className="font-mono text-xl font-bold text-primary">
+                              {formatOrderNumber(order.order_number)}
+                            </span>
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Clock className="w-3 h-3" />
+                              {formatTime(order.created_at)}
+                            </div>
+                            <Badge 
+                              variant="outline" 
+                              className={`mt-1 text-xs ${
+                                order.status === 'completed' ? 'border-green-500 text-green-500' :
+                                order.status === 'ready' ? 'border-blue-500 text-blue-500' :
+                                order.status === 'in_progress' ? 'border-yellow-500 text-yellow-500' :
+                                'border-muted-foreground'
+                              }`}
+                            >
+                              {order.status === 'completed' ? 'Abgeschlossen' :
+                               order.status === 'ready' ? 'Fertig' :
+                               order.status === 'in_progress' ? 'In Arbeit' :
+                               order.status === 'created' ? 'Neu' : order.status}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-mono text-lg font-bold text-primary">
+                            {order.total?.toFixed(2)} €
+                          </p>
+                          {order.deposit_total > 0 && (
+                            <p className="text-xs text-green-500">
+                              inkl. {order.deposit_total.toFixed(2)}€ Pfand
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="border-t border-border pt-3">
+                        <ul className="space-y-1">
+                          {order.items?.map((item, idx) => (
+                            <li key={idx} className="flex justify-between text-sm">
+                              <span className={item.is_deposit_return ? 'text-green-500' : ''}>
+                                {item.quantity}x {item.article_name}
+                              </span>
+                              <span className={`font-mono ${item.is_deposit_return ? 'text-green-500' : 'text-muted-foreground'}`}>
+                                {item.is_deposit_return ? '-' : ''}{(item.price * item.quantity).toFixed(2)} €
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+          <div className="pt-4 border-t border-border flex justify-between items-center">
+            <p className="text-sm text-muted-foreground">
+              {archiveOrders.length} Bestellungen
+            </p>
+            <Button variant="outline" onClick={() => setShowArchive(false)}>
+              Schließen
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="flex flex-1 overflow-hidden">
         {/* Categories Sidebar - Desktop */}
