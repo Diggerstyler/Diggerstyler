@@ -6,37 +6,62 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Clock, Hammer, Check, RefreshCw, ListOrdered } from "lucide-react";
+import { ArrowLeft, Clock, Hammer, Check, RefreshCw, ListOrdered, Star } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function KuechePage() {
-  const { standId, standType } = useParams();
+  const { standId, standType, stationId } = useParams();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [standInfo, setStandInfo] = useState(null);
+  const [stationInfo, setStationInfo] = useState(null);
   const [kitchenSummary, setKitchenSummary] = useState({ total_items: {}, total_orders: 0 });
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
-      const [ordersRes, standRes, summaryRes] = await Promise.all([
-        axios.get(`${API}/orders?stand_id=${standId}`),
-        axios.get(`${API}/stands/${standId}`),
-        axios.get(`${API}/stands/${standId}/kitchen-summary`)
-      ]);
+      // Fetch different data based on whether we're in station mode
+      const summaryUrl = stationId 
+        ? `${API}/stands/${standId}/kitchen-summary?station_id=${stationId}`
+        : `${API}/stands/${standId}/kitchen-summary`;
       
-      // Filter for created and in_progress orders (sorted oldest first by backend)
-      const relevantOrders = ordersRes.data.filter(
-        o => o.status === "created" || o.status === "in_progress"
-      );
-      setOrders(relevantOrders);
+      const requests = [
+        axios.get(`${API}/stands/${standId}`),
+        axios.get(summaryUrl)
+      ];
+      
+      // If station mode, fetch station-specific orders
+      if (stationId) {
+        requests.push(axios.get(`${API}/stands/${standId}/station/${stationId}/orders`));
+        requests.push(axios.get(`${API}/stations`).then(res => 
+          res.data.find(s => s.id === stationId)
+        ));
+      } else {
+        requests.push(axios.get(`${API}/orders?stand_id=${standId}`));
+      }
+      
+      const results = await Promise.all(requests);
+      const [standRes, summaryRes, ordersData, station] = results;
+      
+      if (stationId) {
+        // Station mode: orders already filtered
+        setOrders(ordersData.data || []);
+        setStationInfo(station || null);
+      } else {
+        // Regular mode: filter for created and in_progress orders
+        const relevantOrders = (ordersData.data || []).filter(
+          o => o.status === "created" || o.status === "in_progress"
+        );
+        setOrders(relevantOrders);
+      }
+      
       setStandInfo(standRes.data);
       setKitchenSummary(summaryRes.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-  }, [standId]);
+  }, [standId, stationId]);
 
   useEffect(() => {
     fetchData();
@@ -44,12 +69,34 @@ export default function KuechePage() {
     return () => clearInterval(interval);
   }, [fetchData]);
 
+  // Handle completing order for a station
+  const handleStationComplete = async (orderId) => {
+    setIsLoading(true);
+    try {
+      await axios.put(`${API}/orders/${orderId}/station-complete`, {
+        station_id: stationId,
+        updated_by: stationInfo?.name || "Macher"
+      });
+      toast.success("Station fertig!");
+      fetchData();
+    } catch (error) {
+      toast.error("Fehler beim Aktualisieren");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const updateOrderStatus = async (orderId, newStatus) => {
+    // If in station mode, use station-specific completion
+    if (stationId && newStatus === "ready") {
+      return handleStationComplete(orderId);
+    }
+    
     setIsLoading(true);
     try {
       await axios.put(`${API}/orders/${orderId}/status`, {
         status: newStatus,
-        updated_by: "Küche"
+        updated_by: stationInfo?.name || "Macher"
       });
       toast.success(
         newStatus === "in_progress" 
@@ -67,6 +114,21 @@ export default function KuechePage() {
   const getTimeDiff = (createdAt) => {
     const diff = Math.floor((Date.now() - new Date(createdAt).getTime()) / 1000 / 60);
     return diff;
+  };
+
+  // Get items for display - in station mode, only show station-relevant items
+  const getDisplayItems = (order) => {
+    if (stationId && order.station_items) {
+      return order.station_items.filter(i => !i.is_deposit_return);
+    }
+    // In normal mode, show main items (not linked articles, those are shown smaller)
+    return order.items.filter(i => !i.is_deposit_return && !i.is_linked_article);
+  };
+
+  // Get linked items for display (shown smaller)
+  const getLinkedItems = (order) => {
+    if (stationId) return []; // Station mode shows its own items
+    return order.items.filter(i => i.is_linked_article);
   };
 
   const createdOrders = orders.filter(o => o.status === "created");
