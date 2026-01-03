@@ -234,7 +234,8 @@ export default function BestellungPage() {
       };
 
       const response = await axios.post(`${API}/orders`, order);
-      toast.success(`Bestellung #${response.data.order_number} erstellt! Summe: ${total.toFixed(2)} €`);
+      showOrderCompletionOverlay(response.data.order_number);
+      toast.success(`Bestellung #${response.data.order_number} erstellt!`);
       setCart([]);
     } catch (error) {
       toast.error("Fehler beim Erstellen der Bestellung");
