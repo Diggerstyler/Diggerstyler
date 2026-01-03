@@ -4,6 +4,8 @@ import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShoppingCart, Hammer, Package, Settings, Zap, ArrowLeft, Store, UtensilsCrossed, Beer, Sparkles, HelpCircle, FastForward } from "lucide-react";
@@ -15,6 +17,7 @@ export default function LandingPage() {
   const [selectedStand, setSelectedStand] = useState(null);
   const [stands, setStands] = useState([]);
   const [showHelp, setShowHelp] = useState(false);
+  const [isTogglingShortProcess, setIsTogglingShortProcess] = useState(false);
 
   useEffect(() => {
     const fetchStands = async () => {
