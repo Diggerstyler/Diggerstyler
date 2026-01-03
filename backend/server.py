@@ -320,6 +320,19 @@ async def update_stand(stand_id: str, stand: StandUpdate, username: str = Depend
     updated = await db.stands.find_one({"id": stand_id}, {"_id": 0})
     return Stand(**updated)
 
+# Toggle short_process from frontend (no auth required for quick toggle)
+@api_router.put("/stands/{stand_id}/toggle-short-process")
+async def toggle_short_process(stand_id: str):
+    stand = await db.stands.find_one({"id": stand_id}, {"_id": 0})
+    if not stand:
+        raise HTTPException(status_code=404, detail="Stand nicht gefunden")
+    
+    new_value = not stand.get("short_process", False)
+    await db.stands.update_one({"id": stand_id}, {"$set": {"short_process": new_value}})
+    
+    updated = await db.stands.find_one({"id": stand_id}, {"_id": 0})
+    return Stand(**updated)
+
 @api_router.delete("/stands/{stand_id}")
 async def delete_stand(stand_id: str, username: str = Depends(verify_admin)):
     result = await db.stands.delete_one({"id": stand_id})
