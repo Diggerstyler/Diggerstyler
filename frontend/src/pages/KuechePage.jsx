@@ -89,10 +89,10 @@ export default function KuechePage() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex items-center gap-3">
-            <ChefHat className="w-5 sm:w-6 h-5 sm:h-6 text-secondary" />
+            <Hammer className="w-5 sm:w-6 h-5 sm:h-6 text-secondary" />
             <div>
               <h1 className="font-display text-lg sm:text-xl font-bold uppercase tracking-tight">
-                Küche
+                Macher
               </h1>
               <p className="text-xs sm:text-sm text-muted-foreground">{standInfo?.name}</p>
             </div>
