@@ -6,7 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Plus, Minus, ShoppingCart, Beer, UtensilsCrossed, RotateCcw, X, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ArrowLeft, Plus, Minus, ShoppingCart, Beer, UtensilsCrossed, RotateCcw, X, Trash2, Archive, Clock } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const WS_URL = process.env.REACT_APP_BACKEND_URL?.replace('https://', 'wss://').replace('http://', 'ws://');
@@ -25,6 +26,46 @@ export default function BestellungPage() {
   const [swipeOffset, setSwipeOffset] = useState(0);
   const touchStartX = useRef(0);
   const wsRef = useRef(null);
+  
+  // Archive state
+  const [showArchive, setShowArchive] = useState(false);
+  const [archiveOrders, setArchiveOrders] = useState([]);
+  const [isLoadingArchive, setIsLoadingArchive] = useState(false);
+
+  const fetchArchive = async () => {
+    setIsLoadingArchive(true);
+    try {
+      const response = await axios.get(`${API}/stands/${standId}/archive?limit=50`);
+      setArchiveOrders(response.data);
+    } catch (error) {
+      toast.error("Fehler beim Laden des Archivs");
+    } finally {
+      setIsLoadingArchive(false);
+    }
+  };
+
+  const openArchive = () => {
+    setShowArchive(true);
+    fetchArchive();
+  };
+
+  const formatTime = (isoString) => {
+    try {
+      const date = new Date(isoString);
+      return date.toLocaleString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return '-';
+    }
+  };
+
+  const formatOrderNumber = (num) => {
+    return num.toString().padStart(2, '0');
+  };
 
   useEffect(() => {
     const fetchData = async () => {
