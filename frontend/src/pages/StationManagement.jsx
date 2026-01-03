@@ -148,7 +148,7 @@ export default function StationManagement() {
       return;
     }
     try {
-      await axios.post(`${API}/api/linked-articles`, {
+      await axios.post(`${API}/linked-articles`, {
         main_article_id: selectedMainArticle,
         linked_article_id: selectedLinkedArticle,
         station_id: selectedStation
@@ -166,7 +166,7 @@ export default function StationManagement() {
 
   const deleteLinkedArticle = async (linked) => {
     try {
-      await axios.delete(`${API}/api/linked-articles/${linked.id}`, authHeader);
+      await axios.delete(`${API}/linked-articles/${linked.id}`, authHeader);
       toast.success("Verknüpfung gelöscht");
       fetchLinkedArticles();
     } catch (err) {
