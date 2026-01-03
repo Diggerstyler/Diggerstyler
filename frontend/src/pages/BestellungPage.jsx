@@ -42,11 +42,16 @@ export default function BestellungPage() {
   const [archiveOrders, setArchiveOrders] = useState([]);
   const [isLoadingArchive, setIsLoadingArchive] = useState(false);
 
-  const showOrderCompletionOverlay = (orderNumber) => {
+  const showOrderCompletionOverlay = (orderNumber, orderTotal) => {
     setCompletedOrderNumber(orderNumber);
-    // Auto-hide after 5 seconds
+    setCompletedOrderTotal(orderTotal);
+    setGivenAmount("");
+    setShowChangeCalc(false);
+    // Auto-hide after 5 seconds (only if change calc is not open)
     overlayTimeoutRef.current = setTimeout(() => {
-      setCompletedOrderNumber(null);
+      if (!showChangeCalc) {
+        setCompletedOrderNumber(null);
+      }
     }, 5000);
   };
 
@@ -55,6 +60,26 @@ export default function BestellungPage() {
       clearTimeout(overlayTimeoutRef.current);
     }
     setCompletedOrderNumber(null);
+    setShowChangeCalc(false);
+    setGivenAmount("");
+  };
+
+  const openChangeCalculator = (e) => {
+    e.stopPropagation();
+    if (overlayTimeoutRef.current) {
+      clearTimeout(overlayTimeoutRef.current);
+    }
+    setShowChangeCalc(true);
+  };
+
+  const calculateChange = () => {
+    const given = parseFloat(givenAmount) || 0;
+    return given - completedOrderTotal;
+  };
+
+  const finishWithChange = () => {
+    dismissOverlay();
+    toast.success("Bestellung abgeschlossen!");
   };
 
   const fetchArchive = async () => {
