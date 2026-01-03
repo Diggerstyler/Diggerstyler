@@ -39,9 +39,44 @@ export default function AusgabePage() {
 
   useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 3000);
-    return () => clearInterval(interval);
-  }, [fetchOrders]);
+    
+    // WebSocket for real-time updates
+    const wsUrl = `${process.env.REACT_APP_BACKEND_URL?.replace('http', 'ws')}/api/ws/${standId}`;
+    let ws = null;
+    let reconnectTimeout = null;
+    
+    const connectWebSocket = () => {
+      try {
+        ws = new WebSocket(wsUrl);
+        
+        ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          if (data.type === 'order_created' || data.type === 'order_updated') {
+            fetchOrders();
+          }
+        };
+        
+        ws.onclose = () => {
+          reconnectTimeout = setTimeout(connectWebSocket, 5000);
+        };
+        
+        ws.onerror = () => ws?.close();
+      } catch (e) {
+        console.log('WebSocket not available');
+      }
+    };
+    
+    connectWebSocket();
+    
+    // Fallback polling every 10 seconds
+    const interval = setInterval(fetchOrders, 10000);
+    
+    return () => {
+      clearInterval(interval);
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      ws?.close();
+    };
+  }, [fetchOrders, standId]);
 
   const completeOrder = async (orderId, orderNumber) => {
     setIsLoading(true);
