@@ -152,13 +152,20 @@ export default function KuechePage() {
                         </div>
                       </CardHeader>
                       <CardContent className="p-3 sm:p-4 pt-0">
-                        <ul className="space-y-1 mb-3 sm:mb-4 text-sm">
+                        {/* Artikel mit großer, präsenter Darstellung */}
+                        <div className="space-y-2 mb-4">
                           {order.items.map((item, idx) => (
-                            <li key={idx} className="font-medium">
-                              {item.quantity}x {item.article_name}
-                            </li>
+                            <div 
+                              key={idx} 
+                              className="flex items-center justify-between p-3 rounded-lg bg-secondary/20 border border-secondary/30"
+                            >
+                              <span className="font-bold text-base sm:text-lg">{item.article_name}</span>
+                              <div className="flex items-center justify-center min-w-[60px] h-12 rounded-lg bg-secondary text-secondary-foreground">
+                                <span className="font-mono text-2xl font-black">{item.quantity}x</span>
+                              </div>
+                            </div>
                           ))}
-                        </ul>
+                        </div>
                         {/* Always show "Fertig" button - no more "Zubereitung" step */}
                         <Button
                           className="w-full bg-green-600 hover:bg-green-700 neon-success text-sm"
