@@ -196,6 +196,27 @@ export default function AdminDashboard() {
               <span className="hidden sm:inline">Statistiken</span>
             </Button>
             <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExport}
+              disabled={isExporting}
+              data-testid="export-btn"
+              className="border-green-500/50 text-green-500 hover:bg-green-500/10"
+            >
+              <Download className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">{isExporting ? "..." : "Export"}</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowResetDialog(true)}
+              data-testid="reset-btn"
+              className="border-destructive/50 text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Reset</span>
+            </Button>
+            <Button
               variant="ghost"
               size="sm"
               onClick={handleLogout}
