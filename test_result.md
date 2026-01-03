@@ -242,8 +242,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Bestellung page - order creation workflow"
-    - "Role/Stand switching - back button navigation"
+    - "Macher view - prominent article display with quantity"
+    - "Kurzer Prozess toggle without password"
+    - "Multiple logins for same role at same stand"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -251,16 +252,21 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      Fixed two user-reported bugs:
-      1. Orders 500 error: Added backward compatibility in GET /api/orders to handle old orders missing subtotal, deposit_total, deposit_return_total fields.
-      2. Article edit error: Changed SelectItem value from empty string "" to "none" for "Kein Pfand" option.
+      Implemented 3 user requests:
+      
+      1. KURZER PROZESS TOGGLE: Already works without password/confirmation. Simple Switch on role selection screen.
+      
+      2. MACHER VIEW IMPROVED: 
+         - Bonnummer now larger (w-20 h-20 / w-24 h-24 on desktop) with border
+         - Articles displayed in prominent boxes with big quantity badges (text-2xl font-black)
+         - "Gesamt Offen" section with even larger quantity display (text-3xl)
+         
+      3. MULTIPLE LOGINS: System already supports this - no session locking. Multiple devices can access same role at same stand via WebSocket updates.
       
       Please test:
-      - Full order creation workflow (Bestellung role > select stand > add items > submit)
-      - Article editing in admin (especially articles without Pfand)
-      - Role/stand switching via back button
-      
-      Admin credentials: admin/admin
+      - Macher view on desktop and mobile (check article/quantity visibility)
+      - Kurzer Prozess toggle (enable/disable and verify it affects workflow)
+      - Open same role (e.g., Macher) on two browser tabs and verify both can see/process orders
   - agent: "main"
     message: |
       Implemented workflow logic fix per user request:
