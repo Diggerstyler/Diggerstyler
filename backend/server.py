@@ -398,15 +398,14 @@ async def get_orders(
 async def create_order(order: OrderCreate):
     order_number = await get_next_order_number(order.stand_id)
     
-    # Check if direct complete (OneManShow) or if stand has skip_preparation
-    stand = await db.stands.find_one({"id": order.stand_id}, {"_id": 0})
+    # Check if direct complete (OneManShow)
+    # Note: skip_preparation only affects the kitchen workflow (UI), not the initial status
+    # Orders always start as "created" and go to kitchen first, except for OneManShow (direct_complete)
     
     if order.direct_complete:
         initial_status = "completed"
-    elif stand and stand.get("skip_preparation", False):
-        initial_status = "ready"
     else:
-        initial_status = "created"
+        initial_status = "created"  # Always goes to kitchen first
     
     order_dict = order.model_dump()
     del order_dict["direct_complete"]
