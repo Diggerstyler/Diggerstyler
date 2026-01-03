@@ -4,7 +4,9 @@ import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Hammer, Package, Settings, Zap, ArrowLeft, Store, UtensilsCrossed, Beer, Sparkles } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ShoppingCart, Hammer, Package, Settings, Zap, ArrowLeft, Store, UtensilsCrossed, Beer, Sparkles, HelpCircle, FastForward } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -12,6 +14,7 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [selectedStand, setSelectedStand] = useState(null);
   const [stands, setStands] = useState([]);
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     const fetchStands = async () => {
@@ -28,7 +31,7 @@ export default function LandingPage() {
     axios.post(`${API}/seed`).catch(() => {});
   }, []);
 
-  const roles = [
+  const allRoles = [
     {
       id: "bestellung",
       name: "Bestellung",
@@ -40,10 +43,11 @@ export default function LandingPage() {
     {
       id: "macher",
       name: "Macher",
-      description: "Bestellungen zubereiten",
+      description: "Bestellungen fertigstellen",
       icon: Hammer,
       color: "secondary",
-      path: "kueche"
+      path: "kueche",
+      hideOnShortProcess: true  // Hide this role when stand has short_process enabled
     },
     {
       id: "ausgabe",
