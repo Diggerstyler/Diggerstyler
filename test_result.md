@@ -348,7 +348,39 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      Implemented major new features:
+      Implemented features from user message #456:
+      
+      1. AUSGABE PAGE - "Letzte Bestellung zurückholen" (Reclaim):
+         - New backend endpoint: PUT /api/orders/{order_id}/reclaim
+         - New backend endpoint: GET /api/stands/{stand_id}/completed-orders
+         - Frontend: "#XX zurück" button in header (yellow)
+         - Frontend: Large "Letzte Bestellung zurückholen" button when no ready orders
+         
+      2. AUSGABE PAGE - Archive:
+         - Archive button added to header
+         - Archive dialog shows all orders for the stand
+         - Order detail dialog when clicking an order
+         - Fullscreen button added
+         
+      3. ADMIN - Orders/Rechnungen Management (/admin/orders):
+         - New page: OrdersManagement.jsx
+         - Lists all orders with pagination
+         - Filter by stand
+         - Click order to see details
+         - Delete button with confirmation dialog
+         - New backend endpoints:
+           - GET /api/admin/orders (with pagination)
+           - DELETE /api/admin/orders/{order_id}
+         - New navigation button in AdminDashboard (FileText icon)
+      
+      4. Already implemented in previous session (from BestellungPage):
+         - Bottom-sheet overlay shows completed order items
+         - Scrollable when many items
+         
+      Test the following flows:
+      1. Ausgabe page: Check reclaim button, archive button, fullscreen
+      2. Admin orders page: View orders, click to see details, delete order
+      3. Test the reclaim functionality by completing an order and then reclaiming it
       
       1. WEITER BUTTON: Replaced 5-second auto-hide with "Weiter →" button in order overlay.
          - Overlay stays visible until user clicks "Weiter"
