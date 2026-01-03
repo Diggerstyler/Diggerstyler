@@ -8,6 +8,7 @@ import OneManShowPage from "@/pages/OneManShowPage";
 import AdminLoginPage from "@/pages/AdminLoginPage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import ArticleManagement from "@/pages/ArticleManagement";
+import StandManagement from "@/pages/StandManagement";
 import StatsPage from "@/pages/StatsPage";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/articles" element={<ArticleManagement />} />
+          <Route path="/admin/stands" element={<StandManagement />} />
           <Route path="/admin/stats" element={<StatsPage />} />
         </Routes>
       </BrowserRouter>
