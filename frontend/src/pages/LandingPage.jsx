@@ -342,6 +342,40 @@ export default function LandingPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Station Selection Dialog */}
+      <Dialog open={showStationDialog} onOpenChange={setShowStationDialog}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase flex items-center gap-2">
+              <Hammer className="w-5 h-5 text-secondary" />
+              Station wählen
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-4">
+            <p className="text-sm text-muted-foreground">
+              Dieser Stand hat verknüpfte Artikel. Wähle deine Station:
+            </p>
+            {stations.map(station => (
+              <Button
+                key={station.id}
+                variant="outline"
+                className={`w-full h-14 justify-start text-left ${station.is_main ? 'border-yellow-500/50' : ''}`}
+                onClick={() => handleStationSelect(station.id)}
+              >
+                <div className="flex items-center gap-3">
+                  {station.is_main && <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />}
+                  <span className="font-medium">{station.name}</span>
+                  {station.is_main && <Badge variant="secondary" className="ml-auto text-xs">Hauptstation</Badge>}
+                </div>
+              </Button>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setShowStationDialog(false)}>Abbrechen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-8 sm:py-16">
         {!selectedStand ? (
           // Step 1: Stand Selection
