@@ -147,32 +147,44 @@ export default function LandingPage() {
         backgroundPosition: "center"
       }}
     >
-      <header className="glass sticky top-0 z-50 px-4 sm:px-8 py-3 sm:py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
+      <header className="glass sticky top-0 z-50 px-3 sm:px-8 py-2 sm:py-4 flex justify-between items-center">
+        <div className="flex items-center gap-2 sm:gap-3">
           {selectedStand && (
             <Button 
               variant="ghost" 
               size="icon"
               onClick={() => setSelectedStand(null)}
               data-testid="back-btn"
+              className="h-8 w-8 sm:h-10 sm:w-10"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           )}
-          <h1 className="font-display text-xl sm:text-2xl font-bold uppercase tracking-tight">
-            Festival<span className="text-primary">_OS</span>
+          <h1 className="font-display text-base sm:text-2xl font-bold uppercase tracking-tight">
+            Karnbachs<span className="text-primary">_Event</span>
           </h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <Button 
-            variant="outline" 
+            variant="ghost" 
             size="sm"
             onClick={() => setShowHelp(true)}
             data-testid="help-btn"
-            className="border-muted-foreground/30"
+            className="h-8 px-2 sm:px-3"
           >
-            <HelpCircle className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Anleitung</span>
+            <HelpCircle className="w-4 h-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => navigate("/admin/login")}
+            data-testid="admin-login-btn"
+            className="h-8 px-2 sm:px-3"
+          >
+            <Settings className="w-4 h-4" />
+          </Button>
+        </div>
+      </header>
           </Button>
           <Button 
             variant="outline" 
