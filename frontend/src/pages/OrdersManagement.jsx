@@ -78,8 +78,10 @@ export default function OrdersManagement() {
   }, []);
 
   useEffect(() => {
-    fetchOrders();
-  }, [currentPage, selectedStand]);
+    if (adminAuth) {
+      fetchOrders();
+    }
+  }, [currentPage, selectedStand, adminAuth]);
 
   const handleStandChange = (value) => {
     setSelectedStand(value);
