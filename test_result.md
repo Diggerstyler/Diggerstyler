@@ -291,39 +291,46 @@ frontend:
 
 test_plan:
   current_focus:
-    - "Order completion overlay with total and change calculator"
-  stuck_tasks:
-    - "Order completion overlay with total and change calculator"
+    - "Weiter Button in overlay instead of 5-second timer"
+    - "Station management and linked articles feature"
+    - "Detailed instructions (Anleitung)"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
     message: |
-      Implemented 4 user requests:
+      Implemented major new features:
       
-      1. PFAND ZURÜCK BUTTON: Now only shown if the stand has articles with deposit configured.
-         - Speisestand (Test): NO deposit articles -> "Pfand zurück" NOT shown ✓
-         - Getränkestand: HAS deposit articles -> "Pfand zurück" IS shown ✓
-      
-      2. BONNUMMER OVERLAY IMPROVED:
-         - Now shows "Zu zahlen" (total amount) below the Bonnummer
-         - Added "Restgeldrechner" (change calculator) button
+      1. WEITER BUTTON: Replaced 5-second auto-hide with "Weiter →" button in order overlay.
+         - Overlay stays visible until user clicks "Weiter"
+         - Restgeldrechner still available as option
          
-      3. RESTGELDRECHNER:
-         - Employee enters what guest gave
-         - Calculates and shows change (green) or shortfall (red)
-         - "Abschließen" button to complete
-         - The order is already forwarded when overlay appears
+      2. STATIONS & LINKED ARTICLES:
+         - New admin page: /admin/stations for managing stations per stand
+         - Stations have "Hauptstation" (main station) option
+         - Linked articles can be created (main article -> side article at station)
+         - Macher role: Station selection when stand has linked articles
+         - Multi-station workflow: Order only goes to Ausgabe when ALL stations complete
+         
+      3. DETAILED INSTRUCTIONS: Expanded help dialog with comprehensive explanations
       
-      4. KURZER PROZESS IN STANDMANAGEMENT:
-         - Already works without password/confirmation (simple toggle switch)
+      New API Endpoints:
+      - GET/POST /api/stations
+      - PUT/DELETE /api/stations/{id}
+      - GET /api/stands/{id}/stations
+      - GET /api/stands/{id}/has-linked-articles
+      - GET/POST /api/linked-articles
+      - DELETE /api/linked-articles/{id}
+      - PUT /api/orders/{id}/station-complete
+      - GET /api/stands/{id}/station/{station_id}/orders
       
-      Please test:
-      - Bestellung at Speisestand (stand_1) - verify NO "Pfand zurück" button
-      - Bestellung at Getränkestand - verify "Pfand zurück" button IS shown
-      - Create order and check overlay with total and calculator button
-      - Test change calculator: enter amount, see change/shortfall, click Abschließen
+      Test flows:
+      1. Create station in admin: /admin/stations -> select stand -> add station
+      2. Create linked article: select main article, side article, and station
+      3. Go to Macher role for stand with stations -> should see station selection
+      4. Create order with linked article -> verify it splits to stations
   - agent: "testing"
     message: |
       🎯 TESTING COMPLETED - 3 OF 4 FEATURES WORKING
