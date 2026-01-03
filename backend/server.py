@@ -334,6 +334,150 @@ async def get_stand(stand_id: str):
         raise HTTPException(status_code=404, detail="Stand nicht gefunden")
     return stand
 
+# Station Routes
+@api_router.get("/stations")
+async def get_all_stations():
+    stations = await db.stations.find({}, {"_id": 0}).to_list(1000)
+    return stations
+
+@api_router.get("/stands/{stand_id}/stations")
+async def get_stand_stations(stand_id: str):
+    stations = await db.stations.find({"stand_id": stand_id, "active": True}, {"_id": 0}).to_list(100)
+    return stations
+
+@api_router.post("/stations", response_model=Station)
+async def create_station(station: StationCreate, username: str = Depends(verify_admin)):
+    # If this is first station for stand or marked as main, ensure only one main station
+    if station.is_main:
+        await db.stations.update_many(
+            {"stand_id": station.stand_id},
+            {"$set": {"is_main": False}}
+        )
+    
+    station_obj = Station(**station.model_dump())
+    await db.stations.insert_one(station_obj.model_dump())
+    return station_obj
+
+@api_router.put("/stations/{station_id}", response_model=Station)
+async def update_station(station_id: str, station: StationUpdate, username: str = Depends(verify_admin)):
+    existing = await db.stations.find_one({"id": station_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Station nicht gefunden")
+    
+    update_data = {k: v for k, v in station.model_dump().items() if v is not None}
+    
+    # If setting as main, unset other main stations for this stand
+    if update_data.get("is_main"):
+        await db.stations.update_many(
+            {"stand_id": existing["stand_id"], "id": {"$ne": station_id}},
+            {"$set": {"is_main": False}}
+        )
+    
+    if update_data:
+        await db.stations.update_one({"id": station_id}, {"$set": update_data})
+    
+    updated = await db.stations.find_one({"id": station_id}, {"_id": 0})
+    return Station(**updated)
+
+@api_router.delete("/stations/{station_id}")
+async def delete_station(station_id: str, username: str = Depends(verify_admin)):
+    # Also delete linked articles for this station
+    await db.linked_articles.delete_many({"station_id": station_id})
+    result = await db.stations.delete_one({"id": station_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Station nicht gefunden")
+    return {"message": "Station gelöscht"}
+
+# Linked Articles Routes (Verknüpfte Artikel)
+@api_router.get("/linked-articles")
+async def get_all_linked_articles():
+    linked = await db.linked_articles.find({}, {"_id": 0}).to_list(1000)
+    return linked
+
+@api_router.get("/articles/{article_id}/linked")
+async def get_article_linked_articles(article_id: str):
+    """Get all linked articles for a main article"""
+    linked = await db.linked_articles.find({"main_article_id": article_id}, {"_id": 0}).to_list(100)
+    return linked
+
+@api_router.get("/stands/{stand_id}/linked-articles")
+async def get_stand_linked_articles(stand_id: str):
+    """Get all linked articles for articles at this stand"""
+    # Get all article IDs for this stand
+    stand = await db.stands.find_one({"id": stand_id}, {"_id": 0})
+    if not stand:
+        raise HTTPException(status_code=404, detail="Stand nicht gefunden")
+    
+    article_ids = stand.get("articles", [])
+    if not article_ids:
+        # Get all articles for this stand type
+        all_articles = await db.articles.find({"active": True}, {"_id": 0}).to_list(1000)
+        article_ids = [a["id"] for a in all_articles]
+    
+    linked = await db.linked_articles.find({"main_article_id": {"$in": article_ids}}, {"_id": 0}).to_list(1000)
+    return linked
+
+@api_router.get("/stands/{stand_id}/has-linked-articles")
+async def stand_has_linked_articles(stand_id: str):
+    """Check if a stand has any linked articles configured"""
+    stand = await db.stands.find_one({"id": stand_id}, {"_id": 0})
+    if not stand:
+        raise HTTPException(status_code=404, detail="Stand nicht gefunden")
+    
+    article_ids = stand.get("articles", [])
+    if not article_ids:
+        all_articles = await db.articles.find({"active": True}, {"_id": 0}).to_list(1000)
+        article_ids = [a["id"] for a in all_articles]
+    
+    linked_count = await db.linked_articles.count_documents({"main_article_id": {"$in": article_ids}})
+    stations = await db.stations.find({"stand_id": stand_id, "active": True}, {"_id": 0}).to_list(100)
+    
+    return {
+        "has_linked_articles": linked_count > 0,
+        "linked_count": linked_count,
+        "stations": stations
+    }
+
+@api_router.post("/linked-articles", response_model=LinkedArticle)
+async def create_linked_article(linked: LinkedArticleCreate, username: str = Depends(verify_admin)):
+    # Verify main article exists
+    main_article = await db.articles.find_one({"id": linked.main_article_id}, {"_id": 0})
+    if not main_article:
+        raise HTTPException(status_code=404, detail="Hauptartikel nicht gefunden")
+    
+    # Verify linked article exists
+    linked_article = await db.articles.find_one({"id": linked.linked_article_id}, {"_id": 0})
+    if not linked_article:
+        raise HTTPException(status_code=404, detail="Verknüpfter Artikel nicht gefunden")
+    
+    # Verify station exists
+    station = await db.stations.find_one({"id": linked.station_id}, {"_id": 0})
+    if not station:
+        raise HTTPException(status_code=404, detail="Station nicht gefunden")
+    
+    # Check if this link already exists
+    existing = await db.linked_articles.find_one({
+        "main_article_id": linked.main_article_id,
+        "linked_article_id": linked.linked_article_id
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Diese Verknüpfung existiert bereits")
+    
+    linked_obj = LinkedArticle(
+        **linked.model_dump(),
+        linked_article_name=linked_article["name"],
+        station_name=station["name"]
+    )
+    await db.linked_articles.insert_one(linked_obj.model_dump())
+    return linked_obj
+
+@api_router.delete("/linked-articles/{linked_id}")
+async def delete_linked_article(linked_id: str, username: str = Depends(verify_admin)):
+    result = await db.linked_articles.delete_one({"id": linked_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Verknüpfung nicht gefunden")
+    return {"message": "Verknüpfung gelöscht"}
+
 # Article Routes
 @api_router.get("/articles", response_model=List[Article])
 async def get_articles(active_only: bool = False):
