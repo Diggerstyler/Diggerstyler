@@ -32,10 +32,17 @@ STANDS = [
     {"id": f"stand_{i}", "name": f"Stand {i}"} for i in range(1, 11)
 ]
 
+STAND_TYPES = [
+    {"id": "speisestand", "name": "Speisestand", "categories": ["speisen"]},
+    {"id": "getraenkestand", "name": "Getränkestand", "categories": ["getraenke"]},
+    {"id": "gemischt", "name": "Gemischter Stand", "categories": ["speisen", "getraenke"]}
+]
+
 ROLES = [
     {"id": "bestellung", "name": "Bestellung", "description": "Artikel buchen & abrechnen"},
     {"id": "kueche", "name": "Küche", "description": "Bestellungen zubereiten"},
-    {"id": "ausgabe", "name": "Ausgabe", "description": "Fertige Bestellungen übergeben"}
+    {"id": "ausgabe", "name": "Ausgabe", "description": "Fertige Bestellungen übergeben"},
+    {"id": "onemanshow", "name": "OneManShow", "description": "Alles in einer Rolle: Tippen, Abrechnen, Ausgeben"}
 ]
 
 ORDER_STATUS = {
@@ -125,6 +132,10 @@ async def get_stands():
 @api_router.get("/roles")
 async def get_roles():
     return ROLES
+
+@api_router.get("/stand-types")
+async def get_stand_types():
+    return STAND_TYPES
 
 # Article Routes
 @api_router.get("/articles", response_model=List[Article])
