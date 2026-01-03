@@ -139,17 +139,119 @@ export default function LandingPage() {
             Festival<span className="text-primary">_OS</span>
           </h1>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => navigate("/admin/login")}
-          data-testid="admin-login-btn"
-          className="border-muted-foreground/30"
-        >
-          <Settings className="w-4 h-4 sm:mr-2" />
-          <span className="hidden sm:inline">Admin</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowHelp(true)}
+            data-testid="help-btn"
+            className="border-muted-foreground/30"
+          >
+            <HelpCircle className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Anleitung</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate("/admin/login")}
+            data-testid="admin-login-btn"
+            className="border-muted-foreground/30"
+          >
+            <Settings className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Admin</span>
+          </Button>
+        </div>
       </header>
+
+      {/* Help Dialog */}
+      <Dialog open={showHelp} onOpenChange={setShowHelp}>
+        <DialogContent className="bg-card border-border max-w-2xl max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-primary" />
+              Anleitung - Festival OS
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh] pr-4">
+            <div className="space-y-6 py-4">
+              <section>
+                <h3 className="font-display text-lg font-bold text-primary mb-2">🎯 Übersicht</h3>
+                <p className="text-sm text-muted-foreground">
+                  Festival OS ist ein Bestellsystem für Festival-Stände. Es gibt 4 Rollen für verschiedene Aufgaben.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-display text-lg font-bold text-primary mb-2">📋 Schritt 1: Stand wählen</h3>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Wähle zuerst den Stand aus, an dem du arbeitest. Jeder Stand kann Speisen, Getränke oder beides verkaufen.
+                </p>
+                <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                  <li><span className="text-orange-500">🍴 Speisestand</span> - Nur Speisen</li>
+                  <li><span className="text-blue-500">🍺 Getränkestand</span> - Nur Getränke</li>
+                  <li><span className="text-purple-500">✨ Gemischt</span> - Beides</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-display text-lg font-bold text-primary mb-2">👥 Schritt 2: Rolle wählen</h3>
+                <div className="space-y-3 text-sm">
+                  <div className="p-3 bg-primary/10 rounded-lg">
+                    <p className="font-bold text-primary">🛒 Bestellung</p>
+                    <p className="text-muted-foreground">Nimmt Bestellungen an, fügt Artikel hinzu, kassiert den Gast. Hat Zugriff auf das Archiv für Rückfragen.</p>
+                  </div>
+                  <div className="p-3 bg-secondary/10 rounded-lg">
+                    <p className="font-bold text-secondary">🔨 Macher</p>
+                    <p className="text-muted-foreground">Sieht eingehende Bestellungen und klickt "Fertig" wenn die Bestellung bereit ist.</p>
+                  </div>
+                  <div className="p-3 bg-accent/10 rounded-lg">
+                    <p className="font-bold text-accent">📦 Ausgabe</p>
+                    <p className="text-muted-foreground">Gibt fertige Bestellungen an Gäste aus und klickt "Übergeben" zur Bestätigung.</p>
+                  </div>
+                  <div className="p-3 bg-green-500/10 rounded-lg">
+                    <p className="font-bold text-green-500">⚡ OneManShow</p>
+                    <p className="text-muted-foreground">Für kleine Stände: Eine Person macht alles - Bestellung, Zubereitung und Ausgabe in einem Schritt.</p>
+                  </div>
+                </div>
+              </section>
+
+              <section>
+                <h3 className="font-display text-lg font-bold text-primary mb-2">🔢 Bonnummern</h3>
+                <p className="text-sm text-muted-foreground">
+                  Jede Bestellung erhält eine Nummer von 01-25. Nach 25 beginnt die Nummerierung wieder bei 01. 
+                  Die große Nummer wird 5 Sekunden eingeblendet - tippen zum Schließen.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-display text-lg font-bold text-primary mb-2">💰 Pfand</h3>
+                <p className="text-sm text-muted-foreground">
+                  Artikel mit Pfand zeigen den Betrag an (+2.00€). Über "Pfand zurück" kann Pfand erstattet werden.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-display text-lg font-bold text-primary mb-2">📁 Archiv</h3>
+                <p className="text-sm text-muted-foreground">
+                  In der Bestellung und OneManShow gibt es ein Archiv mit allen vergangenen Bestellungen - für Rückfragen mit Gästen.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-display text-lg font-bold text-primary mb-2">🗑️ Artikel entfernen</h3>
+                <p className="text-sm text-muted-foreground">
+                  Im Warenkorb: Artikel nach rechts wischen um 1 Stück zu entfernen.
+                </p>
+              </section>
+            </div>
+          </ScrollArea>
+          <div className="pt-4 border-t border-border flex justify-end">
+            <Button onClick={() => setShowHelp(false)}>
+              Verstanden
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-8 py-8 sm:py-16">
         {!selectedStand ? (
