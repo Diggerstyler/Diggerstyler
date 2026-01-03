@@ -8,9 +8,20 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ShoppingCart, Hammer, Package, Settings, Zap, ArrowLeft, Store, UtensilsCrossed, Beer, Sparkles, HelpCircle, FastForward, Star } from "lucide-react";
+import { ShoppingCart, Hammer, Package, Settings, Zap, ArrowLeft, Store, UtensilsCrossed, Beer, Sparkles, HelpCircle, FastForward, Star, Maximize, Minimize } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+// Fullscreen utility
+const toggleFullscreen = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen?.() || 
+    document.documentElement.webkitRequestFullscreen?.();
+  } else {
+    document.exitFullscreen?.() || 
+    document.webkitExitFullscreen?.();
+  }
+};
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -18,11 +29,25 @@ export default function LandingPage() {
   const [stands, setStands] = useState([]);
   const [showHelp, setShowHelp] = useState(false);
   const [isTogglingShortProcess, setIsTogglingShortProcess] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   // Station selection state
   const [showStationDialog, setShowStationDialog] = useState(false);
   const [stations, setStations] = useState([]);
   const [hasLinkedArticles, setHasLinkedArticles] = useState(false);
+  
+  // Track fullscreen state
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchStands = async () => {
