@@ -220,9 +220,9 @@ export default function KuechePage() {
                         </div>
                       </CardHeader>
                       <CardContent className="p-3 sm:p-4 pt-0">
-                        {/* Artikel mit großer, präsenter Darstellung */}
-                        <div className="space-y-2 mb-4">
-                          {order.items.map((item, idx) => (
+                        {/* Hauptartikel - groß dargestellt */}
+                        <div className="space-y-2 mb-2">
+                          {getDisplayItems(order).map((item, idx) => (
                             <div 
                               key={idx} 
                               className="flex items-center justify-between p-3 rounded-lg bg-secondary/20 border border-secondary/30"
@@ -234,7 +234,22 @@ export default function KuechePage() {
                             </div>
                           ))}
                         </div>
-                        {/* Always show "Fertig" button - no more "Zubereitung" step */}
+                        {/* Verknüpfte Artikel - klein dargestellt */}
+                        {getLinkedItems(order).length > 0 && (
+                          <div className="space-y-1 mb-4 pl-4 border-l-2 border-muted">
+                            <p className="text-xs text-muted-foreground uppercase tracking-wide">+ Beilagen</p>
+                            {getLinkedItems(order).map((item, idx) => (
+                              <div 
+                                key={idx} 
+                                className="flex items-center justify-between py-1 px-2 rounded bg-muted/30 text-sm"
+                              >
+                                <span className="text-muted-foreground">{item.article_name}</span>
+                                <span className="font-mono text-muted-foreground">{item.quantity}x</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {/* "Fertig" button */}
                         <Button
                           className="w-full bg-green-600 hover:bg-green-700 neon-success text-sm"
                           onClick={() => updateOrderStatus(order.id, "ready")}
@@ -242,7 +257,7 @@ export default function KuechePage() {
                           data-testid={`finish-order-${order.id}`}
                         >
                           <Check className="w-4 h-4 mr-2" />
-                          Fertig
+                          {stationId ? "Station Fertig" : "Fertig"}
                         </Button>
                       </CardContent>
                     </Card>
