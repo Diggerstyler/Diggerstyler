@@ -194,11 +194,14 @@ backend:
     file: "/app/frontend/src/pages/LandingPage.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "The system already supports multiple simultaneous logins for the same role. There's no session locking or exclusive access. Multiple devices can open the same role at the same stand and process orders independently using the WebSocket-based real-time updates."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Multiple logins work perfectly. Opened Macher view in two separate tabs simultaneously - both loaded identical content with same orders (2 orders visible in each). No session locking detected. Both tabs can refresh independently. Data consistency maintained across sessions. System supports multiple devices accessing same role without conflicts."
 
 frontend:
   - task: "Article editing dialog with Pfandgruppe select"
