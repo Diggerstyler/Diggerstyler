@@ -252,6 +252,24 @@ export default function BestellungPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Order Completion Overlay */}
+      {completedOrderNumber !== null && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center cursor-pointer"
+          onClick={dismissOverlay}
+        >
+          <div className="text-center animate-in zoom-in-50 duration-300">
+            <p className="text-2xl text-muted-foreground mb-4 uppercase tracking-wider">Bon Nummer</p>
+            <div className="w-48 h-48 sm:w-64 sm:h-64 rounded-2xl bg-primary/20 border-4 border-primary flex items-center justify-center mx-auto mb-6">
+              <span className="font-mono text-8xl sm:text-9xl font-black text-primary">
+                {completedOrderNumber.toString().padStart(2, '0')}
+              </span>
+            </div>
+            <p className="text-lg text-muted-foreground">Tippen zum Schließen</p>
+          </div>
+        </div>
+      )}
+
       <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
         <Button 
           variant="ghost" 
