@@ -44,14 +44,13 @@ export default function LandingPage() {
     if (!selectedStand) return;
     setIsTogglingShortProcess(true);
     try {
-      await axios.put(`${API}/stands/${selectedStand.id}`, {
-        short_process: !selectedStand.short_process
-      });
+      const response = await axios.put(`${API}/stands/${selectedStand.id}/toggle-short-process`);
+      const newValue = response.data.short_process;
       // Update local state
-      setSelectedStand(prev => ({ ...prev, short_process: !prev.short_process }));
+      setSelectedStand(prev => ({ ...prev, short_process: newValue }));
       // Update stands list
       setStands(prev => prev.map(s => 
-        s.id === selectedStand.id ? { ...s, short_process: !s.short_process } : s
+        s.id === selectedStand.id ? { ...s, short_process: newValue } : s
       ));
     } catch (error) {
       console.error("Error toggling short process:", error);
