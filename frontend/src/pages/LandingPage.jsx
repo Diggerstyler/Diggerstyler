@@ -185,107 +185,65 @@ export default function LandingPage() {
           </Button>
         </div>
       </header>
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => navigate("/admin/login")}
-            data-testid="admin-login-btn"
-            className="border-muted-foreground/30"
-          >
-            <Settings className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Admin</span>
-          </Button>
-        </div>
-      </header>
 
       {/* Help Dialog */}
       <Dialog open={showHelp} onOpenChange={setShowHelp}>
-        <DialogContent className="bg-card border-border max-w-2xl max-h-[85vh]">
+        <DialogContent className="bg-card border-border max-w-lg max-h-[85vh]">
           <DialogHeader>
             <DialogTitle className="font-display uppercase flex items-center gap-2">
               <HelpCircle className="w-5 h-5 text-primary" />
-              Anleitung - Festival OS
+              Anleitung
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="max-h-[60vh] pr-4">
-            <div className="space-y-6 py-4">
+            <div className="space-y-4 py-2">
               <section>
-                <h3 className="font-display text-lg font-bold text-primary mb-2">🎯 Übersicht</h3>
+                <h3 className="font-bold text-primary mb-1">📋 Stand wählen</h3>
                 <p className="text-sm text-muted-foreground">
-                  Festival OS ist ein Bestellsystem für Festival-Stände. Es gibt 4 Rollen für verschiedene Aufgaben.
+                  Wähle deinen Stand. Bei "Kurzer Prozess" geht die Bestellung direkt zur Ausgabe.
                 </p>
               </section>
 
               <section>
-                <h3 className="font-display text-lg font-bold text-primary mb-2">📋 Schritt 1: Stand wählen</h3>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Wähle zuerst den Stand aus, an dem du arbeitest. Jeder Stand kann Speisen, Getränke oder beides verkaufen.
-                </p>
-                <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                  <li><span className="text-orange-500">🍴 Speisestand</span> - Nur Speisen</li>
-                  <li><span className="text-blue-500">🍺 Getränkestand</span> - Nur Getränke</li>
-                  <li><span className="text-purple-500">✨ Gemischt</span> - Beides</li>
-                </ul>
-              </section>
-
-              <section>
-                <h3 className="font-display text-lg font-bold text-primary mb-2">👥 Schritt 2: Rolle wählen</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="p-3 bg-primary/10 rounded-lg">
+                <h3 className="font-bold text-primary mb-1">👥 Rollen</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="p-2 bg-primary/10 rounded">
                     <p className="font-bold text-primary">🛒 Bestellung</p>
-                    <p className="text-muted-foreground">Nimmt Bestellungen an, fügt Artikel hinzu, kassiert den Gast. Hat Zugriff auf das Archiv für Rückfragen.</p>
+                    <p className="text-muted-foreground text-xs">Kassiert Gäste, hat Archiv</p>
                   </div>
-                  <div className="p-3 bg-secondary/10 rounded-lg">
+                  <div className="p-2 bg-secondary/10 rounded">
                     <p className="font-bold text-secondary">🔨 Macher</p>
-                    <p className="text-muted-foreground">Sieht eingehende Bestellungen und klickt "Fertig" wenn die Bestellung bereit ist.</p>
+                    <p className="text-muted-foreground text-xs">Klickt "Fertig" wenn bereit</p>
                   </div>
-                  <div className="p-3 bg-accent/10 rounded-lg">
+                  <div className="p-2 bg-accent/10 rounded">
                     <p className="font-bold text-accent">📦 Ausgabe</p>
-                    <p className="text-muted-foreground">Gibt fertige Bestellungen an Gäste aus und klickt "Übergeben" zur Bestätigung.</p>
+                    <p className="text-muted-foreground text-xs">Übergibt an Gast</p>
                   </div>
-                  <div className="p-3 bg-green-500/10 rounded-lg">
-                    <p className="font-bold text-green-500">⚡ OneManShow</p>
-                    <p className="text-muted-foreground">Für kleine Stände: Eine Person macht alles - Bestellung, Zubereitung und Ausgabe in einem Schritt.</p>
+                  <div className="p-2 bg-green-500/10 rounded">
+                    <p className="font-bold text-green-500">⚡ OneMan</p>
+                    <p className="text-muted-foreground text-xs">Alles in einem Schritt</p>
                   </div>
                 </div>
               </section>
 
               <section>
-                <h3 className="font-display text-lg font-bold text-primary mb-2">🔢 Bonnummern</h3>
+                <h3 className="font-bold text-primary mb-1">🔢 Bonnummern</h3>
                 <p className="text-sm text-muted-foreground">
-                  Jede Bestellung erhält eine Nummer von 01-25. Nach 25 beginnt die Nummerierung wieder bei 01. 
-                  Die große Nummer wird 5 Sekunden eingeblendet - tippen zum Schließen.
+                  01-25, dann wieder 01. Große Anzeige für 5 Sek. nach Abschluss.
                 </p>
               </section>
 
               <section>
-                <h3 className="font-display text-lg font-bold text-primary mb-2">💰 Pfand</h3>
+                <h3 className="font-bold text-primary mb-1">⚡ Kurzer Prozess</h3>
                 <p className="text-sm text-muted-foreground">
-                  Artikel mit Pfand zeigen den Betrag an (+2.00€). Über "Pfand zurück" kann Pfand erstattet werden.
-                </p>
-              </section>
-
-              <section>
-                <h3 className="font-display text-lg font-bold text-primary mb-2">📁 Archiv</h3>
-                <p className="text-sm text-muted-foreground">
-                  In der Bestellung und OneManShow gibt es ein Archiv mit allen vergangenen Bestellungen - für Rückfragen mit Gästen.
-                </p>
-              </section>
-
-              <section>
-                <h3 className="font-display text-lg font-bold text-primary mb-2">🗑️ Artikel entfernen</h3>
-                <p className="text-sm text-muted-foreground">
-                  Im Warenkorb: Artikel nach rechts wischen um 1 Stück zu entfernen.
+                  Aktivieren = Bestellung geht direkt zur Ausgabe (ohne Macher). Toggle bei Rollenauswahl.
                 </p>
               </section>
             </div>
           </ScrollArea>
-          <div className="pt-4 border-t border-border flex justify-end">
-            <Button onClick={() => setShowHelp(false)}>
-              Verstanden
-            </Button>
-          </div>
+          <Button onClick={() => setShowHelp(false)} className="mt-2">
+            OK
+          </Button>
         </DialogContent>
       </Dialog>
 
