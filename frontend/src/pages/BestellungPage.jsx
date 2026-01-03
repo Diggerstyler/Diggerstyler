@@ -7,11 +7,24 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Minus, ShoppingCart, Beer, UtensilsCrossed, RotateCcw, X, Trash2, Archive, Clock, Calculator } from "lucide-react";
+import { ArrowLeft, Plus, Minus, ShoppingCart, Beer, UtensilsCrossed, RotateCcw, X, Trash2, Archive, Clock, Calculator, Maximize, Minimize } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const WS_URL = process.env.REACT_APP_BACKEND_URL?.replace('https://', 'wss://').replace('http://', 'ws://');
+
+// Fullscreen utility functions
+const toggleFullscreen = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen?.() || 
+    document.documentElement.webkitRequestFullscreen?.() ||
+    document.documentElement.mozRequestFullScreen?.();
+  } else {
+    document.exitFullscreen?.() || 
+    document.webkitExitFullscreen?.() ||
+    document.mozCancelFullScreen?.();
+  }
+};
 
 export default function BestellungPage() {
   const { standId, standType } = useParams();
@@ -27,6 +40,20 @@ export default function BestellungPage() {
   const [swipeOffset, setSwipeOffset] = useState(0);
   const touchStartX = useRef(0);
   const wsRef = useRef(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  // Track fullscreen state
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
   
   // Order completion overlay state
   const [completedOrderNumber, setCompletedOrderNumber] = useState(null);
