@@ -156,9 +156,13 @@ class FestivalAPITester:
                     "article_id": test_article["id"],
                     "article_name": test_article["name"],
                     "quantity": 2,
-                    "price": test_article["price"]
+                    "price": test_article["price"],
+                    "deposit_amount": 0
                 }
             ],
+            "subtotal": test_article["price"] * 2,
+            "deposit_total": 0,
+            "deposit_return_total": 0,
             "total": test_article["price"] * 2,
             "created_by": "Bestellung"
         }
