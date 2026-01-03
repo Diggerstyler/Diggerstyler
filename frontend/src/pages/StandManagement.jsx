@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Plus, Pencil, Trash2, Store, Settings } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, Store, Settings, FastForward } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -29,7 +29,7 @@ export default function StandManagement() {
   const [formData, setFormData] = useState({
     name: "",
     stand_type: "gemischt",
-    skip_preparation: false
+    short_process: false
   });
   const [selectedArticles, setSelectedArticles] = useState([]);
 
