@@ -1007,6 +1007,100 @@ async def get_stand_archive(stand_id: str, limit: int = 100):
     
     return orders
 
+# Ausgabe: Reclaim last completed order (undo pickup)
+@api_router.put("/orders/{order_id}/reclaim")
+async def reclaim_order(order_id: str):
+    """Reclaim a completed order back to ready status (undo pickup)"""
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Bestellung nicht gefunden")
+    
+    if order.get("status") != "completed":
+        raise HTTPException(status_code=400, detail="Nur abgeschlossene Bestellungen können zurückgeholt werden")
+    
+    update_data = {
+        "status": "ready",
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "completed_by": None  # Clear completed_by
+    }
+    
+    await db.orders.update_one({"id": order_id}, {"$set": update_data})
+    updated = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    
+    # Broadcast update to stand
+    await manager.broadcast_to_stand(order["stand_id"], {
+        "type": "order_updated",
+        "order": updated
+    })
+    
+    return Order(**updated)
+
+# Ausgabe: Get last completed orders for a stand
+@api_router.get("/stands/{stand_id}/completed-orders")
+async def get_completed_orders(stand_id: str, limit: int = 10):
+    """Get recently completed orders for a stand (for reclaim feature)"""
+    orders = await db.orders.find(
+        {"stand_id": stand_id, "status": "completed"},
+        {"_id": 0}
+    ).sort("updated_at", -1).to_list(limit)
+    
+    # Ensure backward compatibility
+    for order in orders:
+        if "subtotal" not in order:
+            order["subtotal"] = order.get("total", 0)
+        if "deposit_total" not in order:
+            order["deposit_total"] = 0
+        if "deposit_return_total" not in order:
+            order["deposit_return_total"] = 0
+    
+    return orders
+
+# Admin: Get all orders (Rechnungen) with pagination
+@api_router.get("/admin/orders")
+async def get_admin_orders(
+    limit: int = 100,
+    offset: int = 0,
+    stand_id: Optional[str] = None,
+    username: str = Depends(verify_admin)
+):
+    """Get all orders for admin view with optional filtering"""
+    query = {}
+    if stand_id:
+        query["stand_id"] = stand_id
+    
+    total_count = await db.orders.count_documents(query)
+    orders = await db.orders.find(query, {"_id": 0}).sort("created_at", -1).skip(offset).limit(limit).to_list(limit)
+    
+    # Ensure backward compatibility
+    for order in orders:
+        if "subtotal" not in order:
+            order["subtotal"] = order.get("total", 0)
+        if "deposit_total" not in order:
+            order["deposit_total"] = 0
+        if "deposit_return_total" not in order:
+            order["deposit_return_total"] = 0
+    
+    return {
+        "orders": orders,
+        "total": total_count,
+        "limit": limit,
+        "offset": offset
+    }
+
+# Admin: Delete a single order
+@api_router.delete("/admin/orders/{order_id}")
+async def delete_order(order_id: str, username: str = Depends(verify_admin)):
+    """Delete a single order (admin only)"""
+    order = await db.orders.find_one({"id": order_id})
+    if not order:
+        raise HTTPException(status_code=404, detail="Bestellung nicht gefunden")
+    
+    result = await db.orders.delete_one({"id": order_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Bestellung nicht gefunden")
+    
+    return {"message": "Bestellung gelöscht", "order_id": order_id}
+
 # Admin: Export all data
 @api_router.get("/admin/export")
 async def export_all_data(username: str = Depends(verify_admin)):
