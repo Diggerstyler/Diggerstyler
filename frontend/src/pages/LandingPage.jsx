@@ -300,9 +300,9 @@ export default function LandingPage() {
                         <Badge variant="outline" className={`${typeConfig.textClass} border-current`}>
                           {typeConfig.label}
                         </Badge>
-                        {stand.skip_preparation && (
-                          <span className="text-xs text-yellow-500 mt-2 flex items-center gap-1">
-                            <Zap className="w-3 h-3" /> Schnellmodus
+                        {stand.short_process && (
+                          <span className="text-xs text-blue-500 mt-2 flex items-center gap-1">
+                            <FastForward className="w-3 h-3" /> Kurzer Prozess
                           </span>
                         )}
                       </CardContent>
