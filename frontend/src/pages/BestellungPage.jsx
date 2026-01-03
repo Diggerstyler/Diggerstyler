@@ -630,9 +630,9 @@ export default function BestellungPage() {
       </Dialog>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Categories Sidebar - Desktop */}
+        {/* Categories Sidebar - Desktop ONLY (not mobile landscape) */}
         {categories.length > 1 && (
-          <aside className="w-40 lg:w-48 border-r border-border p-3 sm:p-4 hidden md:block shrink-0">
+          <aside className="w-40 lg:w-48 border-r border-border p-3 sm:p-4 hidden lg:block shrink-0">
             <nav className="space-y-2">
               {categories.map(cat => {
                 const Icon = cat.icon;
@@ -675,7 +675,7 @@ export default function BestellungPage() {
         )}
 
         {/* Articles Grid */}
-        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-auto pb-44 md:pb-4">
+        <main className="flex-1 p-2 sm:p-3 lg:p-6 overflow-auto pb-36 lg:pb-4">
           {/* Mobile Category Tabs */}
           <div className="md:hidden flex gap-2 mb-4 overflow-x-auto pb-2">
             {categories.map(cat => (
