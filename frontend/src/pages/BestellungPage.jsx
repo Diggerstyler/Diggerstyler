@@ -244,6 +244,9 @@ export default function BestellungPage() {
   const depositReturnTotal = cart.filter(i => i.is_deposit_return).reduce((sum, item) => sum + (Math.abs(item.price) * item.quantity), 0);
   const total = subtotal + depositTotal - depositReturnTotal;
 
+  // Check if any article at this stand has a deposit configured
+  const standHasDepositArticles = articles.some(article => article.deposit && article.deposit.amount > 0);
+
   const submitOrder = async () => {
     if (cart.length === 0) {
       toast.error("Der Warenkorb ist leer");
