@@ -17,7 +17,7 @@ export default function OrdersManagement() {
   const [orders, setOrders] = useState([]);
   const [totalOrders, setTotalOrders] = useState(0);
   const [stands, setStands] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedStand, setSelectedStand] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderToDelete, setOrderToDelete] = useState(null);
@@ -26,6 +26,15 @@ export default function OrdersManagement() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 20;
+
+  // Check admin auth
+  const adminAuth = sessionStorage.getItem("adminAuth");
+  
+  useEffect(() => {
+    if (!adminAuth) {
+      navigate("/admin/login");
+    }
+  }, [adminAuth, navigate]);
 
   const auth = {
     username: 'admin',
