@@ -451,7 +451,16 @@ export default function OneManShowPage() {
             <Archive className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">Archiv</span>
           </Button>
-          <Badge variant="outline" className="border-green-500 text-green-500">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleFullscreen}
+            className="w-9 h-9"
+            title={isFullscreen ? "Vollbild beenden" : "Vollbild"}
+          >
+            {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+          </Button>
+          <Badge variant="outline" className="border-green-500 text-green-500 hidden sm:flex">
             <Check className="w-4 h-4 mr-1" />
             <span className="hidden sm:inline">Direkt fertig</span>
           </Badge>
