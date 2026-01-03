@@ -168,10 +168,7 @@ export default function KuechePage() {
                         >
                           <Check className="w-4 h-4 mr-2" />
                           Fertig
-                          >
-                            Zubereitung
-                          </Button>
-                        )}
+                        </Button>
                       </CardContent>
                     </Card>
                   ))
@@ -180,72 +177,8 @@ export default function KuechePage() {
             </ScrollArea>
           </div>
 
-          {/* In Progress Orders - Only visible in normal mode */}
-          {!skipPreparation && (
-            <div className="lg:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <h2 className="font-display text-base sm:text-lg font-bold uppercase">In Arbeit</h2>
-                <Badge variant="default" className="neon-primary">
-                  {inProgressOrders.length}
-                </Badge>
-              </div>
-              <ScrollArea className="h-[calc(100vh-250px)] sm:h-[calc(100vh-200px)]">
-                <div className="space-y-3 sm:space-y-4 pr-2 sm:pr-4">
-                  {inProgressOrders.length === 0 ? (
-                    <Card className="bg-card border-dashed">
-                      <CardContent className="p-6 sm:p-8 text-center text-muted-foreground text-sm">
-                        Keine Bestellungen in Arbeit
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    inProgressOrders.map(order => (
-                      <Card 
-                        key={order.id} 
-                        className="bg-card border-primary/30"
-                        data-testid={`order-progress-${order.id}`}
-                      >
-                        <CardHeader className="pb-2 p-3 sm:p-4">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <CardTitle className="font-mono text-xl sm:text-2xl">
-                                #{order.order_number}
-                              </CardTitle>
-                              <div className="flex items-center gap-2 mt-1 text-xs sm:text-sm text-muted-foreground">
-                                <Clock className="w-3 sm:w-4 h-3 sm:h-4" />
-                                <span>{getTimeDiff(order.created_at)} Min.</span>
-                              </div>
-                            </div>
-                            <Badge className="bg-primary text-xs">In Arbeit</Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="p-3 sm:p-4 pt-0">
-                          <ul className="space-y-1 mb-3 sm:mb-4 text-sm">
-                            {order.items.map((item, idx) => (
-                              <li key={idx} className="font-medium">
-                                {item.quantity}x {item.article_name}
-                              </li>
-                            ))}
-                          </ul>
-                          <Button
-                            className="w-full bg-green-600 hover:bg-green-700 neon-success text-sm"
-                            onClick={() => updateOrderStatus(order.id, "ready")}
-                            disabled={isLoading}
-                            data-testid={`finish-order-${order.id}`}
-                          >
-                            <Check className="w-4 h-4 mr-2" />
-                            Fertig melden
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    ))
-                  )}
-                </div>
-              </ScrollArea>
-            </div>
-          )}
-
           {/* Kitchen Summary - Total Open Items */}
-          <div className={skipPreparation ? "lg:col-span-2" : "lg:col-span-1"}>
+          <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <h2 className="font-display text-base sm:text-lg font-bold uppercase">Gesamt Offen</h2>
               <Badge variant="outline" className="border-accent text-accent">
