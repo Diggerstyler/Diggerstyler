@@ -832,65 +832,107 @@ export default function BestellungPage() {
         </aside>
       </div>
 
-      {/* Mobile Cart */}
+      {/* Mobile Cart - Compact & Collapsible */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 glass border-t border-border z-50">
-        {/* Swipeable cart items */}
-        {cart.length > 0 && (
-          <div className="max-h-32 overflow-auto p-2 space-y-1">
-            {cart.map(item => (
-              <div 
-                key={`${item.article_id}_${item.is_deposit_return}`}
-                className={`flex items-center gap-2 p-2 rounded-sm relative overflow-hidden ${item.is_deposit_return ? 'bg-green-500/10' : 'bg-muted/50'}`}
-                onTouchStart={(e) => handleTouchStart(e, item)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={() => handleTouchEnd(item)}
-                style={{
-                  transform: swipingItem === `${item.article_id}_${item.is_deposit_return}` ? `translateX(-${swipeOffset}px)` : 'translateX(0)',
-                  transition: swipingItem === `${item.article_id}_${item.is_deposit_return}` ? 'none' : 'transform 0.2s'
-                }}
-              >
-                <div className="flex-1 min-w-0">
-                  <p className={`font-medium text-xs truncate ${item.is_deposit_return ? 'text-green-500' : ''}`}>
-                    {item.quantity}x {item.article_name}
-                  </p>
-                </div>
-                <span className={`font-mono text-xs ${item.is_deposit_return ? 'text-green-500' : ''}`}>
-                  {item.is_deposit_return ? '-' : ''}{Math.abs(item.price * item.quantity).toFixed(2)}€
-                </span>
-                {/* Delete indicator */}
-                <div 
-                  className="absolute right-0 top-0 bottom-0 w-16 bg-destructive flex items-center justify-center"
-                  style={{
-                    transform: swipingItem === `${item.article_id}_${item.is_deposit_return}` ? 'translateX(0)' : 'translateX(100%)',
-                    opacity: swipingItem === `${item.article_id}_${item.is_deposit_return}` ? swipeOffset / 60 : 0
-                  }}
-                >
-                  <X className="w-4 h-4 text-white" />
-                </div>
-              </div>
-            ))}
+        {/* Collapsed view - just summary bar, tap to expand */}
+        {cart.length > 0 && !showMobileCart && (
+          <div 
+            className="p-2 flex items-center justify-between cursor-pointer active:bg-muted/50"
+            onClick={() => setShowMobileCart(true)}
+          >
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="border-primary text-primary font-mono">
+                {cart.reduce((sum, item) => sum + item.quantity, 0)}
+              </Badge>
+              <span className="text-xs text-muted-foreground truncate max-w-[150px]">
+                {cart.slice(0, 2).map(i => `${i.quantity}x ${i.article_name.split(' ')[0]}`).join(', ')}
+                {cart.length > 2 && '...'}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-lg font-bold text-primary">
+                {total.toFixed(2)} €
+              </span>
+              <ChevronUp className="w-4 h-4 text-muted-foreground" />
+            </div>
           </div>
         )}
         
-        <div className="p-3 space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground text-sm">
-              {cart.reduce((sum, item) => sum + item.quantity, 0)} Artikel
-              {depositReturnTotal > 0 && <span className="text-green-500"> (-{depositReturnTotal.toFixed(2)}€ Pfand)</span>}
-            </span>
-            <span className="font-mono text-lg font-bold text-primary">
-              {total.toFixed(2)} €
-            </span>
-          </div>
-          <Button
-            className="w-full h-11 font-semibold uppercase neon-primary text-sm"
-            onClick={submitOrder}
-            disabled={cart.length === 0 || isSubmitting}
-            data-testid="submit-order-mobile-btn"
-          >
-            {isSubmitting ? "Wird erstellt..." : "Bestellung aufgeben"}
-          </Button>
-        </div>
+        {/* Expanded cart view */}
+        {(showMobileCart || cart.length === 0) && (
+          <>
+            {/* Cart items - compact horizontal scroll for landscape */}
+            {cart.length > 0 && (
+              <div className="relative">
+                {/* Collapse button */}
+                <button 
+                  className="absolute top-1 right-2 z-10 p-1 rounded-full bg-muted/80"
+                  onClick={() => setShowMobileCart(false)}
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                
+                {/* Landscape: horizontal scroll, Portrait: vertical compact list */}
+                <div className="max-h-24 landscape:max-h-16 overflow-auto p-2 pr-8 space-y-1 landscape:flex landscape:space-y-0 landscape:gap-2 landscape:overflow-x-auto landscape:overflow-y-hidden">
+                  {cart.map(item => (
+                    <div 
+                      key={`${item.article_id}_${item.is_deposit_return}`}
+                      className={`flex items-center gap-1 px-2 py-1 rounded-sm relative overflow-hidden shrink-0 ${item.is_deposit_return ? 'bg-green-500/10' : 'bg-muted/50'} landscape:min-w-fit`}
+                      onTouchStart={(e) => handleTouchStart(e, item)}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={() => handleTouchEnd(item)}
+                      style={{
+                        transform: swipingItem === `${item.article_id}_${item.is_deposit_return}` ? `translateX(-${swipeOffset}px)` : 'translateX(0)',
+                        transition: swipingItem === `${item.article_id}_${item.is_deposit_return}` ? 'none' : 'transform 0.2s'
+                      }}
+                    >
+                      <span className={`font-mono text-xs font-bold ${item.is_deposit_return ? 'text-green-500' : 'text-primary'}`}>
+                        {item.quantity}x
+                      </span>
+                      <span className={`text-xs truncate max-w-[80px] landscape:max-w-[100px] ${item.is_deposit_return ? 'text-green-500' : ''}`}>
+                        {item.article_name}
+                      </span>
+                      <span className={`font-mono text-xs ${item.is_deposit_return ? 'text-green-500' : 'text-muted-foreground'}`}>
+                        {item.is_deposit_return ? '-' : ''}{Math.abs(item.price * item.quantity).toFixed(2)}€
+                      </span>
+                      {/* Delete indicator */}
+                      <div 
+                        className="absolute right-0 top-0 bottom-0 w-12 bg-destructive flex items-center justify-center landscape:hidden"
+                        style={{
+                          transform: swipingItem === `${item.article_id}_${item.is_deposit_return}` ? 'translateX(0)' : 'translateX(100%)',
+                          opacity: swipingItem === `${item.article_id}_${item.is_deposit_return}` ? swipeOffset / 60 : 0
+                        }}
+                      >
+                        <X className="w-3 h-3 text-white" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Bottom bar with total and button */}
+            <div className="p-2 flex items-center gap-2 landscape:py-1">
+              <div className="flex-1 flex items-center justify-between">
+                <span className="text-muted-foreground text-xs">
+                  {cart.reduce((sum, item) => sum + item.quantity, 0)} Artikel
+                  {depositReturnTotal > 0 && <span className="text-green-500 text-xs"> (-{depositReturnTotal.toFixed(2)}€)</span>}
+                </span>
+                <span className="font-mono text-base font-bold text-primary landscape:text-sm">
+                  {total.toFixed(2)} €
+                </span>
+              </div>
+              <Button
+                className="h-10 landscape:h-8 px-4 font-semibold uppercase neon-primary text-sm landscape:text-xs"
+                onClick={submitOrder}
+                disabled={cart.length === 0 || isSubmitting}
+                data-testid="submit-order-mobile-btn"
+              >
+                {isSubmitting ? "..." : "Bestellen"}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
