@@ -334,6 +334,99 @@ export default function AdminDashboard() {
           </>
         )}
       </main>
+
+      {/* PIN Dialog */}
+      <Dialog open={showResetDialog} onOpenChange={(open) => {
+        setShowResetDialog(open);
+        if (!open) {
+          setPinInput("");
+          setPinError("");
+        }
+      }}>
+        <DialogContent className="bg-card border-border max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              Daten zurücksetzen
+            </DialogTitle>
+            <DialogDescription>
+              Geben Sie den PIN ein, um alle Bestellungen zu löschen.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="pin">PIN</Label>
+              <Input
+                id="pin"
+                type="password"
+                placeholder="PIN eingeben"
+                value={pinInput}
+                onChange={(e) => setPinInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handlePinSubmit()}
+                className={pinError ? 'border-destructive' : ''}
+                data-testid="pin-input"
+              />
+              {pinError && (
+                <p className="text-sm text-destructive">{pinError}</p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setShowResetDialog(false)}
+              >
+                Abbrechen
+              </Button>
+              <Button
+                className="flex-1 bg-destructive hover:bg-destructive/90"
+                onClick={handlePinSubmit}
+                disabled={!pinInput}
+                data-testid="verify-pin-btn"
+              >
+                Weiter
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="bg-card border-border max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              Wirklich zurücksetzen?
+            </DialogTitle>
+            <DialogDescription className="pt-2">
+              <strong className="text-destructive">ACHTUNG:</strong> Alle Bestellungen werden unwiderruflich gelöscht!
+              <br /><br />
+              Stände, Artikel und Pfandgruppen bleiben erhalten.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 pt-4">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => {
+                setShowConfirmDialog(false);
+                setPinInput("");
+              }}
+            >
+              Abbrechen
+            </Button>
+            <Button
+              className="flex-1 bg-destructive hover:bg-destructive/90"
+              onClick={handleConfirmReset}
+              disabled={isResetting}
+              data-testid="confirm-reset-btn"
+            >
+              {isResetting ? "Wird gelöscht..." : "Ja, zurücksetzen"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
