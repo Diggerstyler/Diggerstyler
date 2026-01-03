@@ -103,10 +103,11 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Festival OS - A festival order management app with 4 roles (Bestellung, Küche, Ausgabe, OneManShow).
-  User reported two bugs:
-  1. Orders not saving (500 error due to missing 'subtotal' field in old orders)
-  2. Article editing not working (empty string value in Select component for Pfandgruppe)
+  Karnbachs Event OS - A festival order management app with 4 roles (Bestellung, Macher, Ausgabe, OneMan).
+  Latest user requests:
+  1. "Kurzer Prozess" toggle on role selection - should work without password/confirmation (DONE - already implemented)
+  2. Macher view - articles with quantity should be displayed more prominently (DONE - implemented larger, bolder display)
+  3. Multiple logins for same role at same stand - should be allowed (DONE - system already supports this)
 
 backend:
   - task: "GET /api/orders - fetch orders with backward compatibility"
