@@ -49,13 +49,7 @@ export default function OneManShowPage() {
     setCompletedOrderTotal(orderTotal);
     setGivenAmount("");
     setShowChangeCalc(false);
-    // Auto-hide after 5 seconds
-    if (overlayTimeoutRef.current) {
-      clearTimeout(overlayTimeoutRef.current);
-    }
-    overlayTimeoutRef.current = setTimeout(() => {
-      setCompletedOrderNumber(null);
-    }, 5000);
+    // No auto-hide - user must click "Weiter"
   };
 
   const dismissOverlay = () => {
