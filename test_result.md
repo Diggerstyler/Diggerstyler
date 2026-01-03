@@ -179,11 +179,14 @@ backend:
     file: "/app/frontend/src/pages/LandingPage.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "The Kurzer Prozess toggle on role selection page already works without any password or confirmation dialog. It's a simple Switch component that directly toggles the stand's short_process setting. Tested via screenshots."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Kurzer Prozess toggle works perfectly without password/confirmation. When ON, Macher role is correctly hidden (only Bestellung, Ausgabe, OneMan visible). When OFF, all 4 roles visible. Toggle responds immediately with no dialogs. Tested on Getränke stand which has Kurzer Prozess enabled."
 
   - task: "Multiple logins for same role at same stand"
     implemented: true
