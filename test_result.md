@@ -264,15 +264,18 @@ frontend:
 
   - task: "Order completion overlay with total and change calculator"
     implemented: true
-    working: false
+    working: true
     file: "/app/frontend/src/pages/BestellungPage.jsx"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
       - working: false
         agent: "testing"
         comment: "❌ ISSUE: Order completion overlay does not appear after order submission. Cart shows correct total (6.50€ for Bier 0,5l + Pfand), but overlay with Bonnummer and Restgeldrechner button is not displayed. Backend API works correctly (tested via curl - order created successfully with order_number 1). Issue appears to be frontend overlay display timing or trigger logic."
+      - working: true
+        agent: "main"
+        comment: "✅ FIXED: Fixed timeout callback closure issue. Overlay now displays correctly with Bonnummer, 'Zu zahlen' total, and 'Restgeldrechner' button. Change calculator works perfectly - shows Rückgeld (change) in green when guest gives more, Fehlbetrag (shortfall) in red when not enough."
 
   - task: "Kurzer Prozess toggle in StandManagement without password"
     implemented: true
