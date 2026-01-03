@@ -780,7 +780,7 @@ async def get_order(order_id: str):
 
 # Kitchen Summary
 @api_router.get("/stands/{stand_id}/kitchen-summary")
-async def get_kitchen_summary(stand_id: str):
+async def get_kitchen_summary(stand_id: str, station_id: Optional[str] = None):
     orders = await db.orders.find(
         {"stand_id": stand_id, "status": {"$in": ["created", "in_progress"]}},
         {"_id": 0}
@@ -791,6 +791,13 @@ async def get_kitchen_summary(stand_id: str):
         for item in order.get("items", []):
             if item.get("is_deposit_return"):
                 continue
+            # If station_id specified, only count items for that station
+            if station_id:
+                if item.get("station_id") != station_id:
+                    continue
+                # Skip already completed items for this station
+                if item.get("station_completed"):
+                    continue
             name = item.get("article_name", "Unbekannt")
             qty = item.get("quantity", 0)
             if name in item_totals:
@@ -804,6 +811,33 @@ async def get_kitchen_summary(stand_id: str):
         "total_items": sorted_items,
         "total_orders": len(orders)
     }
+
+# Get orders for a specific station
+@api_router.get("/stands/{stand_id}/station/{station_id}/orders")
+async def get_station_orders(stand_id: str, station_id: str):
+    """Get orders that have items for this station"""
+    orders = await db.orders.find(
+        {"stand_id": stand_id, "status": {"$in": ["created", "in_progress"]}},
+        {"_id": 0}
+    ).sort("created_at", 1).to_list(1000)
+    
+    # Filter orders that have items for this station and are not yet complete
+    station_orders = []
+    for order in orders:
+        station_status = order.get("station_status", {})
+        # Skip if this station has already completed
+        if station_status.get(station_id, False):
+            continue
+        
+        # Check if order has items for this station
+        station_items = [item for item in order.get("items", []) if item.get("station_id") == station_id]
+        if station_items:
+            # Create a filtered order view for this station
+            filtered_order = order.copy()
+            filtered_order["station_items"] = station_items
+            station_orders.append(filtered_order)
+    
+    return station_orders
 
 # Stats Routes
 @api_router.post("/stats/overview")
