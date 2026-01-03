@@ -73,6 +73,9 @@ export default function KuechePage() {
   const inProgressOrders = orders.filter(o => o.status === "in_progress");
   const skipPreparation = standInfo?.skip_preparation || false;
 
+  // In skip_preparation mode: created orders show "Fertig" button directly
+  // In normal mode: created orders show "Zubereitung" button, then move to in_progress with "Fertig" button
+
   return (
     <div className="min-h-screen bg-background">
       <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
@@ -116,7 +119,7 @@ export default function KuechePage() {
 
       <main className="p-4 sm:p-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Incoming Orders */}
+          {/* Incoming Orders - Always visible */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <h2 className="font-display text-base sm:text-lg font-bold uppercase">Eingehend</h2>
@@ -162,6 +165,7 @@ export default function KuechePage() {
                           ))}
                         </ul>
                         {skipPreparation ? (
+                          /* Skip mode: Show "Fertig" button directly */
                           <Button
                             className="w-full bg-green-600 hover:bg-green-700 neon-success text-sm"
                             onClick={() => updateOrderStatus(order.id, "ready")}
@@ -169,16 +173,17 @@ export default function KuechePage() {
                             data-testid={`finish-order-${order.id}`}
                           >
                             <Check className="w-4 h-4 mr-2" />
-                            Direkt Fertig
+                            Fertig
                           </Button>
                         ) : (
+                          /* Normal mode: Show "Zubereitung" button */
                           <Button
                             className="w-full neon-secondary bg-secondary text-sm"
                             onClick={() => updateOrderStatus(order.id, "in_progress")}
                             disabled={isLoading}
                             data-testid={`start-order-${order.id}`}
                           >
-                            Zubereitung starten
+                            Zubereitung
                           </Button>
                         )}
                       </CardContent>
@@ -189,7 +194,7 @@ export default function KuechePage() {
             </ScrollArea>
           </div>
 
-          {/* In Progress Orders */}
+          {/* In Progress Orders - Only visible in normal mode */}
           {!skipPreparation && (
             <div className="lg:col-span-1">
               <div className="flex items-center gap-2 mb-4">
