@@ -11,6 +11,7 @@ import ArticleManagement from "@/pages/ArticleManagement";
 import StandManagement from "@/pages/StandManagement";
 import StationManagement from "@/pages/StationManagement";
 import StatsPage from "@/pages/StatsPage";
+import OrdersManagement from "@/pages/OrdersManagement";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/admin/stands" element={<StandManagement />} />
           <Route path="/admin/stations" element={<StationManagement />} />
           <Route path="/admin/stats" element={<StatsPage />} />
+          <Route path="/admin/orders" element={<OrdersManagement />} />
         </Routes>
       </BrowserRouter>
       <Toaster position="top-right" richColors />
