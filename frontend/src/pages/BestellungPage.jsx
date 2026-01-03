@@ -588,7 +588,7 @@ export default function BestellungPage() {
               >
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex flex-col h-full">
-                    <div className="flex gap-1 mb-2">
+                    <div className="flex gap-1 mb-2 flex-wrap">
                       <Badge variant="outline" className="text-xs">
                         {article.category === "getraenke" ? "Getränk" : "Speise"}
                       </Badge>
@@ -598,7 +598,13 @@ export default function BestellungPage() {
                         </Badge>
                       )}
                     </div>
-                    <h3 className="font-semibold text-sm sm:text-base mb-2 line-clamp-2">{article.name}</h3>
+                    <h3 className="font-semibold text-sm sm:text-base mb-1 line-clamp-2">{article.name}</h3>
+                    {/* Verknüpfte Artikel klein anzeigen */}
+                    {article.linkedArticles?.length > 0 && (
+                      <p className="text-xs text-muted-foreground mb-2">
+                        + {article.linkedArticles.map(l => l.linked_article_name).join(', ')}
+                      </p>
+                    )}
                     <p className="font-mono text-base sm:text-lg text-primary mt-auto">
                       {article.price.toFixed(2)} €
                     </p>
