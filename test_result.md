@@ -289,6 +289,54 @@ frontend:
         agent: "testing"
         comment: "✅ VERIFIED: Kurzer Prozess toggle works perfectly without password/confirmation. Found 3 toggles in StandManagement. Toggle changes state immediately (OFF→ON→OFF) with no confirmation dialogs. No role='dialog' elements appear. Toggle functionality is instant and user-friendly as required."
 
+  - task: "Back button navigation from all role pages"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/BestellungPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: All back button navigation working perfectly. Tested Bestellung→Landing, Macher→Landing, Ausgabe→Landing, Role selection→Landing. All navigate correctly to landing page (/) for role/stand reselection."
+
+  - task: "Macher page clickable articles with visual feedback"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/KuechePage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Clickable articles functionality perfect. Articles show green checkmark icon, strikethrough text, and green background when clicked. Click again to unmark (removes all indicators). Multiple articles can be marked simultaneously. 'Fertig' button completes order regardless of marked items - marked items are just visual help for workers."
+
+  - task: "Ausgabe page large bons (only 2 visible)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/AusgabePage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Large bon displays working perfectly. Found large Bonnummer containers (w-32 h-32 = 128x128px or w-40 h-40 = 160x160px) with large text (text-6xl/7xl). Only 2 orders visible at a time as required. 'Übergeben' button available for order completion."
+
+  - task: "Kurzer Prozess toggle on role selection page"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/pages/LandingPage.jsx"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL ISSUE: Kurzer Prozess toggle functionality is broken. Toggle UI appears and responds to clicks but actual state change is not working. Toggle remains in OFF position despite clicking. Macher role stays visible when it should be hidden. No password/confirmation required (correct). Immediate UI response (correct). The toggle state persistence and role visibility logic needs fixing."
+
 test_plan:
   current_focus:
     - "Weiter Button in overlay instead of 5-second timer"
