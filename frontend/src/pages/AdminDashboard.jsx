@@ -22,7 +22,8 @@ import {
   Trash2,
   AlertTriangle,
   HelpCircle,
-  Layers
+  Layers,
+  FileText
 } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -209,6 +210,16 @@ export default function AdminDashboard() {
               className="h-8 px-2"
             >
               <BarChart3 className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/admin/orders")}
+              data-testid="orders-nav-btn"
+              className="h-8 px-2"
+              title="Alle Rechnungen"
+            >
+              <FileText className="w-4 h-4" />
             </Button>
             <Button
               variant="ghost"
