@@ -314,12 +314,12 @@ export default function StandManagement() {
                         <TableCell className="text-center">
                           <div className="flex items-center justify-center gap-2">
                             <Switch
-                              checked={stand.skip_preparation || false}
-                              onCheckedChange={() => toggleSkipPreparation(stand)}
-                              data-testid={`toggle-skip-${stand.id}`}
+                              checked={stand.short_process || false}
+                              onCheckedChange={() => toggleShortProcess(stand)}
+                              data-testid={`toggle-short-${stand.id}`}
                             />
                             <span className="text-xs text-muted-foreground hidden sm:inline">
-                              {stand.skip_preparation ? "Überspringen" : "Normal"}
+                              {stand.short_process ? "Kurz" : "Normal"}
                             </span>
                           </div>
                         </TableCell>
