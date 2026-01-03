@@ -388,6 +388,7 @@ frontend:
 test_plan:
   current_focus:
     - "Kurzer Prozess toggle on role selection page"
+    - "Frontend testing for message #456 features"
   stuck_tasks:
     - "Kurzer Prozess toggle on role selection page"
   test_all: false
