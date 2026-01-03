@@ -343,14 +343,14 @@ export default function ArticleManagement() {
                 <div className="space-y-2">
                   <Label htmlFor="deposit">Pfandgruppe (optional)</Label>
                   <Select 
-                    value={formData.deposit_group_id} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, deposit_group_id: value }))}
+                    value={formData.deposit_group_id || "none"} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, deposit_group_id: value === "none" ? "" : value }))}
                   >
                     <SelectTrigger data-testid="article-deposit-select">
                       <SelectValue placeholder="Kein Pfand" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Kein Pfand</SelectItem>
+                      <SelectItem value="none">Kein Pfand</SelectItem>
                       {depositGroups.filter(d => d.active).map(deposit => (
                         <SelectItem key={deposit.id} value={deposit.id}>
                           {deposit.name} ({deposit.amount.toFixed(2)} €)
