@@ -81,7 +81,7 @@ export default function StationManagement() {
 
   const fetchStandArticles = async () => {
     try {
-      const res = await axios.get(`${API}/api/stands/${selectedStand.id}/articles`);
+      const res = await axios.get(`${API}/stands/${selectedStand.id}/articles`);
       setArticles(res.data);
     } catch (err) {
       toast.error("Fehler beim Laden der Stand-Artikel");
@@ -90,7 +90,7 @@ export default function StationManagement() {
 
   const fetchLinkedArticles = async () => {
     try {
-      const res = await axios.get(`${API}/api/stands/${selectedStand.id}/linked-articles`);
+      const res = await axios.get(`${API}/stands/${selectedStand.id}/linked-articles`);
       setLinkedArticles(res.data);
     } catch (err) {
       toast.error("Fehler beim Laden der verknüpften Artikel");
@@ -103,7 +103,7 @@ export default function StationManagement() {
       return;
     }
     try {
-      await axios.post(`${API}/api/stations`, {
+      await axios.post(`${API}/stations`, {
         stand_id: selectedStand.id,
         name: newStationName,
         is_main: newStationIsMain
@@ -120,7 +120,7 @@ export default function StationManagement() {
 
   const toggleMainStation = async (station) => {
     try {
-      await axios.put(`${API}/api/stations/${station.id}`, {
+      await axios.put(`${API}/stations/${station.id}`, {
         is_main: !station.is_main
       }, authHeader);
       toast.success(station.is_main ? "Hauptstation entfernt" : "Als Hauptstation gesetzt");
@@ -133,7 +133,7 @@ export default function StationManagement() {
   const deleteStation = async (station) => {
     if (!window.confirm(`Station "${station.name}" löschen? Alle Verknüpfungen werden auch gelöscht.`)) return;
     try {
-      await axios.delete(`${API}/api/stations/${station.id}`, authHeader);
+      await axios.delete(`${API}/stations/${station.id}`, authHeader);
       toast.success("Station gelöscht");
       fetchStations();
       fetchLinkedArticles();
