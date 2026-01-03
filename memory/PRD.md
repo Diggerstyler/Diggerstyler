@@ -1,98 +1,84 @@
 # Festival Order Management System (FESTIVAL_OS)
 ## PRD - Product Requirements Document
 
-### Datum: 2025-01-03 (Update)
-
----
-
-## Original Problem Statement
-Bestellmanagement-App für ein Stadtfest mit:
-- Konfigurierbare Stände (hinzufügen, löschen, umbenennen)
-- 3 Standtypen: Speisestand, Getränkestand, Gemischter Stand
-- 4 Rollen: Bestellung, Küche, Ausgabe, OneManShow
-- Artikel-Zuweisung pro Stand
-- Küchen-Einstellung: Zubereitung überspringen ja/nein
-- Küche mit Gesamt-Übersicht aller offenen Artikel
-- Admin-Bereich mit Statistiken
-
----
-
-## Aktualisierungen/Erweiterungen
-
-### Echtzeit-Aktualisierung
-- Polling alle 3 Sekunden zwischen Rollen
-- Wenn Rolle 1 bestellt → Rolle 2 sieht es nach max. 3 Sekunden
-- Küchen-Summary aktualisiert sich automatisch
-
-### Sortierung
-- Bestellungen werden nach Eingang sortiert (FIFO - First In, First Out)
-- Älteste Bestellung ist immer oben/vorn
+### Datum: 2025-01-03 (Final Update)
 
 ---
 
 ## Implementierte Features
 
-### Backend (FastAPI + MongoDB)
-- [x] `/api/stands` - CRUD für Stände
-- [x] `/api/stands/{id}/articles` - Artikel für einen Stand (gefiltert)
-- [x] `/api/stands/{id}/kitchen-summary` - Gesamt offene Artikel
-- [x] `/api/stand-types` - Standtypen
-- [x] `/api/roles` - 4 Rollen inkl. OneManShow
-- [x] `/api/articles` - CRUD für Artikel
-- [x] `/api/orders` - CRUD, sortiert nach Eingang (FIFO)
-- [x] `skip_preparation` - Bestellungen direkt auf "Fertig"
-- [x] Admin Auth für geschützte Endpoints
+### 1. WebSockets für Echtzeit-Updates
+- Alle Rollen verbinden sich per WebSocket
+- Bei neuer Bestellung/Status-Änderung: Sofortige Benachrichtigung
+- Keine Verzögerung mehr (vorher 3s Polling)
 
-### Frontend (React + Shadcn UI) - RESPONSIVE
-- [x] Landing Page - Stand + Rolle Auswahl
-- [x] Bestellungs-Seite (POS) - Artikelfilter nach Stand
-- [x] Küche-Seite mit "GESAMT OFFEN" Übersicht
-- [x] Ausgabe-Seite
-- [x] OneManShow (alles in einer Ansicht)
-- [x] Admin Dashboard
-- [x] **Standverwaltung** (NEU) - Stände CRUD
-- [x] **Artikel-Zuweisung** (NEU) - Artikel zu Ständen
-- [x] **Zubereitung überspringen** (NEU) - Pro Stand einstellbar
-- [x] Artikelverwaltung
-- [x] Statistiken mit Filtern
+### 2. Pfandsystem
+- **Pfandgruppen** (Admin): Glas 0,5l (2.00€), Glas 0,3l (1.50€), Becher (1.00€)
+- **Artikel-Zuweisung**: Jeder Artikel kann optional eine Pfandgruppe haben
+- **Pfand zurück Button**: In Sidebar (Desktop) oder als Buttons (Mobile)
+- **Berechnung**: Artikel + Pfand - Pfand zurück = Zu kassieren
 
-### Admin-Funktionen
-| Feature | Beschreibung |
-|---------|-------------|
-| Stände verwalten | Hinzufügen, Bearbeiten, Löschen von Ständen |
-| Standtyp ändern | Speisestand, Getränkestand, Gemischt |
-| Artikel zuweisen | Welche Artikel an welchem Stand |
-| Zubereitung | Normal oder Überspringen (direkt fertig) |
+### 3. Swipe zum Löschen
+- Im Warenkorb: Artikel nach links wischen zum Entfernen
+- Pro Wisch: 1 Stück wird entfernt
+- Funktioniert in Rolle 1 (Bestellung) und Rolle 4 (OneManShow)
 
----
+### 4. OneManShow - Direktmodus
+- Kein Küchen-Workflow
+- Direkt: Tippen → Kassieren → Fertig
+- Order geht direkt auf Status "completed"
 
-## Küchen-Übersicht "GESAMT OFFEN"
+### 5. Statistik mit Stunden-Übersicht
+- **Bestellungen pro Stunde**: Tabelle mit Uhrzeit, Anzahl, Umsatz, Ø pro Bestellung
+- **Gesamt-Zeile** am Ende
+- Filter: Startdatum, Enddatum, Stand, Status
 
-Die Küche zeigt rechts eine Zusammenfassung aller offenen Artikel:
-```
-ZU PRODUZIEREN
-- Bratwurst    4x
-- Pommes       2x
-- Bier 0,5l   3x
-```
-Diese Übersicht aktualisiert sich alle 3 Sekunden.
+### 6. UI-Änderungen
+- **Rollenauswahl zuerst**: 4 Kacheln (Bestellung, Küche, Ausgabe, OneManShow)
+- **Dann Standauswahl**: Stände als Kacheln (nicht Dropdown)
+- **Kein Dropdown mehr**: Besser für Handy-Bedienung
 
 ---
 
-## Polling/Updates zwischen Rollen
+## Workflow-Übersicht
 
-| Aktion | Update-Zeit |
-|--------|------------|
-| Neue Bestellung | ~3 Sekunden bis Küche sieht |
-| Küche → Fertig | ~3 Sekunden bis Ausgabe sieht |
-| Ausgabe → Übergeben | ~3 Sekunden bis Summary aktualisiert |
+### Rolle 1 (Bestellung)
+1. Artikel tippen (Pfand wird automatisch addiert)
+2. Pfand zurück tippen wenn Gäste Gläser bringen
+3. Swipe zum Korrigieren
+4. "Bestellung aufgeben" → Geht an Küche
 
-Für echte Echtzeit wären WebSockets nötig.
+### Rolle 2 (Küche)
+1. Sieht eingehende Bestellungen (älteste zuerst)
+2. "Zubereitung starten" oder "Direkt fertig" (wenn Schnellmodus)
+3. "Fertig melden" → Geht an Ausgabe
+4. Rechts: Gesamt-Übersicht aller offenen Artikel
+
+### Rolle 3 (Ausgabe)
+1. Sieht fertige Bestellungen
+2. Klick auf Bestellung → Übergeben
+3. Status wird "completed"
+
+### Rolle 4 (OneManShow)
+1. Wie Rolle 1, aber Button heißt "Kassieren & Fertig"
+2. Order geht direkt auf "completed"
+3. Kein Küchen-Workflow nötig
+
+---
+
+## Admin-Funktionen
+
+| Bereich | Funktionen |
+|---------|------------|
+| Stände | Hinzufügen, Bearbeiten, Löschen, Typ ändern, Schnellmodus |
+| Artikel | CRUD, Pfandgruppe zuweisen |
+| Pfandgruppen | Erstellen, Bearbeiten, Löschen |
+| Statistiken | Filter, Stunden-Übersicht, CSV Export |
 
 ---
 
 ## Tech Stack
-- Backend: FastAPI, Motor (async MongoDB)
+- Backend: FastAPI, Motor, WebSockets
 - Frontend: React, Tailwind CSS, Shadcn UI
 - Database: MongoDB
 - Auth: Basic Auth für Admin
@@ -100,7 +86,6 @@ Für echte Echtzeit wären WebSockets nötig.
 ---
 
 ## Next Tasks (Optional)
-1. WebSockets für echte Echtzeit-Updates
+1. Sound bei neuen Bestellungen
 2. Druckfunktion für Bons
-3. Sound bei neuen Bestellungen
-4. Mitarbeiter-Namen bei Rollenauswahl
+3. Offline-Modus mit Sync
