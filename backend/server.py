@@ -368,7 +368,7 @@ async def get_next_order_number(stand_id: str) -> int:
     )
     return counter["count"]
 
-@api_router.get("/orders", response_model=List[Order])
+@api_router.get("/orders")
 async def get_orders(
     stand_id: Optional[str] = None,
     status: Optional[str] = None
@@ -380,6 +380,18 @@ async def get_orders(
         query["status"] = status
     
     orders = await db.orders.find(query, {"_id": 0}).sort("created_at", 1).to_list(1000)
+    
+    # Ensure backward compatibility - add missing fields for older orders
+    for order in orders:
+        if "subtotal" not in order:
+            order["subtotal"] = order.get("total", 0)
+        if "deposit_total" not in order:
+            order["deposit_total"] = 0
+        if "deposit_return_total" not in order:
+            order["deposit_return_total"] = 0
+        if "pfand_total" in order:  # Old field name migration
+            del order["pfand_total"]
+    
     return orders
 
 @api_router.post("/orders", response_model=Order)
