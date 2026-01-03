@@ -41,6 +41,7 @@ export default function BestellungPage() {
   const touchStartX = useRef(0);
   const wsRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showMobileCart, setShowMobileCart] = useState(false);
   
   // Track fullscreen state
   useEffect(() => {
