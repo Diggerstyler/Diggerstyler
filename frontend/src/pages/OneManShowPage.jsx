@@ -270,7 +270,7 @@ export default function OneManShowPage() {
 
       const response = await axios.post(`${API}/orders`, order);
       setLastOrder(response.data);
-      showOrderCompletionOverlay(response.data.order_number);
+      showOrderCompletionOverlay(response.data.order_number, total);
       toast.success(`Bestellung #${response.data.order_number} abgeschlossen!`);
       setCart([]);
     } catch (error) {
