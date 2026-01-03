@@ -210,24 +210,22 @@ export default function AdminDashboard() {
               <Download className="w-4 h-4" />
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => setShowResetDialog(true)}
               data-testid="reset-btn"
-              className="border-destructive/50 text-destructive hover:bg-destructive/10"
+              className="h-8 px-2 text-destructive"
             >
-              <Trash2 className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Reset</span>
+              <Trash2 className="w-4 h-4" />
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => setShowHelp(true)}
               data-testid="help-btn"
-              className="border-muted-foreground/30"
+              className="h-8 px-2"
             >
-              <HelpCircle className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Anleitung</span>
+              <HelpCircle className="w-4 h-4" />
             </Button>
             <Button
               variant="ghost"
