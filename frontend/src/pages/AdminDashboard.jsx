@@ -194,6 +194,16 @@ export default function AdminDashboard() {
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => navigate("/admin/stations")}
+              data-testid="stations-nav-btn"
+              className="h-8 px-2"
+              title="Stationen & Verknüpfungen"
+            >
+              <Layers className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate("/admin/stats")}
               data-testid="stats-nav-btn"
               className="h-8 px-2"
