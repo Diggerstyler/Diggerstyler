@@ -249,12 +249,48 @@ metadata:
   test_sequence: 1
   run_ui: true
 
+frontend:
+  - task: "Pfand zurück button visibility based on stand articles"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/BestellungPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Pfand zurück button visibility works correctly. Speisestand (stand_1) does NOT show 'Pfand zurück' button (0 sections, 0 buttons found). Getränkestand shows 'Pfand zurück' button as expected. Logic based on standHasDepositArticles variable works perfectly."
+
+  - task: "Order completion overlay with total and change calculator"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/pages/BestellungPage.jsx"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ ISSUE: Order completion overlay does not appear after order submission. Cart shows correct total (6.50€ for Bier 0,5l + Pfand), but overlay with Bonnummer and Restgeldrechner button is not displayed. Backend API works correctly (tested via curl - order created successfully with order_number 1). Issue appears to be frontend overlay display timing or trigger logic."
+
+  - task: "Kurzer Prozess toggle in StandManagement without password"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/StandManagement.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Kurzer Prozess toggle works perfectly without password/confirmation. Found 3 toggles in StandManagement. Toggle changes state immediately (OFF→ON→OFF) with no confirmation dialogs. No role='dialog' elements appear. Toggle functionality is instant and user-friendly as required."
+
 test_plan:
   current_focus:
-    - "Pfand zurück button visibility based on stand articles"
     - "Order completion overlay with total and change calculator"
-    - "Kurzer Prozess toggle in StandManagement without password"
-  stuck_tasks: []
+  stuck_tasks:
+    - "Order completion overlay with total and change calculator"
   test_all: false
   test_priority: "high_first"
 
