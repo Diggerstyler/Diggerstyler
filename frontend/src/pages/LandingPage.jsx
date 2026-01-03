@@ -222,6 +222,15 @@ export default function LandingPage() {
         <div className="flex items-center gap-1 sm:gap-2">
           <Button 
             variant="ghost" 
+            size="icon"
+            onClick={toggleFullscreen}
+            className="h-8 w-8 sm:h-10 sm:w-10"
+            title={isFullscreen ? "Vollbild beenden" : "Vollbild"}
+          >
+            {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+          </Button>
+          <Button 
+            variant="ghost" 
             size="sm"
             onClick={() => setShowHelp(true)}
             data-testid="help-btn"
