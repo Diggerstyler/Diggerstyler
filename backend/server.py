@@ -596,6 +596,91 @@ async def admin_login(credentials: HTTPBasicCredentials = Depends(security)):
     verify_admin(credentials)
     return {"message": "Login erfolgreich", "username": credentials.username}
 
+# Archive endpoint for Bestellung role - get all orders for a stand (sorted by newest first)
+@api_router.get("/stands/{stand_id}/archive")
+async def get_stand_archive(stand_id: str, limit: int = 100):
+    """Get order archive for a stand (for resolving disputes with guests)"""
+    orders = await db.orders.find(
+        {"stand_id": stand_id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(limit)
+    
+    # Ensure backward compatibility
+    for order in orders:
+        if "subtotal" not in order:
+            order["subtotal"] = order.get("total", 0)
+        if "deposit_total" not in order:
+            order["deposit_total"] = 0
+        if "deposit_return_total" not in order:
+            order["deposit_return_total"] = 0
+    
+    return orders
+
+# Admin: Export all data
+@api_router.get("/admin/export")
+async def export_all_data(username: str = Depends(verify_admin)):
+    """Export all data as JSON for backup"""
+    orders = await db.orders.find({}, {"_id": 0}).to_list(100000)
+    articles = await db.articles.find({}, {"_id": 0}).to_list(1000)
+    stands = await db.stands.find({}, {"_id": 0}).to_list(100)
+    deposit_groups = await db.deposit_groups.find({}, {"_id": 0}).to_list(100)
+    
+    # Ensure backward compatibility for orders
+    for order in orders:
+        if "subtotal" not in order:
+            order["subtotal"] = order.get("total", 0)
+        if "deposit_total" not in order:
+            order["deposit_total"] = 0
+        if "deposit_return_total" not in order:
+            order["deposit_return_total"] = 0
+    
+    export_data = {
+        "export_date": datetime.now(timezone.utc).isoformat(),
+        "orders": orders,
+        "articles": articles,
+        "stands": stands,
+        "deposit_groups": deposit_groups,
+        "statistics": {
+            "total_orders": len(orders),
+            "total_revenue": sum(o.get("total", 0) for o in orders),
+            "completed_orders": len([o for o in orders if o.get("status") == "completed"])
+        }
+    }
+    
+    return export_data
+
+# Admin: Verify PIN for reset
+class PinVerification(BaseModel):
+    pin: str
+
+RESET_PIN = "200183"
+
+@api_router.post("/admin/verify-pin")
+async def verify_reset_pin(pin_data: PinVerification, username: str = Depends(verify_admin)):
+    """Verify PIN before allowing reset"""
+    if pin_data.pin != RESET_PIN:
+        raise HTTPException(status_code=403, detail="Falscher PIN")
+    return {"verified": True, "message": "PIN korrekt"}
+
+# Admin: Reset all order data (keeps articles, stands, deposit groups)
+@api_router.post("/admin/reset")
+async def reset_order_data(pin_data: PinVerification, username: str = Depends(verify_admin)):
+    """Reset all orders and counters (requires correct PIN)"""
+    if pin_data.pin != RESET_PIN:
+        raise HTTPException(status_code=403, detail="Falscher PIN")
+    
+    # Delete all orders
+    orders_deleted = await db.orders.delete_many({})
+    
+    # Reset all order counters
+    counters_deleted = await db.order_counters.delete_many({})
+    
+    return {
+        "message": "Alle Bestellungen wurden zurückgesetzt",
+        "orders_deleted": orders_deleted.deleted_count,
+        "counters_reset": counters_deleted.deleted_count
+    }
+
 # Seed initial data
 @api_router.post("/seed")
 async def seed_data():
