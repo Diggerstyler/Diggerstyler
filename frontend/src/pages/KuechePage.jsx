@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Clock, Hammer, Check, RefreshCw, ListOrdered, Star } from "lucide-react";
+import { ArrowLeft, Clock, Hammer, Check, RefreshCw, ListOrdered, Star, CheckCircle2 } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -18,6 +18,34 @@ export default function KuechePage() {
   const [stationInfo, setStationInfo] = useState(null);
   const [kitchenSummary, setKitchenSummary] = useState({ total_items: {}, total_orders: 0 });
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Track marked items per order (local state only - just for visual help)
+  const [markedItems, setMarkedItems] = useState({}); // { orderId: { itemIndex: true } }
+
+  // Toggle item marked state (visual only)
+  const toggleItemMarked = (orderId, itemIndex) => {
+    setMarkedItems(prev => ({
+      ...prev,
+      [orderId]: {
+        ...(prev[orderId] || {}),
+        [itemIndex]: !(prev[orderId]?.[itemIndex])
+      }
+    }));
+  };
+
+  // Check if item is marked
+  const isItemMarked = (orderId, itemIndex) => {
+    return markedItems[orderId]?.[itemIndex] || false;
+  };
+
+  // Clear marked items for an order when it's completed
+  const clearMarkedItems = (orderId) => {
+    setMarkedItems(prev => {
+      const newState = { ...prev };
+      delete newState[orderId];
+      return newState;
+    });
+  };
 
   const fetchData = useCallback(async () => {
     try {
