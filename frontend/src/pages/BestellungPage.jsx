@@ -30,7 +30,12 @@ export default function BestellungPage() {
   
   // Order completion overlay state
   const [completedOrderNumber, setCompletedOrderNumber] = useState(null);
+  const [completedOrderTotal, setCompletedOrderTotal] = useState(0);
   const overlayTimeoutRef = useRef(null);
+  
+  // Change calculator state
+  const [showChangeCalc, setShowChangeCalc] = useState(false);
+  const [givenAmount, setGivenAmount] = useState("");
   
   // Archive state
   const [showArchive, setShowArchive] = useState(false);
