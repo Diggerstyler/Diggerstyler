@@ -54,7 +54,7 @@ export default function StationManagement() {
 
   const fetchStands = async () => {
     try {
-      const res = await axios.get(`${API}/api/stands`);
+      const res = await axios.get(`${API}/stands`);
       setStands(res.data.filter(s => s.active));
     } catch (err) {
       toast.error("Fehler beim Laden der Stände");
@@ -63,7 +63,7 @@ export default function StationManagement() {
 
   const fetchAllArticles = async () => {
     try {
-      const res = await axios.get(`${API}/api/articles`);
+      const res = await axios.get(`${API}/articles`);
       setAllArticles(res.data.filter(a => a.active));
     } catch (err) {
       toast.error("Fehler beim Laden der Artikel");
@@ -72,7 +72,7 @@ export default function StationManagement() {
 
   const fetchStations = async () => {
     try {
-      const res = await axios.get(`${API}/api/stands/${selectedStand.id}/stations`);
+      const res = await axios.get(`${API}/stands/${selectedStand.id}/stations`);
       setStations(res.data);
     } catch (err) {
       toast.error("Fehler beim Laden der Stationen");
