@@ -1,0 +1,156 @@
+{
+  "brand_identity": {
+    "name": "FESTIVAL_OS",
+    "archetype": "Electric & Neon",
+    "vibe": "High-Energy, Efficient, Nightlife, Industrial",
+    "description": "A high-contrast, dark-mode-first order management system designed for the chaos of a night festival. It prioritizes speed, legibility in low light, and touch accuracy."
+  },
+  "typography": {
+    "headings": {
+      "family": "Unbounded, display",
+      "weights": ["700", "900"],
+      "usage": "All page titles, modal headers, and major stats. Use uppercase for extra impact.",
+      "letterSpacing": "tracking-tight"
+    },
+    "body": {
+      "family": "Manrope, sans-serif",
+      "weights": ["400", "600"],
+      "usage": "UI elements, buttons, inputs, table data.",
+      "letterSpacing": "tracking-normal"
+    },
+    "mono": {
+      "family": "JetBrains Mono, monospace",
+      "weights": ["500"],
+      "usage": "Prices, Order IDs, Timestamps, Kitchen Tickets."
+    },
+    "import_url": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Manrope:wght@400;600&family=Unbounded:wght@700;900&display=swap"
+  },
+  "colors": {
+    "mode": "dark",
+    "palette": {
+      "background": "#09090B",
+      "foreground": "#FAFAFA",
+      "card": "#18181B",
+      "card_foreground": "#FAFAFA",
+      "popover": "#18181B",
+      "popover_foreground": "#FAFAFA",
+      "primary": "#D946EF",
+      "primary_foreground": "#FFFFFF",
+      "secondary": "#06B6D4",
+      "secondary_foreground": "#FFFFFF",
+      "muted": "#27272A",
+      "muted_foreground": "#A1A1AA",
+      "accent": "#FACC15",
+      "accent_foreground": "#000000",
+      "destructive": "#EF4444",
+      "destructive_foreground": "#FFFFFF",
+      "border": "#27272A",
+      "input": "#27272A",
+      "ring": "#D946EF"
+    },
+    "usage_rules": {
+      "gradients": "Avoid full gradients. Use gradients only for borders or text highlights.",
+      "glassmorphism": "Use 'bg-zinc-900/80 backdrop-blur-xl border-white/10' for overlays and sticky headers.",
+      "status": {
+        "success": "#22C55E",
+        "warning": "#FACC15",
+        "error": "#EF4444",
+        "info": "#3B82F6"
+      }
+    }
+  },
+  "visual_enhancers": {
+    "radius": "rounded-sm",
+    "borders": "1px solid #27272A",
+    "shadows": {
+      "neon_primary": "0 0 20px -5px rgba(217, 70, 239, 0.5)",
+      "neon_secondary": "0 0 20px -5px rgba(6, 182, 212, 0.5)",
+      "card_hover": "0 10px 30px -10px rgba(0, 0, 0, 0.5)"
+    },
+    "textures": "Add a subtle noise texture overlay to the body background to reduce digital flatness."
+  },
+  "layout_strategies": {
+    "general": {
+      "spacing": "Generous. Use p-6 or p-8 for containers. Gap-4 or Gap-6 for grids.",
+      "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+      "grid_system": "Bento Grid. Mix col-span-1, col-span-2, and row-spans to create interest."
+    },
+    "pages": {
+      "landing": {
+        "structure": "Full-screen hero with background image. 3 large interactive cards for Role Selection centered in the viewport.",
+        "background_image": "https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg"
+      },
+      "order_pos": {
+        "structure": "Split View. Left: Category Sidebar (15%). Center: Product Grid (55%). Right: Cart/Checkout (30%).",
+        "mobile": "Tabs for categories. Cart as a bottom sheet or drawer."
+      },
+      "kitchen_display": {
+        "structure": "Kanban Board. Columns: 'Incoming', 'In Progress', 'Ready'.",
+        "card_style": "High contrast, large text. Time elapsed must be prominent."
+      },
+      "pickup_display": {
+        "structure": "Grid of 'Ready' orders. Massive Order Numbers. Green pulsing border for new ready orders."
+      }
+    }
+  },
+  "components": {
+    "buttons": {
+      "default": "h-12 px-6 font-semibold tracking-wide uppercase text-sm transition-all active:scale-95",
+      "primary": "bg-primary text-primary-foreground shadow-neon_primary hover:bg-primary/90",
+      "secondary": "bg-secondary text-secondary-foreground shadow-neon_secondary hover:bg-secondary/90",
+      "outline": "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+    },
+    "cards": {
+      "base": "bg-card border border-border shadow-sm hover:border-primary/50 transition-colors",
+      "interactive": "cursor-pointer hover:-translate-y-1 transition-transform duration-200"
+    },
+    "inputs": {
+      "style": "h-12 bg-input/50 border-transparent focus:border-primary focus:ring-1 focus:ring-primary transition-all text-lg"
+    }
+  },
+  "motion": {
+    "library": "framer-motion",
+    "defaults": {
+      "duration": 0.2,
+      "ease": "easeOut"
+    },
+    "interactions": {
+      "hover": "scale: 1.02",
+      "tap": "scale: 0.98",
+      "page_transition": "opacity: 0 -> 1, y: 10 -> 0"
+    }
+  },
+  "image_assets": {
+    "backgrounds": {
+      "festival_crowd": "https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg",
+      "concert_lights": "https://images.pexels.com/photos/35481248/pexels-photo-35481248.jpeg"
+    },
+    "placeholders": {
+      "food_burger": "https://images.pexels.com/photos/29502146/pexels-photo-29502146.jpeg",
+      "food_generic": "https://images.pexels.com/photos/35437162/pexels-photo-35437162.png"
+    }
+  },
+  "instructions_to_main_agent": [
+    "1. INSTALL FONTS: Add the Google Fonts import to index.css immediately.",
+    "2. CONFIGURE TAILWIND: Update tailwind.config.js with the colors and font families defined above.",
+    "3. GLOBAL CSS: Add the base styles (background color, text color) to index.css.",
+    "4. SHADCN: Customize the components in /components/ui to match the 'visual_enhancers' (radius, borders).",
+    "5. LAYOUT: Build the Role Selection page first using the 'festival_crowd' background.",
+    "6. DATA-TESTID: Ensure every button and input has a data-testid attribute.",
+    "7. NO GRADIENTS: Do not use gradients for backgrounds. Use solid dark colors with noise texture if possible.",
+    "8. USE LUCIDE-REACT: Use lucide-react for all icons."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "You tend to converge toward generic, 'on distribution' outputs. Avoid this.",
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur).",
+    "You MUST NOT apply universal transition. Eg: transition: all.",
+    "You MUST NOT center align the app container.",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations.",
+    "NEVER use AI assistant Emoji characters.",
+    "Every interaction needs micro-animations.",
+    "Use 2-3x more spacing than feels comfortable.",
+    "Use sonner for toasts."
+  ]
+}
