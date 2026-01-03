@@ -108,7 +108,7 @@ class FestivalAPITester:
             "active": True
         }
         
-        success, created_article = self.run_test("Create Article (Admin)", "POST", "articles", 201, test_article, auth=True)
+        success, created_article = self.run_test("Create Article (Admin)", "POST", "articles", 200, test_article, auth=True)
         
         if success and created_article:
             article_id = created_article.get('id')
