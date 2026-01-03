@@ -676,40 +676,36 @@ export default function BestellungPage() {
 
         {/* Articles Grid */}
         <main className="flex-1 p-2 sm:p-3 lg:p-6 overflow-auto pb-36 lg:pb-4">
-          {/* Mobile Category Tabs */}
-          <div className="md:hidden flex gap-2 mb-4 overflow-x-auto pb-2">
+          {/* Mobile Category Tabs - more compact */}
+          <div className="lg:hidden flex gap-1 mb-2 overflow-x-auto pb-1">
             {categories.map(cat => (
               <Button
                 key={cat.id}
                 variant={activeCategory === cat.id ? "secondary" : "outline"}
                 size="sm"
-                className="shrink-0"
+                className="shrink-0 h-7 px-2 text-xs"
                 onClick={() => setActiveCategory(cat.id)}
               >
                 {cat.name}
               </Button>
             ))}
+            {/* Inline Pfand buttons for mobile */}
+            {standHasDepositArticles && depositGroups.map(deposit => (
+              <Button
+                key={deposit.id}
+                variant="outline"
+                size="sm"
+                className="shrink-0 h-7 px-2 text-xs border-green-500/50 text-green-500"
+                onClick={() => addDepositReturn(deposit)}
+              >
+                <RotateCcw className="w-3 h-3 mr-1" />
+                {deposit.name}
+              </Button>
+            ))}
           </div>
-
-          {/* Mobile Deposit Return - only show if stand has articles with deposit */}
-          {standHasDepositArticles && depositGroups.length > 0 && (
-            <div className="md:hidden flex gap-2 mb-4 overflow-x-auto pb-2">
-              {depositGroups.map(deposit => (
-                <Button
-                  key={deposit.id}
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0 border-green-500/50 text-green-500"
-                  onClick={() => addDepositReturn(deposit)}
-                >
-                  <RotateCcw className="w-3 h-3 mr-1" />
-                  {deposit.name} zurück
-                </Button>
-              ))}
-            </div>
-          )}
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
+          {/* Articles Grid - optimized for landscape */}
+          <div className="grid grid-cols-2 landscape:grid-cols-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1.5 sm:gap-2 lg:gap-4">
             {filteredArticles.map(article => (
               <Card
                 key={article.id}
@@ -717,26 +713,27 @@ export default function BestellungPage() {
                 onClick={() => addToCart(article)}
                 data-testid={`article-${article.id}`}
               >
-                <CardContent className="p-3 sm:p-4">
+                <CardContent className="p-2 sm:p-3 lg:p-4">
                   <div className="flex flex-col h-full">
-                    <div className="flex gap-1 mb-2 flex-wrap">
-                      <Badge variant="outline" className="text-xs">
+                    {/* Compact badges for mobile */}
+                    <div className="flex gap-1 mb-1 flex-wrap">
+                      <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">
                         {article.category === "getraenke" ? "Getränk" : "Speise"}
                       </Badge>
                       {article.deposit && (
-                        <Badge variant="outline" className="text-xs border-green-500/50 text-green-500">
+                        <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-green-500/50 text-green-500">
                           +{article.deposit.amount.toFixed(2)}€
                         </Badge>
                       )}
                     </div>
-                    <h3 className="font-semibold text-sm sm:text-base mb-1 line-clamp-2">{article.name}</h3>
+                    <h3 className="font-semibold text-xs sm:text-sm lg:text-base mb-0.5 line-clamp-2">{article.name}</h3>
                     {/* Verknüpfte Artikel klein anzeigen */}
                     {article.linkedArticles?.length > 0 && (
-                      <p className="text-xs text-muted-foreground mb-2">
+                      <p className="text-[10px] text-muted-foreground mb-1 line-clamp-1">
                         + {article.linkedArticles.map(l => l.linked_article_name).join(', ')}
                       </p>
                     )}
-                    <p className="font-mono text-base sm:text-lg text-primary mt-auto">
+                    <p className="font-mono text-sm sm:text-base lg:text-lg text-primary mt-auto font-bold">
                       {article.price.toFixed(2)} €
                     </p>
                   </div>
@@ -746,8 +743,8 @@ export default function BestellungPage() {
           </div>
         </main>
 
-        {/* Cart Sidebar - Desktop */}
-        <aside className="w-72 lg:w-80 border-l border-border hidden md:flex flex-col shrink-0">
+        {/* Cart Sidebar - Desktop ONLY */}
+        <aside className="w-72 lg:w-80 border-l border-border hidden lg:flex flex-col shrink-0">
           <div className="p-3 sm:p-4 border-b border-border">
             <h2 className="font-display text-base lg:text-lg font-bold uppercase">Warenkorb</h2>
             <p className="text-xs text-muted-foreground">Wischen zum Entfernen</p>
