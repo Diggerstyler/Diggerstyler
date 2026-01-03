@@ -283,20 +283,83 @@ export default function BestellungPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Order Completion Overlay */}
+      {/* Order Completion Overlay with Change Calculator */}
       {completedOrderNumber !== null && (
         <div 
-          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center cursor-pointer"
-          onClick={dismissOverlay}
+          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center"
+          onClick={!showChangeCalc ? dismissOverlay : undefined}
         >
-          <div className="text-center animate-in zoom-in-50 duration-300">
-            <p className="text-2xl text-muted-foreground mb-4 uppercase tracking-wider">Bon Nummer</p>
-            <div className="w-48 h-48 sm:w-64 sm:h-64 rounded-2xl bg-primary/20 border-4 border-primary flex items-center justify-center mx-auto mb-6">
-              <span className="font-mono text-8xl sm:text-9xl font-black text-primary">
+          <div className="text-center animate-in zoom-in-50 duration-300 p-4 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <p className="text-xl sm:text-2xl text-muted-foreground mb-4 uppercase tracking-wider">Bon Nummer</p>
+            <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-2xl bg-primary/20 border-4 border-primary flex items-center justify-center mx-auto mb-4">
+              <span className="font-mono text-7xl sm:text-8xl font-black text-primary">
                 {completedOrderNumber.toString().padStart(2, '0')}
               </span>
             </div>
-            <p className="text-lg text-muted-foreground">Tippen zum Schließen</p>
+            
+            {/* Order Total */}
+            <div className="bg-card/80 rounded-xl p-4 mb-4 border border-border">
+              <p className="text-sm text-muted-foreground mb-1">Zu zahlen</p>
+              <p className="font-mono text-3xl sm:text-4xl font-bold text-primary">
+                {completedOrderTotal.toFixed(2)} €
+              </p>
+            </div>
+
+            {/* Change Calculator */}
+            {!showChangeCalc ? (
+              <>
+                <Button
+                  variant="outline"
+                  className="w-full h-12 mb-3 border-green-500/50 text-green-500 hover:bg-green-500/10"
+                  onClick={openChangeCalculator}
+                >
+                  <Calculator className="w-5 h-5 mr-2" />
+                  Restgeldrechner
+                </Button>
+                <p className="text-sm text-muted-foreground">Tippen außerhalb zum Schließen</p>
+              </>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-card/80 rounded-xl p-4 border border-border">
+                  <p className="text-sm text-muted-foreground mb-2">Gast gibt</p>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={givenAmount}
+                    onChange={(e) => setGivenAmount(e.target.value)}
+                    placeholder="0.00"
+                    className="text-center font-mono text-2xl h-14 bg-background"
+                    autoFocus
+                  />
+                </div>
+                
+                {givenAmount && parseFloat(givenAmount) >= completedOrderTotal && (
+                  <div className="bg-green-500/20 rounded-xl p-4 border border-green-500/50">
+                    <p className="text-sm text-green-400 mb-1">Rückgeld</p>
+                    <p className="font-mono text-4xl font-bold text-green-500">
+                      {calculateChange().toFixed(2)} €
+                    </p>
+                  </div>
+                )}
+                
+                {givenAmount && parseFloat(givenAmount) < completedOrderTotal && (
+                  <div className="bg-red-500/20 rounded-xl p-4 border border-red-500/50">
+                    <p className="text-sm text-red-400 mb-1">Fehlbetrag</p>
+                    <p className="font-mono text-3xl font-bold text-red-500">
+                      {Math.abs(calculateChange()).toFixed(2)} €
+                    </p>
+                  </div>
+                )}
+
+                <Button
+                  className="w-full h-12 bg-green-600 hover:bg-green-700"
+                  onClick={finishWithChange}
+                >
+                  Abschließen
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
