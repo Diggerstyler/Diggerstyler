@@ -491,13 +491,48 @@ export default function ArticleManagement() {
                           {article.price.toFixed(2)} €
                         </TableCell>
                         <TableCell className="hidden md:table-cell">
-                          {article.deposit_group_id ? (
-                            <Badge variant="outline" className="border-green-500/50 text-green-500">
-                              {getDepositName(article.deposit_group_id)}
-                            </Badge>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <button className="cursor-pointer hover:opacity-80 transition-opacity">
+                                {article.deposit_group_id ? (
+                                  <Badge variant="outline" className="border-green-500/50 text-green-500 hover:bg-green-500/10">
+                                    {getDepositName(article.deposit_group_id)}
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="border-muted-foreground/50 text-muted-foreground hover:border-green-500/50 hover:text-green-500">
+                                    Pfand wählen
+                                  </Badge>
+                                )}
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-48 p-2" align="start">
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground mb-2 font-medium">Pfandgruppe wählen:</p>
+                                {/* Option: Kein Pfand */}
+                                <button
+                                  className={`w-full text-left px-2 py-1.5 rounded text-sm flex items-center justify-between hover:bg-muted ${!article.deposit_group_id ? 'bg-muted' : ''}`}
+                                  onClick={() => quickSetDeposit(article, null)}
+                                >
+                                  <span className="text-muted-foreground">Kein Pfand</span>
+                                  {!article.deposit_group_id && <Check className="w-4 h-4 text-primary" />}
+                                </button>
+                                {/* Deposit groups */}
+                                {depositGroups.map(deposit => (
+                                  <button
+                                    key={deposit.id}
+                                    className={`w-full text-left px-2 py-1.5 rounded text-sm flex items-center justify-between hover:bg-green-500/10 ${article.deposit_group_id === deposit.id ? 'bg-green-500/10' : ''}`}
+                                    onClick={() => quickSetDeposit(article, deposit.id)}
+                                  >
+                                    <span>
+                                      <span className="text-green-500">{deposit.name}</span>
+                                      <span className="text-muted-foreground ml-1">({deposit.amount.toFixed(2)}€)</span>
+                                    </span>
+                                    {article.deposit_group_id === deposit.id && <Check className="w-4 h-4 text-green-500" />}
+                                  </button>
+                                ))}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         </TableCell>
                         <TableCell className="text-center">
                           <Switch
