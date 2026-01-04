@@ -366,16 +366,28 @@ export default function KuechePage() {
           </div>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
-          {/* Sound Toggle */}
+          {/* Sound Toggle with Test */}
           <Button
             variant={soundEnabled ? "default" : "outline"}
-            size="icon"
-            onClick={() => setSoundEnabled(!soundEnabled)}
+            size="sm"
+            onClick={() => {
+              unlockAudio();
+              if (!soundEnabled) {
+                setSoundEnabled(true);
+              } else {
+                // Test sound on click when enabled
+                if (audioContextRef.current) {
+                  createBingSound(audioContextRef.current);
+                }
+              }
+            }}
+            onDoubleClick={() => setSoundEnabled(!soundEnabled)}
             className={`shrink-0 ${soundEnabled ? 'bg-green-600 hover:bg-green-700' : ''}`}
-            title={soundEnabled ? "Ton aus" : "Ton an"}
+            title={soundEnabled ? "Klick = Test-Ton, Doppelklick = Aus" : "Klick = Ton an"}
             data-testid="sound-toggle"
           >
-            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            {soundEnabled ? <Volume2 className="w-4 h-4 mr-1" /> : <VolumeX className="w-4 h-4 mr-1" />}
+            <span className="text-xs">{soundEnabled ? 'An' : 'Aus'}</span>
           </Button>
           
           {/* Fullscreen Toggle */}
