@@ -23,24 +23,102 @@ const toggleFullscreen = () => {
   }
 };
 
-// Web Audio API for reliable sound playback
-const createBingSound = (audioContext) => {
-  const oscillator = audioContext.createOscillator();
-  const gainNode = audioContext.createGain();
-  
-  oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
-  
-  oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5 note
-  oscillator.frequency.setValueAtTime(1100, audioContext.currentTime + 0.1); // Higher
-  oscillator.frequency.setValueAtTime(880, audioContext.currentTime + 0.2); // Back
-  
-  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-  
-  oscillator.start(audioContext.currentTime);
-  oscillator.stop(audioContext.currentTime + 0.5);
-};
+// iOS-compatible notification sound class
+class NotificationSound {
+  constructor() {
+    this.audioContext = null;
+    this.audioBuffer = null;
+    this.isUnlocked = false;
+  }
+
+  async unlock() {
+    try {
+      // Create AudioContext
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!this.audioContext) {
+        this.audioContext = new AudioContext();
+      }
+
+      // Resume if suspended (required for iOS)
+      if (this.audioContext.state === 'suspended') {
+        await this.audioContext.resume();
+      }
+
+      // Create a short silent buffer and play it (iOS unlock trick)
+      const silentBuffer = this.audioContext.createBuffer(1, 1, 22050);
+      const source = this.audioContext.createBufferSource();
+      source.buffer = silentBuffer;
+      source.connect(this.audioContext.destination);
+      source.start(0);
+
+      // Pre-create the bing sound buffer
+      await this.createBingBuffer();
+      
+      this.isUnlocked = true;
+      console.log('Audio unlocked successfully');
+      return true;
+    } catch (e) {
+      console.error('Audio unlock failed:', e);
+      return false;
+    }
+  }
+
+  async createBingBuffer() {
+    if (!this.audioContext) return;
+    
+    // Create a pleasant "bing" sound
+    const sampleRate = this.audioContext.sampleRate;
+    const duration = 0.4;
+    const numSamples = sampleRate * duration;
+    
+    this.audioBuffer = this.audioContext.createBuffer(1, numSamples, sampleRate);
+    const channelData = this.audioBuffer.getChannelData(0);
+    
+    for (let i = 0; i < numSamples; i++) {
+      const t = i / sampleRate;
+      // Two-tone bing (880Hz and 1100Hz)
+      const freq1 = 880;
+      const freq2 = 1100;
+      const envelope = Math.exp(-t * 8); // Decay
+      const wave = Math.sin(2 * Math.PI * freq1 * t) * 0.5 + 
+                   Math.sin(2 * Math.PI * freq2 * t) * 0.3;
+      channelData[i] = wave * envelope * 0.5;
+    }
+  }
+
+  play() {
+    if (!this.isUnlocked || !this.audioContext || !this.audioBuffer) {
+      console.log('Audio not ready');
+      return false;
+    }
+
+    try {
+      // Resume context if needed (can get suspended on iOS)
+      if (this.audioContext.state === 'suspended') {
+        this.audioContext.resume();
+      }
+
+      const source = this.audioContext.createBufferSource();
+      source.buffer = this.audioBuffer;
+      
+      const gainNode = this.audioContext.createGain();
+      gainNode.gain.value = 0.7;
+      
+      source.connect(gainNode);
+      gainNode.connect(this.audioContext.destination);
+      source.start(0);
+      
+      console.log('Bing played!');
+      return true;
+    } catch (e) {
+      console.error('Play failed:', e);
+      return false;
+    }
+  }
+}
+
+// Global sound instance
+const notificationSound = new NotificationSound();
 
 export default function KuechePage() {
   const { standId, standType, stationId } = useParams();
@@ -59,19 +137,27 @@ export default function KuechePage() {
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const previousOrderCount = useRef(0);
-  const audioContextRef = useRef(null);
   const wakeLockRef = useRef(null);
 
-  // Initialize AudioContext on first user interaction
-  const unlockAudio = useCallback(() => {
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume();
-    }
-    setAudioUnlocked(true);
+  // Unlock audio (must be called from user gesture)
+  const unlockAudio = useCallback(async () => {
+    const success = await notificationSound.unlock();
+    setAudioUnlocked(success);
+    return success;
   }, []);
+
+  // Play test sound
+  const playTestSound = useCallback(async () => {
+    if (!audioUnlocked) {
+      const success = await unlockAudio();
+      if (success) {
+        // Small delay then play
+        setTimeout(() => notificationSound.play(), 100);
+      }
+    } else {
+      notificationSound.play();
+    }
+  }, [audioUnlocked, unlockAudio]);
 
   // Save sound preference
   useEffect(() => {
