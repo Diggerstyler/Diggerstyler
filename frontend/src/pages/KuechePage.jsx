@@ -433,24 +433,24 @@ export default function KuechePage() {
           <Button
             variant={soundEnabled ? "default" : "outline"}
             size="sm"
-            onClick={() => {
-              unlockAudio();
+            onClick={async () => {
               if (!soundEnabled) {
+                // Turn on and unlock
                 setSoundEnabled(true);
+                await unlockAudio();
+                setTimeout(() => notificationSound.play(), 100);
               } else {
-                // Test sound on click when enabled
-                if (audioContextRef.current) {
-                  createBingSound(audioContextRef.current);
-                }
+                // Test sound when already enabled
+                await playTestSound();
               }
             }}
             onDoubleClick={() => setSoundEnabled(!soundEnabled)}
-            className={`shrink-0 ${soundEnabled ? 'bg-green-600 hover:bg-green-700' : ''}`}
+            className={`shrink-0 ${soundEnabled ? 'bg-green-600 hover:bg-green-700' : ''} ${audioUnlocked ? '' : 'animate-pulse'}`}
             title={soundEnabled ? "Klick = Test-Ton, Doppelklick = Aus" : "Klick = Ton an"}
             data-testid="sound-toggle"
           >
             {soundEnabled ? <Volume2 className="w-4 h-4 mr-1" /> : <VolumeX className="w-4 h-4 mr-1" />}
-            <span className="text-xs">{soundEnabled ? 'An' : 'Aus'}</span>
+            <span className="text-xs">{audioUnlocked ? (soundEnabled ? 'An' : 'Aus') : 'Aktivieren'}</span>
           </Button>
           
           {/* Fullscreen Toggle */}
