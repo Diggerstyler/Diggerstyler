@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
@@ -6,9 +6,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Clock, Hammer, Check, RefreshCw, ListOrdered, Star, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Clock, Hammer, Check, RefreshCw, ListOrdered, Star, CheckCircle2, Volume2, VolumeX, Maximize, Minimize } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+// Notification sound (Base64 encoded short bing sound)
+const BING_SOUND = "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU4GAACAgICAgICAgICAgICAgICAgICAgJCQkJCQkJCQkJCQkJCQkJCQoKCgoKCgoKCgoKCgoKCgoKCwsLCwsLCwsLCwsLCwsLCwsLCwwMDAwMDAwMDAwMDAwMDAwMDA0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ4ODg4ODg4ODg4ODg4ODg4ODg8PDw8PDw8PDw8PDw8PDw8PD///////////////////////+AgICAgICAgICAgICAgICAgICAgHBwcHBwcHBwcHBwcHBwcHBwYGBgYGBgYGBgYGBgYGBgYGBQUFBQUFBQUFBQUFBQUFBQUEBAQEBAQEBAQEBAQEBAQEBAMDAwMDAwMDAwMDAwMDAwMDAwICAgICAgICAgICAgICAgICAgEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgICAgICAgICAgICAgICAgICAgJCQkJCQkJCQkJCQkJCQkJCQoKCgoKCgoKCgoKCgoKCgoKCwsLCwsLCwsLCwsLCwsLCwsLC4uLi4uLi4uLi4uLi4uLi4uLjAwMDAwMDAwMDAwMDAwMDAwMDIyMjIyMjIyMjIyMjIyMjIyMjQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDY2NjY2NjY2NjY2NjY2NjY2Njg4ODg4ODg4ODg4ODg4ODg4ODo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojw8PDw8PDw8PDw8PDw8PDw8PD4+Pj4+Pj4+Pj4+Pj4+Pj4+PkBAQEBAQEBAQEBAQEBAQEBAQD4+Pj4+Pj4+Pj4+Pj4+Pj4+Pjw8PDw8PDw8PDw8PDw8PDw8PDo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojg4ODg4ODg4ODg4ODg4ODg4ODY2NjY2NjY2NjY2NjY2NjY2NjQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDIyMjIyMjIyMjIyMjIyMjIyMjAwMDAwMDAwMDAwMDAwMDAwMC4uLi4uLi4uLi4uLi4uLi4uLiwsLCwsLCwsLCwsLCwsLCwsLCoqKioqKioqKioqKioqKioqKigoKCgoKCgoKCgoKCgoKCgoKCYmJiYmJiYmJiYmJiYmJiYmJiQkJCQkJCQkJCQkJCQkJCQkJCIiIiIiIiIiIiIiIiIiIiIiIiAgICAgICAgICAgICAgICAgIB+fn5+fn5+fn5+fn5+fn5+fn58fHx8fHx8fHx8fHx8fHx8fHx6enp6enp6enp6enp6enp6enp4eHh4eHh4eHh4eHh4eHh4eHh2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ0dHR0dHR0dHR0dHR0dHR0dHRycnJycnJycnJycnJycnJycnJwcHBwcHBwcHBwcHBwcHBwcHBubm5ubm5ubm5ubm5ubm5ubm5sbGxsbGxsbGxsbGxsbGxsbGxqampqampqampqampqampqampoaGhoaGhoaGhoaGhoaGhoaGhmZmZmZmZmZmZmZmZmZmZmZmZkZGRkZGRkZGRkZGRkZGRkZGRiYmJiYmJiYmJiYmJiYmJiYmJgYGBgYGBgYGBgYGBgYGBgYGBeXl5eXl5eXl5eXl5eXl5eXl5cXFxcXFxcXFxcXFxcXFxcXFxaWlpaWlpaWlpaWlpaWlpaWlpYWFhYWFhYWFhYWFhYWFhYWFhWVlZWVlZWVlZWVlZWVlZWVlZUVFRUVFRUVFRUVFRUVFRUVFRSUlJSUlJSUlJSUlJSUlJSUlJQUFBQUFBQUFBQUFBQUFBQUFBOTk5OTk5OTk5OTk5OTk5OTk5MTExMTExMTExMTExMTExMTExKSkpKSkpKSkpKSkpKSkpKSkpISEhISEhISEhISEhISEhISEhGRkZGRkZGRkZGRkZGRkZGRkZERERERERERERERERERERERERCQkJCQkJCQkJCQkJCQkJCQkJAQEBAQEBAQEBAQEBAQEBAQEA+Pj4+Pj4+Pj4+Pj4+Pj4+Pjw8PDw8PDw8PDw8PDw8PDw8PDo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojg4ODg4ODg4ODg4ODg4ODg4ODY2NjY2NjY2NjY2NjY2NjY2Ng==";
+
+// Fullscreen utility functions
+const toggleFullscreen = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen?.() || 
+    document.documentElement.webkitRequestFullscreen?.() ||
+    document.documentElement.mozRequestFullScreen?.();
+  } else {
+    document.exitFullscreen?.() || 
+    document.webkitExitFullscreen?.() ||
+    document.mozCancelFullScreen?.();
+  }
+};
 
 export default function KuechePage() {
   const { standId, standType, stationId } = useParams();
@@ -18,6 +34,72 @@ export default function KuechePage() {
   const [stationInfo, setStationInfo] = useState(null);
   const [kitchenSummary, setKitchenSummary] = useState({ total_items: {}, total_orders: 0 });
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Sound & Fullscreen state
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    const saved = localStorage.getItem('macher_sound_enabled');
+    return saved !== null ? saved === 'true' : true; // Default: on
+  });
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const previousOrderCount = useRef(0);
+  const audioRef = useRef(null);
+  const wakeLockRef = useRef(null);
+
+  // Initialize audio
+  useEffect(() => {
+    audioRef.current = new Audio(BING_SOUND);
+    audioRef.current.volume = 0.7;
+    return () => {
+      audioRef.current = null;
+    };
+  }, []);
+
+  // Save sound preference
+  useEffect(() => {
+    localStorage.setItem('macher_sound_enabled', soundEnabled.toString());
+  }, [soundEnabled]);
+
+  // Play notification sound when orders go from 0 to 1+
+  const playNotificationSound = useCallback(() => {
+    if (soundEnabled && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(e => console.log('Audio play failed:', e));
+    }
+  }, [soundEnabled]);
+
+  // Track fullscreen state and Wake Lock
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFs = !!document.fullscreenElement;
+      setIsFullscreen(isFs);
+      
+      // Wake Lock: Keep screen awake in fullscreen
+      if (isFs && 'wakeLock' in navigator) {
+        navigator.wakeLock.request('screen')
+          .then(lock => {
+            wakeLockRef.current = lock;
+            console.log('Wake Lock activated');
+          })
+          .catch(e => console.log('Wake Lock failed:', e));
+      } else if (!isFs && wakeLockRef.current) {
+        wakeLockRef.current.release();
+        wakeLockRef.current = null;
+        console.log('Wake Lock released');
+      }
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      // Release wake lock on unmount
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release();
+      }
+    };
+  }, []);
   
   // Track marked items per order (local state only - just for visual help)
   const [markedItems, setMarkedItems] = useState({}); // { orderId: { itemIndex: true } }
