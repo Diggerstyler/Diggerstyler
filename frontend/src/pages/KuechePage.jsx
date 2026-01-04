@@ -154,24 +154,32 @@ export default function KuechePage() {
       const results = await Promise.all(requests);
       const [standRes, summaryRes, ordersData, station] = results;
       
+      let newOrders = [];
       if (stationId) {
         // Station mode: orders already filtered
-        setOrders(ordersData.data || []);
+        newOrders = ordersData.data || [];
+        setOrders(newOrders);
         setStationInfo(station || null);
       } else {
         // Regular mode: filter for created and in_progress orders
-        const relevantOrders = (ordersData.data || []).filter(
+        newOrders = (ordersData.data || []).filter(
           o => o.status === "created" || o.status === "in_progress"
         );
-        setOrders(relevantOrders);
+        setOrders(newOrders);
       }
+      
+      // Play sound if orders went from 0 to 1+
+      if (previousOrderCount.current === 0 && newOrders.length > 0) {
+        playNotificationSound();
+      }
+      previousOrderCount.current = newOrders.length;
       
       setStandInfo(standRes.data);
       setKitchenSummary(summaryRes.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-  }, [standId, stationId]);
+  }, [standId, stationId, playNotificationSound]);
 
   useEffect(() => {
     fetchData();
