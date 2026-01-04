@@ -537,13 +537,26 @@ async def create_article(article: ArticleCreate, username: str = Depends(verify_
 
 @api_router.put("/articles/{article_id}", response_model=Article)
 async def update_article(article_id: str, article: ArticleUpdate, username: str = Depends(verify_admin)):
-    update_data = {k: v for k, v in article.model_dump().items() if v is not None}
+    # Get current article
+    current = await db.articles.find_one({"id": article_id}, {"_id": 0})
+    if not current:
+        raise HTTPException(status_code=404, detail="Artikel nicht gefunden")
+    
+    # Build update data - allow null for deposit_group_id
+    update_data = {}
+    article_dict = article.model_dump()
+    
+    for k, v in article_dict.items():
+        # Always include deposit_group_id (even if null) to allow removal
+        if k == "deposit_group_id":
+            update_data[k] = v
+        elif v is not None:
+            update_data[k] = v
+    
     if not update_data:
         raise HTTPException(status_code=400, detail="Keine Daten zum Aktualisieren")
     
     result = await db.articles.update_one({"id": article_id}, {"$set": update_data})
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Artikel nicht gefunden")
     
     updated = await db.articles.find_one({"id": article_id}, {"_id": 0})
     return Article(**updated)
