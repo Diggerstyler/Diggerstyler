@@ -134,6 +134,28 @@ export default function ArticleManagement() {
     setIsDialogOpen(true);
   };
 
+  // Quick deposit change function
+  const quickSetDeposit = async (article, depositGroupId) => {
+    try {
+      const data = {
+        name: article.name,
+        price: article.price,
+        category: article.category,
+        deposit_group_id: depositGroupId || null,
+        active: article.active
+      };
+      
+      await axios.put(`${API}/articles/${article.id}`, data, {
+        headers: { Authorization: `Basic ${auth}` }
+      });
+      
+      toast.success(`Pfand für "${article.name}" aktualisiert`);
+      fetchData();
+    } catch (error) {
+      toast.error("Fehler beim Aktualisieren");
+    }
+  };
+
   const handleEditDeposit = (deposit) => {
     setEditingDeposit(deposit);
     setDepositFormData({
