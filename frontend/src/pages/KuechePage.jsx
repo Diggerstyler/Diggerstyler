@@ -166,33 +166,10 @@ export default function KuechePage() {
 
   // Play notification sound when orders go from 0 to 1+
   const playNotificationSound = useCallback(() => {
-    if (soundEnabled && audioContextRef.current && audioUnlocked) {
-      try {
-        createBingSound(audioContextRef.current);
-        console.log('Bing sound played!');
-      } catch (e) {
-        console.log('Audio play failed:', e);
-      }
+    if (soundEnabled && audioUnlocked) {
+      notificationSound.play();
     }
   }, [soundEnabled, audioUnlocked]);
-
-  // Unlock audio on any user interaction
-  useEffect(() => {
-    const handleInteraction = () => {
-      unlockAudio();
-      // Remove listeners after first interaction
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('touchstart', handleInteraction);
-    };
-    
-    document.addEventListener('click', handleInteraction);
-    document.addEventListener('touchstart', handleInteraction);
-    
-    return () => {
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('touchstart', handleInteraction);
-    };
-  }, [unlockAudio]);
 
   // Track fullscreen state and Wake Lock
   useEffect(() => {
