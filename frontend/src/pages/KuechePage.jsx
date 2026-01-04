@@ -325,6 +325,30 @@ export default function KuechePage() {
           </div>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
+          {/* Sound Toggle */}
+          <Button
+            variant={soundEnabled ? "default" : "outline"}
+            size="icon"
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            className={`shrink-0 ${soundEnabled ? 'bg-green-600 hover:bg-green-700' : ''}`}
+            title={soundEnabled ? "Ton aus" : "Ton an"}
+            data-testid="sound-toggle"
+          >
+            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+          </Button>
+          
+          {/* Fullscreen Toggle */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleFullscreen}
+            className="shrink-0"
+            title={isFullscreen ? "Vollbild beenden" : "Vollbild"}
+            data-testid="fullscreen-toggle"
+          >
+            {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+          </Button>
+          
           <Button
             variant="outline"
             size="sm"
