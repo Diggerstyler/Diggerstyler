@@ -10,9 +10,6 @@ import { ArrowLeft, Clock, Hammer, Check, RefreshCw, ListOrdered, Star, CheckCir
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-// Notification sound (Base64 encoded short bing sound)
-const BING_SOUND = "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU4GAACAgICAgICAgICAgICAgICAgICAgJCQkJCQkJCQkJCQkJCQkJCQoKCgoKCgoKCgoKCgoKCgoKCwsLCwsLCwsLCwsLCwsLCwsLCwwMDAwMDAwMDAwMDAwMDAwMDA0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ4ODg4ODg4ODg4ODg4ODg4ODg8PDw8PDw8PDw8PDw8PDw8PD///////////////////////+AgICAgICAgICAgICAgICAgICAgHBwcHBwcHBwcHBwcHBwcHBwYGBgYGBgYGBgYGBgYGBgYGBQUFBQUFBQUFBQUFBQUFBQUEBAQEBAQEBAQEBAQEBAQEBAMDAwMDAwMDAwMDAwMDAwMDAwICAgICAgICAgICAgICAgICAgEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgICAgICAgICAgICAgICAgICAgJCQkJCQkJCQkJCQkJCQkJCQoKCgoKCgoKCgoKCgoKCgoKCwsLCwsLCwsLCwsLCwsLCwsLC4uLi4uLi4uLi4uLi4uLi4uLjAwMDAwMDAwMDAwMDAwMDAwMDIyMjIyMjIyMjIyMjIyMjIyMjQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDY2NjY2NjY2NjY2NjY2NjY2Njg4ODg4ODg4ODg4ODg4ODg4ODo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojw8PDw8PDw8PDw8PDw8PDw8PD4+Pj4+Pj4+Pj4+Pj4+Pj4+PkBAQEBAQEBAQEBAQEBAQEBAQD4+Pj4+Pj4+Pj4+Pj4+Pj4+Pjw8PDw8PDw8PDw8PDw8PDw8PDo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojg4ODg4ODg4ODg4ODg4ODg4ODY2NjY2NjY2NjY2NjY2NjY2NjQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDIyMjIyMjIyMjIyMjIyMjIyMjAwMDAwMDAwMDAwMDAwMDAwMC4uLi4uLi4uLi4uLi4uLi4uLiwsLCwsLCwsLCwsLCwsLCwsLCoqKioqKioqKioqKioqKioqKigoKCgoKCgoKCgoKCgoKCgoKCYmJiYmJiYmJiYmJiYmJiYmJiQkJCQkJCQkJCQkJCQkJCQkJCIiIiIiIiIiIiIiIiIiIiIiIiAgICAgICAgICAgICAgICAgIB+fn5+fn5+fn5+fn5+fn5+fn58fHx8fHx8fHx8fHx8fHx8fHx6enp6enp6enp6enp6enp6enp4eHh4eHh4eHh4eHh4eHh4eHh2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ0dHR0dHR0dHR0dHR0dHR0dHRycnJycnJycnJycnJycnJycnJwcHBwcHBwcHBwcHBwcHBwcHBubm5ubm5ubm5ubm5ubm5ubm5sbGxsbGxsbGxsbGxsbGxsbGxqampqampqampqampqampqampoaGhoaGhoaGhoaGhoaGhoaGhmZmZmZmZmZmZmZmZmZmZmZmZkZGRkZGRkZGRkZGRkZGRkZGRiYmJiYmJiYmJiYmJiYmJiYmJgYGBgYGBgYGBgYGBgYGBgYGBeXl5eXl5eXl5eXl5eXl5eXl5cXFxcXFxcXFxcXFxcXFxcXFxaWlpaWlpaWlpaWlpaWlpaWlpYWFhYWFhYWFhYWFhYWFhYWFhWVlZWVlZWVlZWVlZWVlZWVlZUVFRUVFRUVFRUVFRUVFRUVFRSUlJSUlJSUlJSUlJSUlJSUlJQUFBQUFBQUFBQUFBQUFBQUFBOTk5OTk5OTk5OTk5OTk5OTk5MTExMTExMTExMTExMTExMTExKSkpKSkpKSkpKSkpKSkpKSkpISEhISEhISEhISEhISEhISEhGRkZGRkZGRkZGRkZGRkZGRkZERERERERERERERERERERERERCQkJCQkJCQkJCQkJCQkJCQkJAQEBAQEBAQEBAQEBAQEBAQEA+Pj4+Pj4+Pj4+Pj4+Pj4+Pjw8PDw8PDw8PDw8PDw8PDw8PDo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojg4ODg4ODg4ODg4ODg4ODg4ODY2NjY2NjY2NjY2NjY2NjY2Ng==";
-
 // Fullscreen utility functions
 const toggleFullscreen = () => {
   if (!document.fullscreenElement) {
@@ -24,6 +21,25 @@ const toggleFullscreen = () => {
     document.webkitExitFullscreen?.() ||
     document.mozCancelFullScreen?.();
   }
+};
+
+// Web Audio API for reliable sound playback
+const createBingSound = (audioContext) => {
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5 note
+  oscillator.frequency.setValueAtTime(1100, audioContext.currentTime + 0.1); // Higher
+  oscillator.frequency.setValueAtTime(880, audioContext.currentTime + 0.2); // Back
+  
+  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+  
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + 0.5);
 };
 
 export default function KuechePage() {
@@ -40,18 +56,21 @@ export default function KuechePage() {
     const saved = localStorage.getItem('macher_sound_enabled');
     return saved !== null ? saved === 'true' : true; // Default: on
   });
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const previousOrderCount = useRef(0);
-  const audioRef = useRef(null);
+  const audioContextRef = useRef(null);
   const wakeLockRef = useRef(null);
 
-  // Initialize audio
-  useEffect(() => {
-    audioRef.current = new Audio(BING_SOUND);
-    audioRef.current.volume = 0.7;
-    return () => {
-      audioRef.current = null;
-    };
+  // Initialize AudioContext on first user interaction
+  const unlockAudio = useCallback(() => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume();
+    }
+    setAudioUnlocked(true);
   }, []);
 
   // Save sound preference
