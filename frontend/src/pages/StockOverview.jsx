@@ -2,12 +2,16 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Box, TrendingDown, AlertTriangle, Euro, Package, RefreshCw } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ArrowLeft, Box, TrendingDown, AlertTriangle, Euro, Package, RefreshCw, Trash2, Plus, RotateCcw } from "lucide-react";
 import LiveClock from "@/components/LiveClock";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -16,6 +20,21 @@ export default function StockOverview() {
   const navigate = useNavigate();
   const [stockData, setStockData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Reset Dialog State
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [resetType, setResetType] = useState("sales");
+  const [pinInput, setPinInput] = useState("");
+  const [pinError, setPinError] = useState("");
+  const [isResetting, setIsResetting] = useState(false);
+  
+  // Restock Dialog State
+  const [showRestockDialog, setShowRestockDialog] = useState(false);
+  const [restockArticle, setRestockArticle] = useState(null);
+  const [restockLarge, setRestockLarge] = useState("");
+  const [restockSmall, setRestockSmall] = useState("");
+  const [isRestocking, setIsRestocking] = useState(false);
+  const [updateInitial, setUpdateInitial] = useState(true);
 
   const auth = sessionStorage.getItem("adminAuth");
 
@@ -38,6 +57,75 @@ export default function StockOverview() {
       toast.error("Fehler beim Laden der Bestandsdaten");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Reset Stock
+  const handleReset = async () => {
+    setPinError("");
+    setIsResetting(true);
+    try {
+      const response = await axios.post(`${API}/admin/stock/reset`, {
+        pin: pinInput,
+        reset_type: resetType
+      }, {
+        headers: { Authorization: `Basic ${auth}` }
+      });
+      
+      toast.success(response.data.message);
+      setShowResetDialog(false);
+      setPinInput("");
+      setResetType("sales");
+      fetchStock();
+    } catch (error) {
+      if (error.response?.status === 403) {
+        setPinError("Falscher PIN");
+      } else {
+        toast.error("Fehler beim Zurücksetzen");
+      }
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  // Restock Article
+  const openRestockDialog = (item) => {
+    setRestockArticle(item);
+    setRestockLarge("");
+    setRestockSmall("");
+    setUpdateInitial(true);
+    setShowRestockDialog(true);
+  };
+
+  const handleRestock = async () => {
+    if (!restockArticle) return;
+    
+    const large = parseFloat(restockLarge) || 0;
+    const small = parseFloat(restockSmall) || 0;
+    
+    if (large === 0 && small === 0) {
+      toast.error("Bitte Menge eingeben");
+      return;
+    }
+    
+    setIsRestocking(true);
+    try {
+      await axios.put(`${API}/articles/${restockArticle.article_id}/stock`, {
+        large_units: large,
+        small_units: small,
+        mode: "add",
+        set_as_initial: updateInitial
+      }, {
+        headers: { Authorization: `Basic ${auth}` }
+      });
+      
+      toast.success(`${restockArticle.article_name} aufgestockt`);
+      setShowRestockDialog(false);
+      fetchStock();
+    } catch (error) {
+      toast.error("Fehler beim Aufstocken");
+    } finally {
+      setIsRestocking(false);
     }
   };
 
@@ -96,7 +184,16 @@ export default function StockOverview() {
           <LiveClock />
           <Button variant="outline" size="sm" onClick={fetchStock}>
             <RefreshCw className="w-4 h-4 mr-2" />
-            Aktualisieren
+            <span className="hidden sm:inline">Aktualisieren</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-destructive border-destructive/50 hover:bg-destructive/10"
+            onClick={() => setShowResetDialog(true)}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Reset</span>
           </Button>
         </div>
       </header>
@@ -201,6 +298,7 @@ export default function StockOverview() {
                       <TableHead className="hidden md:table-cell">Füllstand</TableHead>
                       <TableHead className="text-right hidden lg:table-cell">Umsatz</TableHead>
                       <TableHead className="text-center">Status</TableHead>
+                      <TableHead className="text-center">Aktion</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -279,6 +377,17 @@ export default function StockOverview() {
                               </Badge>
                             )}
                           </TableCell>
+                          <TableCell className="text-center">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openRestockDialog(item)}
+                              title="Bestand aufstocken"
+                              className="text-secondary hover:text-secondary"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       );
                     })}
@@ -289,6 +398,204 @@ export default function StockOverview() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Reset Dialog */}
+      <Dialog open={showResetDialog} onOpenChange={(open) => {
+        setShowResetDialog(open);
+        if (!open) {
+          setPinInput("");
+          setPinError("");
+          setResetType("sales");
+        }
+      }}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase flex items-center gap-2 text-destructive">
+              <RotateCcw className="w-5 h-5" />
+              Bestand zurücksetzen
+            </DialogTitle>
+            <DialogDescription>
+              Wähle aus, was zurückgesetzt werden soll.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <RadioGroup value={resetType} onValueChange={setResetType} className="space-y-3">
+              <div className="flex items-start space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50">
+                <RadioGroupItem value="sales" id="sales" className="mt-1" />
+                <Label htmlFor="sales" className="flex-1 cursor-pointer">
+                  <div className="font-medium">Nur Verkäufe zurücksetzen</div>
+                  <div className="text-sm text-muted-foreground">
+                    Setzt den aktuellen Bestand auf den Anfangsbestand zurück. 
+                    Die verkaufte Menge wird auf 0 gesetzt.
+                  </div>
+                </Label>
+              </div>
+              <div className="flex items-start space-x-3 p-3 rounded-lg border border-destructive/50 hover:bg-destructive/10">
+                <RadioGroupItem value="all" id="all" className="mt-1" />
+                <Label htmlFor="all" className="flex-1 cursor-pointer">
+                  <div className="font-medium text-destructive">Bestand und Verkäufe zurücksetzen</div>
+                  <div className="text-sm text-muted-foreground">
+                    Setzt ALLES auf 0: Anfangsbestand, aktueller Bestand und Verkäufe. 
+                    Der Bestand muss neu erfasst werden.
+                  </div>
+                </Label>
+              </div>
+            </RadioGroup>
+
+            <div className="space-y-2">
+              <Label htmlFor="pin">PIN eingeben</Label>
+              <Input
+                id="pin"
+                type="password"
+                placeholder="Reset-PIN"
+                value={pinInput}
+                onChange={(e) => setPinInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && pinInput && handleReset()}
+                className={pinError ? 'border-destructive' : ''}
+              />
+              {pinError && (
+                <p className="text-sm text-destructive">{pinError}</p>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowResetDialog(false)}
+            >
+              Abbrechen
+            </Button>
+            <Button
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={handleReset}
+              disabled={!pinInput || isResetting}
+            >
+              {isResetting ? "Wird zurückgesetzt..." : "Zurücksetzen"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Restock Dialog */}
+      <Dialog open={showRestockDialog} onOpenChange={(open) => {
+        setShowRestockDialog(open);
+        if (!open) {
+          setRestockArticle(null);
+          setRestockLarge("");
+          setRestockSmall("");
+        }
+      }}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase flex items-center gap-2 text-secondary">
+              <Plus className="w-5 h-5" />
+              Bestand aufstocken
+            </DialogTitle>
+            <DialogDescription>
+              {restockArticle?.article_name} - Ware nachkaufen
+            </DialogDescription>
+          </DialogHeader>
+          
+          {restockArticle && (
+            <div className="space-y-4">
+              {/* Current Stock Info */}
+              <div className="p-3 bg-muted rounded-lg text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Aktueller Bestand:</span>
+                  <span className="font-mono font-bold text-secondary">
+                    {formatStock(restockArticle)}
+                  </span>
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span className="text-muted-foreground">Anfangsbestand:</span>
+                  <span className="font-mono">
+                    {Math.round(restockArticle.initial_stock_sales_units)} VK
+                  </span>
+                </div>
+              </div>
+
+              {/* Input Fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="large">
+                    {restockArticle.stock_unit?.large_unit_name || "Großeinheiten"} hinzufügen
+                  </Label>
+                  <Input
+                    id="large"
+                    type="number"
+                    min="0"
+                    step="1"
+                    placeholder="0"
+                    value={restockLarge}
+                    onChange={(e) => setRestockLarge(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="small">
+                    {restockArticle.stock_unit?.small_unit_name || "Einzelne"} hinzufügen
+                  </Label>
+                  <Input
+                    id="small"
+                    type="number"
+                    min="0"
+                    step="1"
+                    placeholder="0"
+                    value={restockSmall}
+                    onChange={(e) => setRestockSmall(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Preview */}
+              {(parseFloat(restockLarge) > 0 || parseFloat(restockSmall) > 0) && (
+                <div className="p-3 bg-secondary/10 rounded-lg text-sm border border-secondary/30">
+                  <div className="font-medium text-secondary mb-1">Vorschau nach Aufstockung:</div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Neuer Bestand:</span>
+                    <span className="font-mono font-bold">
+                      {restockArticle.stock_large_units + (parseFloat(restockLarge) || 0)} {restockArticle.stock_unit?.large_unit_name || ""} 
+                      {" + "}
+                      {Math.round(restockArticle.stock_small_units + (parseFloat(restockSmall) || 0))} {restockArticle.stock_unit?.small_unit_name || "Stück"}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Update Initial Checkbox */}
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="updateInitial"
+                  checked={updateInitial}
+                  onChange={(e) => setUpdateInitial(e.target.checked)}
+                  className="rounded border-border"
+                />
+                <Label htmlFor="updateInitial" className="text-sm cursor-pointer">
+                  Auch zum Anfangsbestand hinzufügen (für korrekte Statistik)
+                </Label>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowRestockDialog(false)}
+            >
+              Abbrechen
+            </Button>
+            <Button
+              className="neon-secondary"
+              onClick={handleRestock}
+              disabled={isRestocking || (!parseFloat(restockLarge) && !parseFloat(restockSmall))}
+            >
+              {isRestocking ? "Wird aufgestockt..." : "Aufstocken"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
