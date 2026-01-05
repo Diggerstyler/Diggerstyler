@@ -424,71 +424,98 @@ class FestivalAPITester:
             print("❌ Cannot test stock reduction without stands")
             return
         
-        test_stand = stands[0]
-        stand_id = test_stand['id']
+        # Find a stand that includes our test article
+        test_stand = None
+        stand_id = None
+        
+        for stand in stands:
+            success, stand_articles = self.run_test(f"Check Stand {stand['name']} Articles", "GET", f"stands/{stand['id']}/articles", 200)
+            if success and stand_articles:
+                # Find our test article in this stand
+                test_article_in_stand = next((art for art in stand_articles if art['id'] == article_id), None)
+                if test_article_in_stand:
+                    test_stand = stand
+                    stand_id = stand['id']
+                    print(f"   Found test article in stand: {stand['name']}")
+                    break
+        
+        if not test_stand:
+            print("   ❌ Test article not found in any stand - checking if it's a category mismatch")
+            print(f"   Test article category: {test_article.get('category', 'unknown')}")
+            # Try the first stand anyway
+            test_stand = stands[0]
+            stand_id = test_stand['id']
         
         # Get stand articles to verify stock_info is included
         success, stand_articles = self.run_test("Get Stand Articles (Before Order)", "GET", f"stands/{stand_id}/articles", 200)
         if success and stand_articles:
             # Find our test article
             test_article_in_stand = next((art for art in stand_articles if art['id'] == article_id), None)
-            if test_article_in_stand and test_article_in_stand.get('stock_info'):
-                initial_total_units = test_article_in_stand['stock_info'].get('total_units', 0)
-                print(f"   Initial stock for test article: {initial_total_units} units")
-                
-                # Create order to reduce stock
-                test_order = {
-                    "stand_id": stand_id,
-                    "stand_name": test_stand["name"],
-                    "items": [
-                        {
-                            "article_id": article_id,
-                            "article_name": test_article["name"],
-                            "quantity": 3,  # Order 3 units
-                            "price": test_article["price"],
-                            "deposit_amount": 0,
-                            "is_deposit_return": False
-                        }
-                    ],
-                    "subtotal": test_article["price"] * 3,
-                    "deposit_total": 0,
-                    "deposit_return_total": 0,
-                    "total": test_article["price"] * 3,
-                    "created_by": "StockTestUser"
-                }
-                
-                success, created_order = self.run_test("Create Order for Stock Reduction", "POST", "orders", 200, test_order)
-                if success and created_order:
-                    print(f"   Created order with 3 units of test article")
+            if test_article_in_stand:
+                if test_article_in_stand.get('stock_info'):
+                    initial_total_units = test_article_in_stand['stock_info'].get('total_units', 0)
+                    print(f"   Initial stock for test article: {initial_total_units} units")
                     
-                    # Check stock after order
-                    success, stand_articles_after = self.run_test("Get Stand Articles (After Order)", "GET", f"stands/{stand_id}/articles", 200)
-                    if success and stand_articles_after:
-                        test_article_after = next((art for art in stand_articles_after if art['id'] == article_id), None)
-                        if test_article_after and test_article_after.get('stock_info'):
-                            final_total_units = test_article_after['stock_info'].get('total_units', 0)
-                            expected_final = initial_total_units - 3
-                            
-                            if final_total_units == expected_final:
-                                print(f"   ✅ Stock reduced correctly: {initial_total_units} → {final_total_units} units")
+                    # Create order to reduce stock
+                    test_order = {
+                        "stand_id": stand_id,
+                        "stand_name": test_stand["name"],
+                        "items": [
+                            {
+                                "article_id": article_id,
+                                "article_name": test_article["name"],
+                                "quantity": 3,  # Order 3 units
+                                "price": test_article["price"],
+                                "deposit_amount": 0,
+                                "is_deposit_return": False
+                            }
+                        ],
+                        "subtotal": test_article["price"] * 3,
+                        "deposit_total": 0,
+                        "deposit_return_total": 0,
+                        "total": test_article["price"] * 3,
+                        "created_by": "StockTestUser"
+                    }
+                    
+                    success, created_order = self.run_test("Create Order for Stock Reduction", "POST", "orders", 200, test_order)
+                    if success and created_order:
+                        print(f"   Created order with 3 units of test article")
+                        
+                        # Check stock after order
+                        success, stand_articles_after = self.run_test("Get Stand Articles (After Order)", "GET", f"stands/{stand_id}/articles", 200)
+                        if success and stand_articles_after:
+                            test_article_after = next((art for art in stand_articles_after if art['id'] == article_id), None)
+                            if test_article_after and test_article_after.get('stock_info'):
+                                final_total_units = test_article_after['stock_info'].get('total_units', 0)
+                                expected_final = initial_total_units - 3
+                                
+                                if final_total_units == expected_final:
+                                    print(f"   ✅ Stock reduced correctly: {initial_total_units} → {final_total_units} units")
+                                else:
+                                    print(f"   ❌ Stock reduction incorrect: expected {expected_final}, got {final_total_units}")
+                                    self.failed_tests.append({
+                                        "test": "Stock Reduction on Order",
+                                        "expected": expected_final,
+                                        "actual": final_total_units
+                                    })
                             else:
-                                print(f"   ❌ Stock reduction incorrect: expected {expected_final}, got {final_total_units}")
+                                print("   ❌ No stock_info found after order")
                                 self.failed_tests.append({
-                                    "test": "Stock Reduction on Order",
-                                    "expected": expected_final,
-                                    "actual": final_total_units
+                                    "test": "Stock Info After Order",
+                                    "error": "stock_info missing from article after order"
                                 })
-                        else:
-                            print("   ❌ No stock_info found after order")
-                            self.failed_tests.append({
-                                "test": "Stock Info After Order",
-                                "error": "stock_info missing from article after order"
-                            })
+                else:
+                    print("   ❌ Test article found but missing stock_info")
+                    self.failed_tests.append({
+                        "test": "Stock Info in Stand Articles",
+                        "error": "Test article found but missing stock_info"
+                    })
             else:
-                print("   ❌ Test article not found in stand articles or missing stock_info")
+                print("   ❌ Test article not found in stand articles")
+                print(f"   Available articles in stand: {[art['name'] for art in stand_articles[:5]]}")
                 self.failed_tests.append({
                     "test": "Stock Info in Stand Articles",
-                    "error": "Test article missing stock_info in stand articles"
+                    "error": "Test article not found in stand articles"
                 })
         
         # TEST 4: Test OneManShow (direct_complete) stock reduction
