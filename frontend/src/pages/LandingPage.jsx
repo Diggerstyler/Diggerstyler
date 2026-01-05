@@ -32,6 +32,7 @@ const toggleFullscreen = async () => {
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { settings } = useTheme();
   const [selectedStand, setSelectedStand] = useState(null);
   const [stands, setStands] = useState([]);
   const [showHelp, setShowHelp] = useState(false);
