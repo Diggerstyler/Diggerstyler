@@ -807,11 +807,35 @@ async def get_stand_articles(stand_id: str):
     deposit_groups = await db.deposit_groups.find({"active": True}, {"_id": 0}).to_list(100)
     deposit_map = {g["id"]: g for g in deposit_groups}
     
+    # Add stock unit info
+    stock_units = await db.stock_units.find({}, {"_id": 0}).to_list(100)
+    stock_unit_map = {u["id"]: u for u in stock_units}
+    
     for article in articles:
         if article.get("deposit_group_id") and article["deposit_group_id"] in deposit_map:
             article["deposit"] = deposit_map[article["deposit_group_id"]]
         else:
             article["deposit"] = None
+        
+        # Bestandsinformationen hinzufügen
+        if article.get("track_stock"):
+            stock_unit = stock_unit_map.get(article.get("stock_unit_id"))
+            if stock_unit:
+                stock_unit["sales_units_per_large"] = calculate_sales_units_per_large(stock_unit)
+            
+            total_stock = get_total_stock_units(article, stock_unit)
+            warning_threshold = article.get("stock_warning_threshold", 0)
+            
+            article["stock_info"] = {
+                "total_units": total_stock,
+                "is_low": total_stock <= warning_threshold and warning_threshold > 0,
+                "is_sold_out": total_stock <= 0,
+                "warning_threshold": warning_threshold,
+                "sold_out_behavior": article.get("stock_sold_out_behavior", "mark"),
+                "unit_name": stock_unit.get("small_unit_name", "Stück") if stock_unit else "Stück"
+            }
+        else:
+            article["stock_info"] = None
     
     return articles
 
