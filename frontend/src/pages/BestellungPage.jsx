@@ -327,6 +327,9 @@ export default function BestellungPage() {
       showOrderCompletionOverlay(response.data.order_number, total, savedCartItems);
       toast.success(`Bestellung #${response.data.order_number} erstellt!`);
       setCart([]);
+      
+      // Refresh articles to update stock info
+      refetchArticles();
     } catch (error) {
       toast.error("Fehler beim Erstellen der Bestellung");
     } finally {
