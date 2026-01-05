@@ -12,6 +12,8 @@ import StandManagement from "@/pages/StandManagement";
 import StationManagement from "@/pages/StationManagement";
 import StatsPage from "@/pages/StatsPage";
 import OrdersManagement from "@/pages/OrdersManagement";
+import StockOverview from "@/pages/StockOverview";
+import SettingsPage from "@/pages/SettingsPage";
 
 function App() {
   return (
@@ -31,6 +33,8 @@ function App() {
           <Route path="/admin/stations" element={<StationManagement />} />
           <Route path="/admin/stats" element={<StatsPage />} />
           <Route path="/admin/orders" element={<OrdersManagement />} />
+          <Route path="/admin/stock" element={<StockOverview />} />
+          <Route path="/admin/settings" element={<SettingsPage />} />
         </Routes>
       </BrowserRouter>
       <Toaster position="top-right" richColors />
