@@ -948,6 +948,58 @@ async def create_order(order: OrderCreate):
     order_dict["station_status"] = station_status
     order_dict["has_linked_articles"] = has_linked_articles
     
+    # === BESTANDSREDUKTION ===
+    # Reduziere Bestand für alle Artikel mit aktiver Bestandsverwaltung
+    stock_units_cache = {}
+    for item in new_items:
+        if item.get("is_deposit_return"):
+            continue
+        
+        article = await db.articles.find_one({"id": item["article_id"]}, {"_id": 0})
+        if not article or not article.get("track_stock"):
+            continue
+        
+        quantity = item["quantity"]
+        
+        # Hole Stock Unit (mit Cache)
+        unit_id = article.get("stock_unit_id")
+        if unit_id:
+            if unit_id not in stock_units_cache:
+                unit = await db.stock_units.find_one({"id": unit_id}, {"_id": 0})
+                if unit:
+                    unit["sales_units_per_large"] = calculate_sales_units_per_large(unit)
+                stock_units_cache[unit_id] = unit
+            stock_unit = stock_units_cache.get(unit_id)
+        else:
+            stock_unit = None
+        
+        # Berechne neue Bestandswerte
+        large_units = article.get("stock_large_units", 0)
+        small_units = article.get("stock_small_units", 0)
+        units_per_large = stock_unit["sales_units_per_large"] if stock_unit else 1
+        
+        # Gesamtbestand in Verkaufseinheiten
+        total_available = (large_units * units_per_large) + small_units
+        new_total = total_available - quantity
+        
+        if new_total < 0:
+            new_total = 0  # Nicht unter 0 gehen
+        
+        # Neue Werte berechnen (Großeinheiten + Rest)
+        if units_per_large > 0:
+            new_large = int(new_total // units_per_large)
+            new_small = new_total - (new_large * units_per_large)
+        else:
+            new_large = 0
+            new_small = new_total
+        
+        # Update Artikel
+        await db.articles.update_one(
+            {"id": item["article_id"]},
+            {"$set": {"stock_large_units": new_large, "stock_small_units": new_small}}
+        )
+    # === ENDE BESTANDSREDUKTION ===
+    
     order_obj = Order(
         order_number=order_number,
         status=initial_status,
