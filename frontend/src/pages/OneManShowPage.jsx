@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Minus, ShoppingCart, Beer, UtensilsCrossed, RotateCcw, X, Trash2, Zap, Check, Archive, Clock, Calculator, Maximize, Minimize, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Plus, Minus, ShoppingCart, Beer, UtensilsCrossed, RotateCcw, X, Trash2, Zap, Check, Archive, Clock, Calculator, Maximize, Minimize, AlertTriangle, Home } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import LiveClock from "@/components/LiveClock";
 
