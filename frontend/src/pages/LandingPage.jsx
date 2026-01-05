@@ -221,6 +221,7 @@ export default function LandingPage() {
           </h1>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
+          <LiveClock className="hidden sm:flex" />
           <Button 
             variant="ghost" 
             size="icon"
