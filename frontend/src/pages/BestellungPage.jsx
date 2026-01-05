@@ -144,6 +144,25 @@ export default function BestellungPage() {
     return num.toString().padStart(2, '0');
   };
 
+  // Function to refetch articles (for stock updates)
+  const refetchArticles = async () => {
+    try {
+      const [articlesRes, linkedRes] = await Promise.all([
+        axios.get(`${API}/stands/${standId}/articles`),
+        axios.get(`${API}/stands/${standId}/linked-articles`)
+      ]);
+      
+      const articlesWithLinked = articlesRes.data.map(article => ({
+        ...article,
+        linkedArticles: linkedRes.data.filter(l => l.main_article_id === article.id)
+      }));
+      
+      setArticles(articlesWithLinked);
+    } catch (error) {
+      console.error("Fehler beim Aktualisieren der Artikel");
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
