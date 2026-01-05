@@ -149,6 +149,49 @@ class StandUpdate(BaseModel):
     short_process: Optional[bool] = None
     active: Optional[bool] = None
 
+# Stock Unit Models (Einheiten-Vorlagen für Bestandsverwaltung)
+class StockUnit(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str  # z.B. "Kiste 24x0,5l", "Fass 30l"
+    unit_type: str  # "container" (Kiste/Karton) oder "barrel" (Fass)
+    # Für Container (Kisten):
+    units_per_container: int = 1  # z.B. 24 Flaschen pro Kiste
+    volume_per_unit: float = 0  # z.B. 0.5 für 0,5l Flasche (optional, für Info)
+    # Für Fässer:
+    total_volume_liters: float = 0  # z.B. 30 für 30l Fass
+    serving_size_liters: float = 0.5  # z.B. 0.5 für 0,5l Glas
+    loss_percent: float = 0  # z.B. 7 für 7% Schankverlust
+    # Berechnete Werte
+    sales_units_per_large: float = 0  # Wird berechnet: Verkaufseinheiten pro Großeinheit
+    large_unit_name: str = "Einheit"  # z.B. "Kiste", "Fass"
+    small_unit_name: str = "Stück"  # z.B. "Flasche", "Glas"
+    active: bool = True
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class StockUnitCreate(BaseModel):
+    name: str
+    unit_type: str  # "container" oder "barrel"
+    units_per_container: int = 1
+    volume_per_unit: float = 0
+    total_volume_liters: float = 0
+    serving_size_liters: float = 0.5
+    loss_percent: float = 0
+    large_unit_name: str = "Einheit"
+    small_unit_name: str = "Stück"
+
+class StockUnitUpdate(BaseModel):
+    name: Optional[str] = None
+    unit_type: Optional[str] = None
+    units_per_container: Optional[int] = None
+    volume_per_unit: Optional[float] = None
+    total_volume_liters: Optional[float] = None
+    serving_size_liters: Optional[float] = None
+    loss_percent: Optional[float] = None
+    large_unit_name: Optional[str] = None
+    small_unit_name: Optional[str] = None
+    active: Optional[bool] = None
+
 class Article(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -156,6 +199,15 @@ class Article(BaseModel):
     price: float
     category: str
     deposit_group_id: Optional[str] = None
+    # Bestandsverwaltung
+    track_stock: bool = False  # Bestandsverwaltung aktiv?
+    stock_unit_id: Optional[str] = None  # Verknüpfung zur Einheit
+    stock_large_units: float = 0  # Großeinheiten (z.B. Kisten/Fässer)
+    stock_small_units: float = 0  # Einzelne Verkaufseinheiten (z.B. lose Flaschen)
+    stock_initial_large: float = 0  # Anfangsbestand Großeinheiten
+    stock_initial_small: float = 0  # Anfangsbestand Kleineinheiten
+    stock_warning_threshold: int = 0  # Ab dieser Menge (VK-Einheiten) = "knapp"
+    stock_sold_out_behavior: str = "mark"  # "disable", "mark", "allow"
     active: bool = True
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
@@ -164,6 +216,12 @@ class ArticleCreate(BaseModel):
     price: float
     category: str
     deposit_group_id: Optional[str] = None
+    track_stock: bool = False
+    stock_unit_id: Optional[str] = None
+    stock_large_units: float = 0
+    stock_small_units: float = 0
+    stock_warning_threshold: int = 0
+    stock_sold_out_behavior: str = "mark"
     active: bool = True
 
 class ArticleUpdate(BaseModel):
@@ -171,6 +229,12 @@ class ArticleUpdate(BaseModel):
     price: Optional[float] = None
     category: Optional[str] = None
     deposit_group_id: Optional[str] = None
+    track_stock: Optional[bool] = None
+    stock_unit_id: Optional[str] = None
+    stock_large_units: Optional[float] = None
+    stock_small_units: Optional[float] = None
+    stock_warning_threshold: Optional[int] = None
+    stock_sold_out_behavior: Optional[str] = None
     active: Optional[bool] = None
 
 # Station Models (for Macher role)
