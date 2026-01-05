@@ -773,6 +773,281 @@ class FestivalAPITester:
         
         print("   🎯 New features testing completed")
 
+    def test_stock_management_features(self):
+        """Test new stock management features from review request"""
+        print("\n=== TESTING NEW STOCK MANAGEMENT FEATURES ===")
+        
+        # First, ensure we have test data
+        self.run_test("Seed Data for Stock Management", "POST", "seed", 200)
+        
+        # Get articles to find one with track_stock=true
+        success, articles = self.run_test("Get Articles for Stock Management", "GET", "articles", 200)
+        if not success or not articles:
+            print("❌ Cannot test stock management without articles")
+            return
+        
+        # Find or create an article with stock tracking
+        stock_article = None
+        for article in articles:
+            if article.get("track_stock"):
+                stock_article = article
+                break
+        
+        if not stock_article:
+            # Enable stock tracking on the first article
+            test_article = articles[0]
+            article_id = test_article['id']
+            
+            # First create a stock unit for testing
+            test_stock_unit = {
+                "name": "Test Kiste 24x0.5l",
+                "unit_type": "container",
+                "units_per_container": 24,
+                "volume_per_unit": 0.5,
+                "large_unit_name": "Kiste",
+                "small_unit_name": "Flasche"
+            }
+            
+            success, created_unit = self.run_test("Create Stock Unit for Testing", "POST", "stock-units", 200, test_stock_unit, auth=True)
+            if not success or not created_unit:
+                print("❌ Cannot create stock unit for testing")
+                return
+            
+            unit_id = created_unit.get('id')
+            
+            # Enable stock tracking
+            stock_settings = {
+                "track_stock": True,
+                "stock_unit_id": unit_id,
+                "stock_large_units": 5,
+                "stock_small_units": 10,
+                "stock_initial_large": 5,
+                "stock_initial_small": 10,
+                "stock_warning_threshold": 20
+            }
+            
+            success, updated_article = self.run_test("Enable Stock Tracking", "PUT", f"articles/{article_id}", 200, stock_settings, auth=True)
+            if success and updated_article:
+                stock_article = updated_article
+                print(f"   ✅ Enabled stock tracking on article: {stock_article['name']}")
+            else:
+                print("❌ Failed to enable stock tracking")
+                return
+        else:
+            article_id = stock_article['id']
+            print(f"   Found article with stock tracking: {stock_article['name']}")
+        
+        # TEST 1: Stock Restock API (Add Mode)
+        print("\n--- Testing Stock Restock API (Add Mode) ---")
+        
+        # Get current stock levels
+        success, current_article = self.run_test("Get Current Article Stock", "GET", f"articles", 200)
+        if success and current_article:
+            current_article = next((art for art in current_article if art['id'] == article_id), None)
+            if current_article:
+                initial_large = current_article.get('stock_large_units', 0)
+                initial_small = current_article.get('stock_small_units', 0)
+                print(f"   Current stock: {initial_large} large units, {initial_small} small units")
+                
+                # Test adding stock with mode="add"
+                add_stock_data = {
+                    "large_units": 2,
+                    "small_units": 5,
+                    "mode": "add",
+                    "set_as_initial": True
+                }
+                
+                success, updated_stock = self.run_test("Add Stock (Add Mode)", "PUT", f"articles/{article_id}/stock", 200, add_stock_data, auth=True)
+                if success and updated_stock:
+                    new_large = updated_stock.get('stock_large_units', 0)
+                    new_small = updated_stock.get('stock_small_units', 0)
+                    new_initial_large = updated_stock.get('stock_initial_large', 0)
+                    new_initial_small = updated_stock.get('stock_initial_small', 0)
+                    
+                    expected_large = initial_large + 2
+                    expected_small = initial_small + 5
+                    
+                    if new_large == expected_large and new_small == expected_small:
+                        print(f"   ✅ Stock added correctly: {initial_large}+2={new_large} large, {initial_small}+5={new_small} small")
+                        if add_stock_data["set_as_initial"]:
+                            expected_initial_large = current_article.get('stock_initial_large', 0) + 2
+                            expected_initial_small = current_article.get('stock_initial_small', 0) + 5
+                            if new_initial_large == expected_initial_large and new_initial_small == expected_initial_small:
+                                print(f"   ✅ Initial stock updated correctly: {new_initial_large} large, {new_initial_small} small")
+                            else:
+                                print(f"   ❌ Initial stock not updated correctly")
+                                self.failed_tests.append({
+                                    "test": "Stock Add Mode - Initial Stock Update",
+                                    "expected": f"{expected_initial_large} large, {expected_initial_small} small",
+                                    "actual": f"{new_initial_large} large, {new_initial_small} small"
+                                })
+                    else:
+                        print(f"   ❌ Stock not added correctly: expected {expected_large} large, {expected_small} small, got {new_large} large, {new_small} small")
+                        self.failed_tests.append({
+                            "test": "Stock Add Mode",
+                            "expected": f"{expected_large} large, {expected_small} small",
+                            "actual": f"{new_large} large, {new_small} small"
+                        })
+        
+        # TEST 2: Stock Reset API - Sales Only
+        print("\n--- Testing Stock Reset API - Sales Only ---")
+        
+        reset_sales_data = {
+            "pin": "200183",
+            "reset_type": "sales"
+        }
+        
+        success, reset_response = self.run_test("Reset Stock - Sales Only", "POST", "admin/stock/reset", 200, reset_sales_data, auth=True)
+        if success and reset_response:
+            articles_reset = reset_response.get('articles_reset', 0)
+            message = reset_response.get('message', '')
+            
+            if articles_reset > 0 and 'Verkäufe zurückgesetzt' in message:
+                print(f"   ✅ Sales reset successful: {articles_reset} articles reset")
+                
+                # Verify that current stock was reset to initial stock
+                success, reset_article = self.run_test("Verify Sales Reset", "GET", "articles", 200)
+                if success and reset_article:
+                    reset_article = next((art for art in reset_article if art['id'] == article_id), None)
+                    if reset_article:
+                        current_large = reset_article.get('stock_large_units', 0)
+                        current_small = reset_article.get('stock_small_units', 0)
+                        initial_large = reset_article.get('stock_initial_large', 0)
+                        initial_small = reset_article.get('stock_initial_small', 0)
+                        
+                        if current_large == initial_large and current_small == initial_small:
+                            print(f"   ✅ Current stock reset to initial: {current_large} large, {current_small} small")
+                        else:
+                            print(f"   ❌ Stock not reset correctly: current {current_large}/{current_small}, initial {initial_large}/{initial_small}")
+                            self.failed_tests.append({
+                                "test": "Stock Reset - Sales Only Verification",
+                                "error": "Current stock not reset to initial stock"
+                            })
+            else:
+                print(f"   ❌ Sales reset failed: {articles_reset} articles reset, message: {message}")
+                self.failed_tests.append({
+                    "test": "Stock Reset - Sales Only",
+                    "error": f"Unexpected response: {reset_response}"
+                })
+        
+        # TEST 3: Stock Reset API - All
+        print("\n--- Testing Stock Reset API - All ---")
+        
+        reset_all_data = {
+            "pin": "200183",
+            "reset_type": "all"
+        }
+        
+        success, reset_all_response = self.run_test("Reset Stock - All", "POST", "admin/stock/reset", 200, reset_all_data, auth=True)
+        if success and reset_all_response:
+            articles_reset = reset_all_response.get('articles_reset', 0)
+            message = reset_all_response.get('message', '')
+            
+            if articles_reset > 0 and 'komplett zurückgesetzt' in message:
+                print(f"   ✅ Complete reset successful: {articles_reset} articles reset")
+                
+                # Verify that all stock values are now 0
+                success, reset_all_article = self.run_test("Verify Complete Reset", "GET", "articles", 200)
+                if success and reset_all_article:
+                    reset_all_article = next((art for art in reset_all_article if art['id'] == article_id), None)
+                    if reset_all_article:
+                        current_large = reset_all_article.get('stock_large_units', 0)
+                        current_small = reset_all_article.get('stock_small_units', 0)
+                        initial_large = reset_all_article.get('stock_initial_large', 0)
+                        initial_small = reset_all_article.get('stock_initial_small', 0)
+                        
+                        if current_large == 0 and current_small == 0 and initial_large == 0 and initial_small == 0:
+                            print(f"   ✅ All stock values reset to 0")
+                        else:
+                            print(f"   ❌ Stock not completely reset: current {current_large}/{current_small}, initial {initial_large}/{initial_small}")
+                            self.failed_tests.append({
+                                "test": "Stock Reset - All Verification",
+                                "error": "Stock values not all reset to 0"
+                            })
+            else:
+                print(f"   ❌ Complete reset failed: {articles_reset} articles reset, message: {message}")
+                self.failed_tests.append({
+                    "test": "Stock Reset - All",
+                    "error": f"Unexpected response: {reset_all_response}"
+                })
+        
+        # Reset stock for next test
+        reset_stock_for_admin_test = {
+            "large_units": 3,
+            "small_units": 7,
+            "set_as_initial": True,
+            "mode": "set"
+        }
+        self.run_test("Reset Stock for Admin Test", "PUT", f"articles/{article_id}/stock", 200, reset_stock_for_admin_test, auth=True)
+        
+        # TEST 4: Admin Reset includes stock reset
+        print("\n--- Testing Admin Reset includes stock reset ---")
+        
+        admin_reset_data = {
+            "pin": "200183"
+        }
+        
+        success, admin_reset_response = self.run_test("Admin Reset", "POST", "admin/reset", 200, admin_reset_data, auth=True)
+        if success and admin_reset_response:
+            orders_deleted = admin_reset_response.get('orders_deleted', 0)
+            stock_reset = admin_reset_response.get('stock_reset', 0)
+            message = admin_reset_response.get('message', '')
+            
+            if 'stock_reset' in admin_reset_response and stock_reset > 0:
+                print(f"   ✅ Admin reset includes stock reset: {stock_reset} articles reset")
+                
+                # Verify that current stock was reset to initial stock
+                success, admin_reset_article = self.run_test("Verify Admin Reset Stock", "GET", "articles", 200)
+                if success and admin_reset_article:
+                    admin_reset_article = next((art for art in admin_reset_article if art['id'] == article_id), None)
+                    if admin_reset_article:
+                        current_large = admin_reset_article.get('stock_large_units', 0)
+                        current_small = admin_reset_article.get('stock_small_units', 0)
+                        initial_large = admin_reset_article.get('stock_initial_large', 0)
+                        initial_small = admin_reset_article.get('stock_initial_small', 0)
+                        
+                        if current_large == initial_large and current_small == initial_small:
+                            print(f"   ✅ Admin reset correctly reset stock to initial values")
+                        else:
+                            print(f"   ❌ Admin reset did not reset stock correctly")
+                            self.failed_tests.append({
+                                "test": "Admin Reset - Stock Reset Verification",
+                                "error": "Stock not reset to initial values"
+                            })
+            else:
+                print(f"   ❌ Admin reset response missing stock_reset: {admin_reset_response}")
+                self.failed_tests.append({
+                    "test": "Admin Reset - Stock Reset",
+                    "error": "stock_reset field missing or 0 in response"
+                })
+        
+        # TEST 5: Wrong PIN handling
+        print("\n--- Testing Wrong PIN handling ---")
+        
+        wrong_pin_data = {
+            "pin": "wrong_pin",
+            "reset_type": "sales"
+        }
+        
+        success, wrong_pin_response = self.run_test("Stock Reset with Wrong PIN", "POST", "admin/stock/reset", 403, wrong_pin_data, auth=True)
+        if success:
+            print("   ✅ Wrong PIN correctly rejected with 403 status")
+        else:
+            print("   ❌ Wrong PIN should return 403 status")
+        
+        # Test wrong PIN for admin reset
+        wrong_admin_pin_data = {
+            "pin": "wrong_pin"
+        }
+        
+        success, wrong_admin_pin_response = self.run_test("Admin Reset with Wrong PIN", "POST", "admin/reset", 403, wrong_admin_pin_data, auth=True)
+        if success:
+            print("   ✅ Wrong PIN for admin reset correctly rejected with 403 status")
+        else:
+            print("   ❌ Wrong PIN for admin reset should return 403 status")
+        
+        print("   🎯 Stock Management Features testing completed")
+
     def run_all_tests(self):
         """Run all test suites"""
         print("🚀 Starting Festival Order Management API Tests")
@@ -786,6 +1061,7 @@ class FestivalAPITester:
             self.test_statistics()
             self.test_stock_inventory_management()  # Add stock inventory management test
             self.test_new_features_message_456()  # Add new features test
+            self.test_stock_management_features()  # Add new stock management features test
             
         except KeyboardInterrupt:
             print("\n⚠️ Tests interrupted by user")
