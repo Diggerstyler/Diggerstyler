@@ -1247,10 +1247,13 @@ async def station_complete_order(order_id: str, request: StationCompleteRequest)
     updated = await db.orders.find_one({"id": order_id}, {"_id": 0})
     
     # Broadcast update
-    await manager.broadcast_to_stand(order["stand_id"], {
-        "type": "order_updated",
-        "order": updated
-    })
+    # Broadcast immediately (fire and forget)
+    async def broadcast_update():
+        await manager.broadcast_to_stand(order["stand_id"], {
+            "type": "order_updated",
+            "order": updated
+        })
+    asyncio.create_task(broadcast_update())
     
     return updated
 
