@@ -222,6 +222,8 @@ export default function AusgabePage() {
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto sm:ml-auto flex-wrap">
+          <LiveClock className="hidden sm:flex" />
+          
           <Badge variant="outline" className="text-sm sm:text-lg px-3 sm:px-4 py-1 sm:py-2 border-green-500 text-green-500 neon-success">
             {orders.length} Fertig
           </Badge>
