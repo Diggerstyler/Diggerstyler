@@ -5,23 +5,27 @@ import App from "@/App";
 
 // ============================================================
 // CRITICAL: ResizeObserver Error Suppression
-// This MUST run before any other code to prevent React Error Overlay
+// This MUST run IMMEDIATELY before any other code
 // ============================================================
 
-// 1. Patch ResizeObserver itself
-if (typeof window !== 'undefined') {
-  const OriginalResizeObserver = window.ResizeObserver;
+// Immediately suppress ResizeObserver errors before React loads
+(function() {
+  if (typeof window === 'undefined') return;
   
+  // Store if we should suppress error overlay
+  window.__SUPPRESS_RESIZE_OBSERVER__ = true;
+
+  // 1. Patch ResizeObserver constructor
+  const OriginalResizeObserver = window.ResizeObserver;
   if (OriginalResizeObserver) {
-    window.ResizeObserver = class PatchedResizeObserver extends OriginalResizeObserver {
+    window.ResizeObserver = class extends OriginalResizeObserver {
       constructor(callback) {
         super((entries, observer) => {
-          // Use requestAnimationFrame to batch notifications and prevent loop errors
           window.requestAnimationFrame(() => {
             try {
               callback(entries, observer);
             } catch (e) {
-              // Silently ignore errors in callback
+              // Silently ignore
             }
           });
         });
@@ -29,59 +33,108 @@ if (typeof window !== 'undefined') {
     };
   }
 
-  // 2. Override console.error to filter ResizeObserver messages
+  // 2. Suppress console.error for ResizeObserver
   const originalConsoleError = console.error;
-  console.error = (...args) => {
-    const message = args[0]?.toString() || '';
-    if (message.includes('ResizeObserver')) {
-      return; // Suppress ResizeObserver errors in console
+  console.error = function(...args) {
+    const message = args.join(' ');
+    if (message.includes('ResizeObserver') || 
+        message.includes('loop completed') ||
+        message.includes('loop limit')) {
+      return;
     }
-    originalConsoleError.apply(console, args);
+    return originalConsoleError.apply(console, args);
   };
 
-  // 3. Global error handler - catches synchronous errors
+  // 3. Global onerror handler
+  const originalOnerror = window.onerror;
   window.onerror = function(message, source, lineno, colno, error) {
-    if (message && (
-      message.toString().includes('ResizeObserver') ||
-      message.toString().includes('loop completed') ||
-      message.toString().includes('loop limit exceeded')
-    )) {
-      return true; // Prevent default handling
+    const msg = String(message || '');
+    if (msg.includes('ResizeObserver') || 
+        msg.includes('loop completed') ||
+        msg.includes('loop limit')) {
+      return true;
     }
-    return false;
+    return originalOnerror ? originalOnerror.apply(this, arguments) : false;
   };
 
-  // 4. Error event listener - catches before React Error Overlay
-  window.addEventListener('error', (event) => {
-    if (event.message && (
-      event.message.includes('ResizeObserver') ||
-      event.message.includes('loop completed') ||
-      event.message.includes('loop limit exceeded')
-    )) {
+  // 4. Error event listener (capture phase)
+  window.addEventListener('error', function(event) {
+    const msg = event.message || '';
+    if (msg.includes('ResizeObserver') || 
+        msg.includes('loop completed') ||
+        msg.includes('loop limit')) {
       event.stopImmediatePropagation();
       event.preventDefault();
       return true;
     }
-  }, true); // Use capture phase to catch before React
+  }, true);
 
-  // 5. Unhandled promise rejection handler
-  window.addEventListener('unhandledrejection', (event) => {
-    const reason = event.reason?.message || event.reason?.toString() || '';
-    if (reason.includes('ResizeObserver')) {
+  // 5. Unhandled rejection handler
+  window.addEventListener('unhandledrejection', function(event) {
+    const reason = event.reason;
+    const msg = reason?.message || reason?.toString?.() || '';
+    if (msg.includes('ResizeObserver')) {
       event.preventDefault();
+      return;
     }
   });
 
-  // 6. Override ErrorEvent to filter ResizeObserver before it reaches React
-  // This is the nuclear option for React's error overlay
-  const originalDispatchEvent = EventTarget.prototype.dispatchEvent;
-  EventTarget.prototype.dispatchEvent = function(event) {
-    if (event.type === 'error' && event.message?.includes('ResizeObserver')) {
-      return true;
-    }
-    return originalDispatchEvent.call(this, event);
-  };
-}
+  // 6. CRITICAL: Disable React Error Overlay for ResizeObserver
+  // This intercepts the iframe that React Dev Overlay uses
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      mutation.addedNodes.forEach(function(node) {
+        if (node.tagName === 'IFRAME' && node.id === 'react-refresh-overlay') {
+          // Check if the error is a ResizeObserver error
+          setTimeout(() => {
+            try {
+              const iframeDoc = node.contentDocument || node.contentWindow?.document;
+              if (iframeDoc) {
+                const bodyText = iframeDoc.body?.innerText || '';
+                if (bodyText.includes('ResizeObserver') || 
+                    bodyText.includes('loop completed') ||
+                    bodyText.includes('loop limit')) {
+                  node.remove();
+                }
+              }
+            } catch (e) {
+              // Cross-origin, try removing anyway if we have flag set
+              if (window.__SUPPRESS_RESIZE_OBSERVER__) {
+                // Check parent document for error
+                const overlays = document.querySelectorAll('[class*="error-overlay"], [id*="error"]');
+                overlays.forEach(el => {
+                  if (el.textContent?.includes('ResizeObserver')) {
+                    el.remove();
+                  }
+                });
+              }
+            }
+          }, 100);
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body || document.documentElement, {
+    childList: true,
+    subtree: true
+  });
+
+  // 7. Also try to catch the webpack overlay
+  if (typeof __webpack_dev_server_client__ !== 'undefined') {
+    try {
+      const originalShowOverlay = window.__REACT_DEVTOOLS_GLOBAL_HOOK__?.showOverlay;
+      if (originalShowOverlay) {
+        window.__REACT_DEVTOOLS_GLOBAL_HOOK__.showOverlay = function(error) {
+          if (error?.message?.includes('ResizeObserver')) {
+            return;
+          }
+          return originalShowOverlay.apply(this, arguments);
+        };
+      }
+    } catch (e) {}
+  }
+})();
 
 // ============================================================
 // React Application Initialization
