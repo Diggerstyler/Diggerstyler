@@ -4,6 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide React Error Overlay for ResizeObserver errors */
+/* This is a CSS-based fallback to hide the overlay */
+iframe#webpack-dev-server-client-overlay,
+#webpack-dev-server-client-overlay {
+  display: none !important;
+}
+
 @layer base {
     :root {
         --background: 240 10% 3.9%;
