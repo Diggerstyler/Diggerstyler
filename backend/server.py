@@ -17,11 +17,24 @@ import asyncio
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+# MongoDB Connection with optimized pool settings for concurrent users
 mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
+client = AsyncIOMotorClient(
+    mongo_url,
+    maxPoolSize=50,  # Support up to 50 concurrent connections
+    minPoolSize=10,  # Keep 10 connections ready
+    maxIdleTimeMS=30000,  # Close idle connections after 30s
+    serverSelectionTimeoutMS=5000,  # 5s timeout for server selection
+    connectTimeoutMS=10000,  # 10s connection timeout
+    retryWrites=True,  # Automatically retry failed writes
+)
 db = client[os.environ['DB_NAME']]
 
-app = FastAPI()
+app = FastAPI(
+    title="Karnbachs Event OS",
+    description="Festival Order Management System",
+    version="1.0.0"
+)
 api_router = APIRouter(prefix="/api")
 security = HTTPBasic()
 
