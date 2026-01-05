@@ -605,6 +605,7 @@ class StockAdjustment(BaseModel):
     large_units: Optional[float] = None
     small_units: Optional[float] = None
     set_as_initial: bool = False  # Setzt auch als Anfangsbestand
+    mode: str = "set"  # "set" = Wert setzen, "add" = Aufstocken (hinzufügen)
 
 @api_router.put("/articles/{article_id}/stock")
 async def adjust_article_stock(article_id: str, adjustment: StockAdjustment, username: str = Depends(verify_admin)):
@@ -613,14 +614,31 @@ async def adjust_article_stock(article_id: str, adjustment: StockAdjustment, use
         raise HTTPException(status_code=404, detail="Artikel nicht gefunden")
     
     update_data = {}
-    if adjustment.large_units is not None:
-        update_data["stock_large_units"] = adjustment.large_units
-        if adjustment.set_as_initial:
-            update_data["stock_initial_large"] = adjustment.large_units
-    if adjustment.small_units is not None:
-        update_data["stock_small_units"] = adjustment.small_units
-        if adjustment.set_as_initial:
-            update_data["stock_initial_small"] = adjustment.small_units
+    
+    if adjustment.mode == "add":
+        # Aufstocken: Werte zum bestehenden Bestand hinzufügen
+        if adjustment.large_units is not None and adjustment.large_units > 0:
+            current_large = article.get("stock_large_units", 0)
+            update_data["stock_large_units"] = current_large + adjustment.large_units
+            if adjustment.set_as_initial:
+                current_initial_large = article.get("stock_initial_large", 0)
+                update_data["stock_initial_large"] = current_initial_large + adjustment.large_units
+        if adjustment.small_units is not None and adjustment.small_units > 0:
+            current_small = article.get("stock_small_units", 0)
+            update_data["stock_small_units"] = current_small + adjustment.small_units
+            if adjustment.set_as_initial:
+                current_initial_small = article.get("stock_initial_small", 0)
+                update_data["stock_initial_small"] = current_initial_small + adjustment.small_units
+    else:
+        # Standard: Wert setzen
+        if adjustment.large_units is not None:
+            update_data["stock_large_units"] = adjustment.large_units
+            if adjustment.set_as_initial:
+                update_data["stock_initial_large"] = adjustment.large_units
+        if adjustment.small_units is not None:
+            update_data["stock_small_units"] = adjustment.small_units
+            if adjustment.set_as_initial:
+                update_data["stock_initial_small"] = adjustment.small_units
     
     if update_data:
         await db.articles.update_one({"id": article_id}, {"$set": update_data})
