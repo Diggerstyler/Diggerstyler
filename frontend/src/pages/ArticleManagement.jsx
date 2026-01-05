@@ -264,7 +264,7 @@ export default function ArticleManagement() {
     });
     
     return result;
-  }, [articles, articleSearch, articleCategoryFilter, articleDepositFilter, articleStockFilter, articleStatusFilter, articleSort, depositGroups]);
+  }, [articles, articleSearch, articleCategoryFilter, articleDepositFilter, articleStockFilter, articleStatusFilter, articleSort, depositGroups, stockUnits, isLowStock, isSoldOut, getTotalStock]);
 
   // === Sorting & Filtering - Stock Units ===
   const toggleUnitSort = (field) => {
