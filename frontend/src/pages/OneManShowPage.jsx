@@ -645,32 +645,59 @@ export default function OneManShowPage() {
           )}
           
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
-            {filteredArticles.map(article => (
-              <Card
-                key={article.id}
-                className="bg-card border-border cursor-pointer hover:border-green-500/50 transition-colors active:scale-95"
-                onClick={() => addToCart(article)}
-              >
-                <CardContent className="p-3 sm:p-4">
-                  <div className="flex flex-col h-full">
-                    <div className="flex gap-1 mb-2 flex-wrap">
-                      <Badge variant="outline" className="text-xs">
-                        {article.category === "getraenke" ? "Getränk" : "Speise"}
-                      </Badge>
-                      {article.deposit && (
-                        <Badge variant="outline" className="text-xs border-green-500/50 text-green-500">
-                          +{article.deposit.amount.toFixed(2)}€
+            {filteredArticles.map(article => {
+              const stockInfo = article.stock_info;
+              const isLow = stockInfo?.is_low && !stockInfo?.is_sold_out;
+              const isSoldOut = stockInfo?.is_sold_out;
+              const isDisabled = isSoldOut && stockInfo?.sold_out_behavior === 'disable';
+              
+              return (
+                <Card
+                  key={article.id}
+                  className={`bg-card border-border cursor-pointer transition-colors active:scale-95 ${
+                    isDisabled ? 'opacity-40 cursor-not-allowed' :
+                    isSoldOut ? 'border-destructive/50 hover:border-destructive' :
+                    isLow ? 'border-yellow-500/50 hover:border-yellow-500' :
+                    'hover:border-green-500/50'
+                  }`}
+                  onClick={() => !isDisabled && addToCart(article)}
+                >
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex flex-col h-full">
+                      <div className="flex gap-1 mb-2 flex-wrap">
+                        <Badge variant="outline" className="text-xs">
+                          {article.category === "getraenke" ? "Getränk" : "Speise"}
                         </Badge>
+                        {article.deposit && (
+                          <Badge variant="outline" className="text-xs border-green-500/50 text-green-500">
+                            +{article.deposit.amount.toFixed(2)}€
+                          </Badge>
+                        )}
+                      </div>
+                      <h3 className="font-semibold text-sm sm:text-base mb-2 line-clamp-2">{article.name}</h3>
+                      
+                      {/* Stock Warning */}
+                      {stockInfo && (isLow || isSoldOut) && (
+                        <div className={`flex items-center gap-1 text-xs mb-2 ${isSoldOut ? 'text-destructive' : 'text-yellow-500'}`}>
+                          <AlertTriangle className="w-3 h-3" />
+                          {isSoldOut ? (
+                            <span className="font-medium">Ausverkauft</span>
+                          ) : (
+                            <span>Noch {Math.round(stockInfo.total_units)} {stockInfo.unit_name}</span>
+                          )}
+                        </div>
                       )}
+                      
+                      <p className={`font-mono text-base sm:text-lg mt-auto ${
+                        isSoldOut ? 'text-destructive' : 'text-primary'
+                      }`}>
+                        {article.price.toFixed(2)} €
+                      </p>
                     </div>
-                    <h3 className="font-semibold text-sm sm:text-base mb-2 line-clamp-2">{article.name}</h3>
-                    <p className="font-mono text-base sm:text-lg text-primary mt-auto">
-                      {article.price.toFixed(2)} €
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </main>
 
