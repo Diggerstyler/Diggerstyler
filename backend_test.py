@@ -29,6 +29,12 @@ class FestivalAPITester:
         self.tests_run += 1
         print(f"\n🔍 Testing {name}...")
         
+        # Handle multiple expected status codes
+        if isinstance(expected_status, list):
+            expected_statuses = expected_status
+        else:
+            expected_statuses = [expected_status]
+        
         try:
             if method == 'GET':
                 response = requests.get(url, headers=headers, timeout=10)
@@ -39,7 +45,7 @@ class FestivalAPITester:
             elif method == 'DELETE':
                 response = requests.delete(url, headers=headers, timeout=10)
 
-            success = response.status_code == expected_status
+            success = response.status_code in expected_statuses
             if success:
                 self.tests_passed += 1
                 print(f"✅ Passed - Status: {response.status_code}")
@@ -48,11 +54,11 @@ class FestivalAPITester:
                 except:
                     return True, {}
             else:
-                print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
+                print(f"❌ Failed - Expected {expected_statuses}, got {response.status_code}")
                 print(f"   Response: {response.text[:200]}")
                 self.failed_tests.append({
                     "test": name,
-                    "expected": expected_status,
+                    "expected": expected_statuses,
                     "actual": response.status_code,
                     "response": response.text[:200]
                 })
