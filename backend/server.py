@@ -468,7 +468,11 @@ async def get_settings():
         settings = {
             "id": "global",
             "timezone": "Europe/Berlin",
-            "event_name": "Karnbachs Event OS"
+            "event_name": "Karnbachs Event OS",
+            "logo_url": None,
+            "primary_color": "#a855f7",    # Purple
+            "secondary_color": "#22c55e",   # Green
+            "accent_color": "#eab308"       # Yellow
         }
         await db.settings.insert_one(settings)
     return settings
@@ -476,7 +480,7 @@ async def get_settings():
 @api_router.put("/settings")
 async def update_settings(settings: dict, username: str = Depends(verify_admin)):
     """Update settings"""
-    allowed_fields = ["timezone", "event_name"]
+    allowed_fields = ["timezone", "event_name", "logo_url", "primary_color", "secondary_color", "accent_color"]
     update_data = {k: v for k, v in settings.items() if k in allowed_fields}
     
     if not update_data:
@@ -490,6 +494,44 @@ async def update_settings(settings: dict, username: str = Depends(verify_admin))
     
     updated = await db.settings.find_one({"id": "global"}, {"_id": 0})
     return updated
+
+@api_router.post("/settings/logo")
+async def upload_logo(file: UploadFile = File(...), username: str = Depends(verify_admin)):
+    """Upload event logo"""
+    import os
+    import base64
+    
+    # Check file type
+    allowed_types = ["image/png", "image/jpeg", "image/jpg", "image/svg+xml", "image/webp"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Ungültiger Dateityp. Erlaubt: PNG, JPG, SVG, WebP")
+    
+    # Check file size (max 2MB)
+    content = await file.read()
+    if len(content) > 2 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Datei zu groß. Maximal 2MB erlaubt.")
+    
+    # Convert to base64 data URL
+    base64_content = base64.b64encode(content).decode('utf-8')
+    data_url = f"data:{file.content_type};base64,{base64_content}"
+    
+    # Save to settings
+    await db.settings.update_one(
+        {"id": "global"},
+        {"$set": {"logo_url": data_url}},
+        upsert=True
+    )
+    
+    return {"logo_url": data_url, "message": "Logo erfolgreich hochgeladen"}
+
+@api_router.delete("/settings/logo")
+async def delete_logo(username: str = Depends(verify_admin)):
+    """Delete event logo"""
+    await db.settings.update_one(
+        {"id": "global"},
+        {"$set": {"logo_url": None}}
+    )
+    return {"message": "Logo gelöscht"}
 
 @api_router.get("/timezones")
 async def get_available_timezones():
