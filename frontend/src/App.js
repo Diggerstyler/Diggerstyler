@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import LandingPage from "@/pages/LandingPage";
 import BestellungPage from "@/pages/BestellungPage";
 import KuechePage from "@/pages/KuechePage";
@@ -17,28 +18,30 @@ import SettingsPage from "@/pages/SettingsPage";
 
 function App() {
   return (
-    <div className="min-h-screen bg-background noise-bg">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/bestellung/:standId/:standType" element={<BestellungPage />} />
-          <Route path="/kueche/:standId/:standType" element={<KuechePage />} />
-          <Route path="/kueche/:standId/:standType/:stationId" element={<KuechePage />} />
-          <Route path="/ausgabe/:standId/:standType" element={<AusgabePage />} />
-          <Route path="/onemanshow/:standId/:standType" element={<OneManShowPage />} />
-          <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/articles" element={<ArticleManagement />} />
-          <Route path="/admin/stands" element={<StandManagement />} />
-          <Route path="/admin/stations" element={<StationManagement />} />
-          <Route path="/admin/stats" element={<StatsPage />} />
-          <Route path="/admin/orders" element={<OrdersManagement />} />
-          <Route path="/admin/stock" element={<StockOverview />} />
-          <Route path="/admin/settings" element={<SettingsPage />} />
-        </Routes>
-      </BrowserRouter>
-      <Toaster position="top-right" richColors />
-    </div>
+    <ErrorBoundary>
+      <div className="min-h-screen bg-background noise-bg">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/bestellung/:standId/:standType" element={<BestellungPage />} />
+            <Route path="/kueche/:standId/:standType" element={<KuechePage />} />
+            <Route path="/kueche/:standId/:standType/:stationId" element={<KuechePage />} />
+            <Route path="/ausgabe/:standId/:standType" element={<AusgabePage />} />
+            <Route path="/onemanshow/:standId/:standType" element={<OneManShowPage />} />
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/articles" element={<ArticleManagement />} />
+            <Route path="/admin/stands" element={<StandManagement />} />
+            <Route path="/admin/stations" element={<StationManagement />} />
+            <Route path="/admin/stats" element={<StatsPage />} />
+            <Route path="/admin/orders" element={<OrdersManagement />} />
+            <Route path="/admin/stock" element={<StockOverview />} />
+            <Route path="/admin/settings" element={<SettingsPage />} />
+          </Routes>
+        </BrowserRouter>
+        <Toaster position="top-right" richColors />
+      </div>
+    </ErrorBoundary>
   );
 }
 
