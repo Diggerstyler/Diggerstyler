@@ -40,6 +40,7 @@ async def create_indexes():
         # Articles collection
         await db.articles.create_index("active")
         await db.articles.create_index("category")
+        await db.articles.create_index("track_stock")
         
         # Stands collection
         await db.stands.create_index("active")
@@ -51,6 +52,9 @@ async def create_indexes():
         # Linked articles collection
         await db.linked_articles.create_index("main_article_id")
         await db.linked_articles.create_index("station_id")
+        
+        # Stock units collection
+        await db.stock_units.create_index("active")
         
         logging.info("Database indexes created successfully")
     except Exception as e:
