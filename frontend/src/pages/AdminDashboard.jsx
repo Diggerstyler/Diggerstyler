@@ -185,8 +185,10 @@ export default function AdminDashboard() {
               onClick={() => navigate("/admin/stands")}
               data-testid="stands-nav-btn"
               className="h-8 px-2"
+              title="Stände"
             >
               <Store className="w-4 h-4" />
+              <span className="hidden sm:inline ml-1">Stände</span>
             </Button>
             <Button
               variant="ghost"
@@ -194,9 +196,10 @@ export default function AdminDashboard() {
               onClick={() => navigate("/admin/articles")}
               data-testid="articles-nav-btn"
               className="h-8 px-2"
+              title="Artikel"
             >
               <Package className="w-4 h-4" />
-              <span className="hidden sm:inline">Artikel</span>
+              <span className="hidden sm:inline ml-1">Artikel</span>
             </Button>
             <Button
               variant="ghost"
@@ -204,9 +207,10 @@ export default function AdminDashboard() {
               onClick={() => navigate("/admin/stock")}
               data-testid="stock-nav-btn"
               className="h-8 px-2"
-              title="Bestandsübersicht"
+              title="Bestand"
             >
               <Box className="w-4 h-4" />
+              <span className="hidden sm:inline ml-1">Bestand</span>
             </Button>
             <Button
               variant="ghost"
@@ -214,9 +218,10 @@ export default function AdminDashboard() {
               onClick={() => navigate("/admin/stations")}
               data-testid="stations-nav-btn"
               className="h-8 px-2"
-              title="Stationen & Verknüpfungen"
+              title="Stationen"
             >
               <Layers className="w-4 h-4" />
+              <span className="hidden sm:inline ml-1">Stationen</span>
             </Button>
             <Button
               variant="ghost"
@@ -224,8 +229,10 @@ export default function AdminDashboard() {
               onClick={() => navigate("/admin/stats")}
               data-testid="stats-nav-btn"
               className="h-8 px-2"
+              title="Statistik"
             >
               <BarChart3 className="w-4 h-4" />
+              <span className="hidden sm:inline ml-1">Statistik</span>
             </Button>
             <Button
               variant="ghost"
@@ -236,6 +243,7 @@ export default function AdminDashboard() {
               title="Einstellungen"
             >
               <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline ml-1">Einstellungen</span>
             </Button>
             <Button
               variant="ghost"
@@ -243,9 +251,10 @@ export default function AdminDashboard() {
               onClick={() => navigate("/admin/orders")}
               data-testid="orders-nav-btn"
               className="h-8 px-2"
-              title="Alle Rechnungen"
+              title="Bestellungen"
             >
               <FileText className="w-4 h-4" />
+              <span className="hidden sm:inline ml-1">Bestellungen</span>
             </Button>
             <Button
               variant="ghost"
@@ -254,8 +263,10 @@ export default function AdminDashboard() {
               disabled={isExporting}
               data-testid="export-btn"
               className="h-8 px-2 text-green-500"
+              title="Export"
             >
               <Download className="w-4 h-4" />
+              <span className="hidden lg:inline ml-1">Export</span>
             </Button>
             <Button
               variant="ghost"
@@ -263,8 +274,10 @@ export default function AdminDashboard() {
               onClick={() => setShowResetDialog(true)}
               data-testid="reset-btn"
               className="h-8 px-2 text-destructive"
+              title="Reset"
             >
               <Trash2 className="w-4 h-4" />
+              <span className="hidden lg:inline ml-1">Reset</span>
             </Button>
             <Button
               variant="ghost"
@@ -272,8 +285,10 @@ export default function AdminDashboard() {
               onClick={() => setShowHelp(true)}
               data-testid="help-btn"
               className="h-8 px-2"
+              title="Hilfe"
             >
               <HelpCircle className="w-4 h-4" />
+              <span className="hidden lg:inline ml-1">Hilfe</span>
             </Button>
             <Button
               variant="ghost"
