@@ -706,40 +706,67 @@ export default function BestellungPage() {
           
           {/* Articles Grid - optimized for landscape */}
           <div className="grid grid-cols-2 landscape:grid-cols-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1.5 sm:gap-2 lg:gap-4">
-            {filteredArticles.map(article => (
-              <Card
-                key={article.id}
-                className="bg-card border-border cursor-pointer hover:border-primary/50 transition-colors active:scale-95"
-                onClick={() => addToCart(article)}
-                data-testid={`article-${article.id}`}
-              >
-                <CardContent className="p-2 sm:p-3 lg:p-4">
-                  <div className="flex flex-col h-full">
-                    {/* Compact badges for mobile */}
-                    <div className="flex gap-1 mb-1 flex-wrap">
-                      <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">
-                        {article.category === "getraenke" ? "Getränk" : "Speise"}
-                      </Badge>
-                      {article.deposit && (
-                        <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-green-500/50 text-green-500">
-                          +{article.deposit.amount.toFixed(2)}€
+            {filteredArticles.map(article => {
+              const stockInfo = article.stock_info;
+              const isLow = stockInfo?.is_low && !stockInfo?.is_sold_out;
+              const isSoldOut = stockInfo?.is_sold_out;
+              const isDisabled = isSoldOut && stockInfo?.sold_out_behavior === 'disable';
+              
+              return (
+                <Card
+                  key={article.id}
+                  className={`bg-card border-border cursor-pointer transition-colors active:scale-95 ${
+                    isDisabled ? 'opacity-40 cursor-not-allowed' :
+                    isSoldOut ? 'border-destructive/50 hover:border-destructive' :
+                    isLow ? 'border-yellow-500/50 hover:border-yellow-500' :
+                    'hover:border-primary/50'
+                  }`}
+                  onClick={() => !isDisabled && addToCart(article)}
+                  data-testid={`article-${article.id}`}
+                >
+                  <CardContent className="p-2 sm:p-3 lg:p-4">
+                    <div className="flex flex-col h-full">
+                      {/* Compact badges for mobile */}
+                      <div className="flex gap-1 mb-1 flex-wrap">
+                        <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">
+                          {article.category === "getraenke" ? "Getränk" : "Speise"}
                         </Badge>
+                        {article.deposit && (
+                          <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-green-500/50 text-green-500">
+                            +{article.deposit.amount.toFixed(2)}€
+                          </Badge>
+                        )}
+                      </div>
+                      <h3 className="font-semibold text-xs sm:text-sm lg:text-base mb-0.5 line-clamp-2">{article.name}</h3>
+                      {/* Verknüpfte Artikel klein anzeigen */}
+                      {article.linkedArticles?.length > 0 && (
+                        <p className="text-[10px] text-muted-foreground mb-1 line-clamp-1">
+                          + {article.linkedArticles.map(l => l.linked_article_name).join(', ')}
+                        </p>
                       )}
-                    </div>
-                    <h3 className="font-semibold text-xs sm:text-sm lg:text-base mb-0.5 line-clamp-2">{article.name}</h3>
-                    {/* Verknüpfte Artikel klein anzeigen */}
-                    {article.linkedArticles?.length > 0 && (
-                      <p className="text-[10px] text-muted-foreground mb-1 line-clamp-1">
-                        + {article.linkedArticles.map(l => l.linked_article_name).join(', ')}
+                      
+                      {/* Stock Warning */}
+                      {stockInfo && (isLow || isSoldOut) && (
+                        <div className={`flex items-center gap-1 text-[10px] mb-1 ${isSoldOut ? 'text-destructive' : 'text-yellow-500'}`}>
+                          <AlertTriangle className="w-3 h-3" />
+                          {isSoldOut ? (
+                            <span className="font-medium">Ausverkauft</span>
+                          ) : (
+                            <span>Noch {Math.round(stockInfo.total_units)} {stockInfo.unit_name}</span>
+                          )}
+                        </div>
+                      )}
+                      
+                      <p className={`font-mono text-sm sm:text-base lg:text-lg mt-auto font-bold ${
+                        isSoldOut ? 'text-destructive' : 'text-primary'
+                      }`}>
+                        {article.price.toFixed(2)} €
                       </p>
-                    )}
-                    <p className="font-mono text-sm sm:text-base lg:text-lg text-primary mt-auto font-bold">
-                      {article.price.toFixed(2)} €
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </main>
 
