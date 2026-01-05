@@ -73,36 +73,57 @@ async def create_indexes():
     except Exception as e:
         logging.error(f"Error creating indexes: {e}")
 
-# WebSocket Connection Manager
+# WebSocket Connection Manager - Optimized for many concurrent connections
 class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, List[WebSocket]] = {}
+        self._lock = asyncio.Lock()  # Thread-safe operations
     
     async def connect(self, websocket: WebSocket, stand_id: str):
         await websocket.accept()
-        if stand_id not in self.active_connections:
-            self.active_connections[stand_id] = []
-        self.active_connections[stand_id].append(websocket)
+        async with self._lock:
+            if stand_id not in self.active_connections:
+                self.active_connections[stand_id] = []
+            self.active_connections[stand_id].append(websocket)
+        logging.info(f"WebSocket connected: stand={stand_id}, total_connections={self.get_connection_count()}")
     
-    def disconnect(self, websocket: WebSocket, stand_id: str):
-        if stand_id in self.active_connections:
-            if websocket in self.active_connections[stand_id]:
-                self.active_connections[stand_id].remove(websocket)
+    async def disconnect(self, websocket: WebSocket, stand_id: str):
+        async with self._lock:
+            if stand_id in self.active_connections:
+                if websocket in self.active_connections[stand_id]:
+                    self.active_connections[stand_id].remove(websocket)
+        logging.info(f"WebSocket disconnected: stand={stand_id}, total_connections={self.get_connection_count()}")
+    
+    def get_connection_count(self):
+        return sum(len(conns) for conns in self.active_connections.values())
     
     async def broadcast_to_stand(self, stand_id: str, message: dict):
-        if stand_id in self.active_connections:
-            dead_connections = []
-            for connection in self.active_connections[stand_id]:
-                try:
-                    await connection.send_json(message)
-                except:
-                    dead_connections.append(connection)
-            for conn in dead_connections:
-                self.active_connections[stand_id].remove(conn)
+        if stand_id not in self.active_connections:
+            return
+        
+        # Copy list to avoid modification during iteration
+        connections = self.active_connections[stand_id].copy()
+        dead_connections = []
+        
+        # Send to all connections concurrently
+        async def send_to_connection(conn):
+            try:
+                await asyncio.wait_for(conn.send_json(message), timeout=5.0)
+            except Exception:
+                dead_connections.append(conn)
+        
+        await asyncio.gather(*[send_to_connection(conn) for conn in connections], return_exceptions=True)
+        
+        # Clean up dead connections
+        if dead_connections:
+            async with self._lock:
+                for conn in dead_connections:
+                    if conn in self.active_connections.get(stand_id, []):
+                        self.active_connections[stand_id].remove(conn)
     
     async def broadcast_all(self, message: dict):
-        for stand_id in self.active_connections:
-            await self.broadcast_to_stand(stand_id, message)
+        tasks = [self.broadcast_to_stand(stand_id, message) for stand_id in list(self.active_connections.keys())]
+        await asyncio.gather(*tasks, return_exceptions=True)
 
 manager = ConnectionManager()
 
