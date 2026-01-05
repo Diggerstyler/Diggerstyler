@@ -430,6 +430,8 @@ export default function KuechePage() {
           </div>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
+          <LiveClock className="hidden sm:flex" />
+          
           {/* Sound Toggle with Test */}
           <Button
             variant={soundEnabled ? "default" : "outline"}
