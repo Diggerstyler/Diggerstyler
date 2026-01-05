@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShoppingCart, Hammer, Package, Settings, Zap, ArrowLeft, Store, UtensilsCrossed, Beer, Sparkles, HelpCircle, FastForward, Star, Maximize, Minimize } from "lucide-react";
 import LiveClock from "@/components/LiveClock";
+import { useTheme } from "@/components/ThemeProvider";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
