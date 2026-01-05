@@ -113,25 +113,25 @@ export default function ArticleManagement() {
   };
 
   // === Helper functions ===
-  const getDepositName = (depositId) => {
+  const getDepositName = useCallback((depositId) => {
     const deposit = depositGroups.find(d => d.id === depositId);
     return deposit ? `${deposit.name} (${deposit.amount.toFixed(2)}€)` : "-";
-  };
+  }, [depositGroups]);
 
-  const getStockUnit = (unitId) => {
+  const getStockUnit = useCallback((unitId) => {
     return stockUnits.find(u => u.id === unitId);
-  };
+  }, [stockUnits]);
 
-  const getTotalStock = (article) => {
-    const unit = getStockUnit(article.stock_unit_id);
+  const getTotalStock = useCallback((article) => {
+    const unit = stockUnits.find(u => u.id === article.stock_unit_id);
     const large = article.stock_large_units || 0;
     const small = article.stock_small_units || 0;
     const unitsPerLarge = unit?.sales_units_per_large || 1;
     return (large * unitsPerLarge) + small;
-  };
+  }, [stockUnits]);
 
-  const formatStock = (article) => {
-    const unit = getStockUnit(article.stock_unit_id);
+  const formatStock = useCallback((article) => {
+    const unit = stockUnits.find(u => u.id === article.stock_unit_id);
     if (!unit) return `${article.stock_small_units || 0} Stück`;
     
     const large = article.stock_large_units || 0;
@@ -144,17 +144,27 @@ export default function ArticleManagement() {
     if (small > 0) parts.push(`${Math.round(small)} ${unit.small_unit_name}${small !== 1 ? 'n' : ''}`);
     
     return parts.join(" + ");
-  };
+  }, [stockUnits]);
 
-  const isLowStock = (article) => {
+  const isLowStock = useCallback((article) => {
     if (!article.track_stock || !article.stock_warning_threshold) return false;
-    return getTotalStock(article) <= article.stock_warning_threshold;
-  };
+    const unit = stockUnits.find(u => u.id === article.stock_unit_id);
+    const large = article.stock_large_units || 0;
+    const small = article.stock_small_units || 0;
+    const unitsPerLarge = unit?.sales_units_per_large || 1;
+    const total = (large * unitsPerLarge) + small;
+    return total <= article.stock_warning_threshold;
+  }, [stockUnits]);
 
-  const isSoldOut = (article) => {
+  const isSoldOut = useCallback((article) => {
     if (!article.track_stock) return false;
-    return getTotalStock(article) <= 0;
-  };
+    const unit = stockUnits.find(u => u.id === article.stock_unit_id);
+    const large = article.stock_large_units || 0;
+    const small = article.stock_small_units || 0;
+    const unitsPerLarge = unit?.sales_units_per_large || 1;
+    const total = (large * unitsPerLarge) + small;
+    return total <= 0;
+  }, [stockUnits]);
 
   // === Sorting & Filtering - Articles ===
   const toggleArticleSort = (field) => {
