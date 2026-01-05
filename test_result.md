@@ -361,30 +361,31 @@ All requested features have been successfully implemented and tested. No issues 
 
 ## Navigation Behavior Testing (Updated: 2025-01-05)
 
-### ✅ Navigation Button Implementation - WORKING
+### ✅ Improved Navigation Behavior - WORKING
 **Status: PASSED**
 
-**Test Scenario:** Comprehensive testing of the new navigation behavior in the Event OS application, verifying that each role page (Bestellung, Macher, Ausgabe, OneManShow) has two navigation buttons with correct functionality.
+**Test Scenario:** Testing the improved navigation behavior in the Event OS application, verifying that navigation buttons work correctly with the new implementation.
 
 **Test Results:**
 
 #### 1. Navigation Button Presence - ✅ WORKING
 - ✅ **Home Button (🏠)**: Present on all role pages with correct tooltip "Zur Startseite"
-- ✅ **Back Button (←)**: Present on all role pages with correct tooltip "Zurück" and data-testid="back-btn"
+- ✅ **Back Button (←)**: Present on all role pages with correct tooltip "Zurück zur Rollenauswahl" and data-testid="back-btn"
 - ✅ Both buttons are clearly visible and accessible in the header section
 - ✅ Consistent implementation across all role pages (BestellungPage, KuechePage, AusgabePage, OneManShowPage)
 
 #### 2. Home Button Functionality - ✅ WORKING
 - ✅ **Direct Navigation**: Home button correctly navigates directly to landing page ("/")
 - ✅ **URL Change**: URL changes from role page to root URL as expected
-- ✅ **Page Content**: Landing page displays correctly with all stand cards visible
+- ✅ **Page Content**: Landing page displays correctly with clean stand selection grid
 - ✅ **Implementation**: Uses `navigate("/")` as specified in requirements
+- ✅ **Clean State**: NO stand is pre-selected, shows full stand selection
 
-#### 3. Back Button Functionality - ⚠️ PARTIALLY WORKING
-- ⚠️ **Navigation Behavior**: Back button uses `navigate(-1)` (browser history back)
-- ⚠️ **Actual Behavior**: Goes back to landing page instead of role selection page
-- ⚠️ **Expected vs Actual**: Expected to return to role selection, but returns to stand selection
-- ⚠️ **Root Cause**: Browser history navigation skips the role selection step
+#### 3. Back Button Functionality - ✅ WORKING (IMPROVED)
+- ✅ **Navigation Behavior**: Back button now correctly navigates to `/?stand={standId}`
+- ✅ **Actual Behavior**: Goes back to role selection with the same stand pre-selected
+- ✅ **Expected vs Actual**: Matches expected behavior - returns to role selection page
+- ✅ **Root Cause Fixed**: No longer uses browser history, uses proper URL navigation
 
 #### 4. Technical Implementation - ✅ WORKING
 - ✅ **Code Structure**: Both buttons properly implemented in header components
@@ -392,31 +393,39 @@ All requested features have been successfully implemented and tested. No issues 
 - ✅ **Tooltips**: Proper tooltip implementation with German text
 - ✅ **Styling**: Consistent button styling and positioning
 - ✅ **Accessibility**: Proper data-testid attributes for testing
+- ✅ **URL Construction**: Back button properly constructs `/?stand={standId}` URL
 
-#### 5. User Experience Analysis - ⚠️ MIXED RESULTS
+#### 5. User Experience Analysis - ✅ WORKING
 - ✅ **Home Button**: Provides expected "go to start" functionality
-- ⚠️ **Back Button**: May confuse users expecting to return to role selection
+- ✅ **Back Button**: Now correctly returns to role selection with stand pre-selected
 - ✅ **Visual Design**: Clear icons and tooltips help user understanding
 - ✅ **Consistency**: Same navigation pattern across all role pages
+- ✅ **Intuitive Flow**: Navigation matches user expectations
 
 **Test Coverage:**
 - ✅ BestellungPage navigation tested successfully
 - ✅ Navigation button visibility and accessibility verified
 - ✅ Home button functionality confirmed working
-- ⚠️ Back button behavior documented (goes to landing instead of role selection)
+- ✅ Back button behavior verified (goes to /?stand={standId} as expected)
 - ✅ URL navigation patterns verified
 - ✅ Cross-page consistency confirmed
+- ✅ Stand pre-selection functionality verified
 
 **Screenshots captured:**
 - Landing page with stand selection
+- Role selection with Essensstand pre-selected
 - BestellungPage with navigation buttons visible
-- Home button navigation result
-- Back button navigation result
+- Home button navigation result (clean landing page)
+- Back button navigation result (role selection with stand pre-selected)
 
 **Technical Notes:**
 - Home button implementation: `onClick={() => navigate("/")}`
-- Back button implementation: `onClick={() => navigate(-1)}`
+- Back button implementation: `onClick={() => navigate(\`/?stand=${standId}\`)}`
 - Both buttons have proper tooltips and accessibility attributes
 - Navigation is consistent across all role pages
+- URL query parameter handling works correctly
 
-**Conclusion:** The navigation button implementation is technically correct and mostly working as designed. The Home button works perfectly, providing direct navigation to the landing page. The Back button works as implemented (browser history back) but may not match user expectations of returning to role selection. This is a design consideration rather than a technical bug.
+**Conclusion:** The improved navigation behavior is working correctly as specified. Both Home (🏠) and Back (←) buttons function as expected:
+- Home button goes to clean landing page (/) with stand selection
+- Back button goes to role selection (/?stand={standId}) with the same stand pre-selected
+- Tooltips are correct: "Zur Startseite" for Home and "Zurück zur Rollenauswahl" for Back
