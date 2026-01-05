@@ -1621,10 +1621,71 @@ async def reset_order_data(pin_data: PinVerification, username: str = Depends(ve
     # Reset all order counters
     counters_deleted = await db.order_counters.delete_many({})
     
+    # Reset sold units in stock tracking (set current stock back to initial stock)
+    # This resets the "Verkauf" data but keeps the initial stock
+    articles_with_stock = await db.articles.find({"track_stock": True}, {"_id": 0}).to_list(1000)
+    stock_reset_count = 0
+    for article in articles_with_stock:
+        initial_large = article.get("stock_initial_large", 0)
+        initial_small = article.get("stock_initial_small", 0)
+        await db.articles.update_one(
+            {"id": article["id"]},
+            {"$set": {
+                "stock_large_units": initial_large,
+                "stock_small_units": initial_small
+            }}
+        )
+        stock_reset_count += 1
+    
     return {
         "message": "Alle Bestellungen wurden zurückgesetzt",
         "orders_deleted": orders_deleted.deleted_count,
-        "counters_reset": counters_deleted.deleted_count
+        "counters_reset": counters_deleted.deleted_count,
+        "stock_reset": stock_reset_count
+    }
+
+class StockResetRequest(BaseModel):
+    pin: str
+    reset_type: str = "sales"  # "sales" = nur Verkäufe, "all" = Bestand und Verkäufe
+
+@api_router.post("/admin/stock/reset")
+async def reset_stock_data(reset_data: StockResetRequest, username: str = Depends(verify_admin)):
+    """Reset stock data - either just sales or complete stock"""
+    if reset_data.pin != RESET_PIN:
+        raise HTTPException(status_code=403, detail="Falscher PIN")
+    
+    articles_with_stock = await db.articles.find({"track_stock": True}, {"_id": 0}).to_list(1000)
+    reset_count = 0
+    
+    for article in articles_with_stock:
+        if reset_data.reset_type == "all":
+            # Reset everything: set stock to 0 and initial to 0
+            await db.articles.update_one(
+                {"id": article["id"]},
+                {"$set": {
+                    "stock_large_units": 0,
+                    "stock_small_units": 0,
+                    "stock_initial_large": 0,
+                    "stock_initial_small": 0
+                }}
+            )
+        else:
+            # Reset only sales: set current stock back to initial stock
+            initial_large = article.get("stock_initial_large", 0)
+            initial_small = article.get("stock_initial_small", 0)
+            await db.articles.update_one(
+                {"id": article["id"]},
+                {"$set": {
+                    "stock_large_units": initial_large,
+                    "stock_small_units": initial_small
+                }}
+            )
+        reset_count += 1
+    
+    message = "Verkäufe zurückgesetzt" if reset_data.reset_type == "sales" else "Bestand komplett zurückgesetzt"
+    return {
+        "message": message,
+        "articles_reset": reset_count
     }
 
 # Seed initial data
