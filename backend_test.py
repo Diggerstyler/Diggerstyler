@@ -258,6 +258,300 @@ class FestivalAPITester:
         # Test unauthorized access to stats
         self.run_test("Get Stats (No Auth)", "POST", "stats/overview", 401, stats_filter)
 
+    def test_stock_inventory_management(self):
+        """Test Stock/Inventory Management feature"""
+        print("\n=== TESTING STOCK/INVENTORY MANAGEMENT ===")
+        
+        # First, ensure we have test data
+        self.run_test("Seed Data for Stock Tests", "POST", "seed", 200)
+        
+        # TEST 1: Stock Units CRUD
+        print("\n--- Testing Stock Units CRUD ---")
+        
+        # Get existing stock units
+        success, stock_units = self.run_test("Get Stock Units", "GET", "stock-units", 200)
+        if success:
+            print(f"   Found {len(stock_units)} existing stock units")
+        
+        # Create new stock unit - Container type
+        container_unit = {
+            "name": "Kiste 12x1l",
+            "unit_type": "container",
+            "units_per_container": 12,
+            "volume_per_unit": 1.0,
+            "large_unit_name": "Kiste",
+            "small_unit_name": "Flasche"
+        }
+        
+        success, created_container = self.run_test("Create Container Stock Unit", "POST", "stock-units", 200, container_unit, auth=True)
+        container_unit_id = None
+        if success and created_container:
+            container_unit_id = created_container.get('id')
+            print(f"   Created container unit with ID: {container_unit_id}")
+            
+            # Verify calculation
+            expected_sales_units = 12
+            actual_sales_units = created_container.get('sales_units_per_large', 0)
+            if actual_sales_units == expected_sales_units:
+                print(f"   ✅ Container calculation correct: {actual_sales_units} units per container")
+            else:
+                print(f"   ❌ Container calculation wrong: expected {expected_sales_units}, got {actual_sales_units}")
+                self.failed_tests.append({
+                    "test": "Container Unit Calculation",
+                    "expected": expected_sales_units,
+                    "actual": actual_sales_units
+                })
+        
+        # Create new stock unit - Barrel type (test the 30l barrel calculation)
+        barrel_unit = {
+            "name": "Fass 30l",
+            "unit_type": "barrel",
+            "total_volume_liters": 30,
+            "serving_size_liters": 0.5,
+            "loss_percent": 7,
+            "large_unit_name": "Fass",
+            "small_unit_name": "Glas"
+        }
+        
+        success, created_barrel = self.run_test("Create Barrel Stock Unit", "POST", "stock-units", 200, barrel_unit, auth=True)
+        barrel_unit_id = None
+        if success and created_barrel:
+            barrel_unit_id = created_barrel.get('id')
+            print(f"   Created barrel unit with ID: {barrel_unit_id}")
+            
+            # Verify barrel calculation: 30l * (1-0.07) / 0.5l = 55.8 ≈ 56 glasses
+            expected_glasses = 30 * (1 - 0.07) / 0.5  # 55.8
+            actual_glasses = created_barrel.get('sales_units_per_large', 0)
+            if abs(actual_glasses - expected_glasses) < 0.1:
+                print(f"   ✅ Barrel calculation correct: {actual_glasses} glasses per barrel")
+            else:
+                print(f"   ❌ Barrel calculation wrong: expected ~{expected_glasses:.1f}, got {actual_glasses}")
+                self.failed_tests.append({
+                    "test": "Barrel Unit Calculation",
+                    "expected": expected_glasses,
+                    "actual": actual_glasses
+                })
+        
+        # Update stock unit
+        if container_unit_id:
+            update_data = {"name": "Kiste 12x1l (Updated)"}
+            success, updated_unit = self.run_test("Update Stock Unit", "PUT", f"stock-units/{container_unit_id}", 200, update_data, auth=True)
+            if success and updated_unit:
+                if updated_unit.get('name') == "Kiste 12x1l (Updated)":
+                    print("   ✅ Stock unit updated successfully")
+                else:
+                    print("   ❌ Stock unit update failed")
+                    self.failed_tests.append({
+                        "test": "Stock Unit Update",
+                        "error": "Name not updated correctly"
+                    })
+        
+        # TEST 2: Article Stock Management
+        print("\n--- Testing Article Stock Management ---")
+        
+        # Get articles for testing
+        success, articles = self.run_test("Get Articles for Stock Testing", "GET", "articles?active_only=true", 200)
+        if not success or not articles:
+            print("❌ Cannot test article stock without articles")
+            return
+        
+        test_article = articles[0]
+        article_id = test_article['id']
+        
+        # Enable stock tracking on an article
+        if container_unit_id:
+            stock_settings = {
+                "track_stock": True,
+                "stock_unit_id": container_unit_id,
+                "stock_warning_threshold": 50,
+                "stock_sold_out_behavior": "mark"
+            }
+            
+            success, updated_article = self.run_test("Enable Stock Tracking", "PUT", f"articles/{article_id}", 200, stock_settings, auth=True)
+            if success and updated_article:
+                if updated_article.get('track_stock') == True:
+                    print("   ✅ Stock tracking enabled successfully")
+                else:
+                    print("   ❌ Stock tracking not enabled")
+                    self.failed_tests.append({
+                        "test": "Enable Stock Tracking",
+                        "error": "track_stock not set to true"
+                    })
+            
+            # Set initial stock
+            initial_stock = {
+                "large_units": 5,
+                "small_units": 10,
+                "set_as_initial": True
+            }
+            
+            success, stock_updated = self.run_test("Set Initial Stock", "PUT", f"articles/{article_id}/stock", 200, initial_stock, auth=True)
+            if success and stock_updated:
+                large_units = stock_updated.get('stock_large_units', 0)
+                small_units = stock_updated.get('stock_small_units', 0)
+                if large_units == 5 and small_units == 10:
+                    print(f"   ✅ Initial stock set: {large_units} large units, {small_units} small units")
+                else:
+                    print(f"   ❌ Initial stock not set correctly: {large_units} large, {small_units} small")
+                    self.failed_tests.append({
+                        "test": "Set Initial Stock",
+                        "expected": "5 large, 10 small",
+                        "actual": f"{large_units} large, {small_units} small"
+                    })
+        
+        # Get stock overview
+        success, stock_overview = self.run_test("Get Stock Overview", "GET", "admin/stock-overview", 200, auth=True)
+        if success and stock_overview:
+            print(f"   Found {len(stock_overview)} articles with stock tracking")
+            # Find our test article in the overview
+            test_article_stock = next((item for item in stock_overview if item['article_id'] == article_id), None)
+            if test_article_stock:
+                total_stock = test_article_stock.get('total_stock_sales_units', 0)
+                print(f"   ✅ Test article found in stock overview with {total_stock} total units")
+            else:
+                print("   ❌ Test article not found in stock overview")
+                self.failed_tests.append({
+                    "test": "Stock Overview Contains Test Article",
+                    "error": "Test article not found in stock overview"
+                })
+        
+        # TEST 3: Stock Reduction on Order
+        print("\n--- Testing Stock Reduction on Order ---")
+        
+        # Get stands for testing
+        success, stands = self.run_test("Get Stands for Stock Order Test", "GET", "stands", 200)
+        if not success or not stands:
+            print("❌ Cannot test stock reduction without stands")
+            return
+        
+        test_stand = stands[0]
+        stand_id = test_stand['id']
+        
+        # Get stand articles to verify stock_info is included
+        success, stand_articles = self.run_test("Get Stand Articles (Before Order)", "GET", f"stands/{stand_id}/articles", 200)
+        if success and stand_articles:
+            # Find our test article
+            test_article_in_stand = next((art for art in stand_articles if art['id'] == article_id), None)
+            if test_article_in_stand and test_article_in_stand.get('stock_info'):
+                initial_total_units = test_article_in_stand['stock_info'].get('total_units', 0)
+                print(f"   Initial stock for test article: {initial_total_units} units")
+                
+                # Create order to reduce stock
+                test_order = {
+                    "stand_id": stand_id,
+                    "stand_name": test_stand["name"],
+                    "items": [
+                        {
+                            "article_id": article_id,
+                            "article_name": test_article["name"],
+                            "quantity": 3,  # Order 3 units
+                            "price": test_article["price"],
+                            "deposit_amount": 0,
+                            "is_deposit_return": False
+                        }
+                    ],
+                    "subtotal": test_article["price"] * 3,
+                    "deposit_total": 0,
+                    "deposit_return_total": 0,
+                    "total": test_article["price"] * 3,
+                    "created_by": "StockTestUser"
+                }
+                
+                success, created_order = self.run_test("Create Order for Stock Reduction", "POST", "orders", 200, test_order)
+                if success and created_order:
+                    print(f"   Created order with 3 units of test article")
+                    
+                    # Check stock after order
+                    success, stand_articles_after = self.run_test("Get Stand Articles (After Order)", "GET", f"stands/{stand_id}/articles", 200)
+                    if success and stand_articles_after:
+                        test_article_after = next((art for art in stand_articles_after if art['id'] == article_id), None)
+                        if test_article_after and test_article_after.get('stock_info'):
+                            final_total_units = test_article_after['stock_info'].get('total_units', 0)
+                            expected_final = initial_total_units - 3
+                            
+                            if final_total_units == expected_final:
+                                print(f"   ✅ Stock reduced correctly: {initial_total_units} → {final_total_units} units")
+                            else:
+                                print(f"   ❌ Stock reduction incorrect: expected {expected_final}, got {final_total_units}")
+                                self.failed_tests.append({
+                                    "test": "Stock Reduction on Order",
+                                    "expected": expected_final,
+                                    "actual": final_total_units
+                                })
+                        else:
+                            print("   ❌ No stock_info found after order")
+                            self.failed_tests.append({
+                                "test": "Stock Info After Order",
+                                "error": "stock_info missing from article after order"
+                            })
+            else:
+                print("   ❌ Test article not found in stand articles or missing stock_info")
+                self.failed_tests.append({
+                    "test": "Stock Info in Stand Articles",
+                    "error": "Test article missing stock_info in stand articles"
+                })
+        
+        # TEST 4: Test OneManShow (direct_complete) stock reduction
+        print("\n--- Testing OneManShow Stock Reduction ---")
+        
+        onemanshow_order = {
+            "stand_id": stand_id,
+            "stand_name": test_stand["name"],
+            "items": [
+                {
+                    "article_id": article_id,
+                    "article_name": test_article["name"],
+                    "quantity": 2,  # Order 2 more units
+                    "price": test_article["price"],
+                    "deposit_amount": 0,
+                    "is_deposit_return": False
+                }
+            ],
+            "subtotal": test_article["price"] * 2,
+            "deposit_total": 0,
+            "deposit_return_total": 0,
+            "total": test_article["price"] * 2,
+            "created_by": "OneManShowUser",
+            "direct_complete": True  # This should complete immediately
+        }
+        
+        success, onemanshow_created = self.run_test("Create OneManShow Order", "POST", "orders", 200, onemanshow_order)
+        if success and onemanshow_created:
+            if onemanshow_created.get('status') == 'completed':
+                print("   ✅ OneManShow order completed immediately")
+            else:
+                print(f"   ❌ OneManShow order status incorrect: {onemanshow_created.get('status')}")
+                self.failed_tests.append({
+                    "test": "OneManShow Order Status",
+                    "expected": "completed",
+                    "actual": onemanshow_created.get('status')
+                })
+        
+        # TEST 5: Test delete stock unit that's in use (should fail)
+        print("\n--- Testing Stock Unit Deletion Protection ---")
+        
+        if container_unit_id:
+            success, delete_response = self.run_test("Delete Stock Unit In Use", "DELETE", f"stock-units/{container_unit_id}", 400, auth=True)
+            if success:
+                print("   ✅ Stock unit deletion correctly prevented (unit in use)")
+            else:
+                print("   ❌ Stock unit deletion should have failed but didn't")
+        
+        # Clean up - remove stock tracking from test article so we can delete the unit
+        if container_unit_id:
+            cleanup_settings = {
+                "track_stock": False,
+                "stock_unit_id": None
+            }
+            self.run_test("Disable Stock Tracking for Cleanup", "PUT", f"articles/{article_id}", 200, cleanup_settings, auth=True)
+            
+            # Now try to delete the stock unit (should succeed)
+            success, delete_response = self.run_test("Delete Unused Stock Unit", "DELETE", f"stock-units/{container_unit_id}", 200, auth=True)
+            if success:
+                print("   ✅ Unused stock unit deleted successfully")
+        
+        print("   🎯 Stock/Inventory Management testing completed")
+
     def test_new_features_message_456(self):
         """Test newly implemented features from user message #456"""
         print("\n=== TESTING NEW FEATURES (Message #456) ===")
