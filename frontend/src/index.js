@@ -4,18 +4,12 @@ import "@/index.css";
 import App from "@/App";
 
 // ============================================================
-// CRITICAL: ResizeObserver Error Suppression
-// This MUST run IMMEDIATELY before any other code
+// ResizeObserver Error Suppression
+// These errors are harmless but trigger React's error overlay
 // ============================================================
 
-// Immediately suppress ResizeObserver errors before React loads
-(function() {
-  if (typeof window === 'undefined') return;
-  
-  // Store if we should suppress error overlay
-  window.__SUPPRESS_RESIZE_OBSERVER__ = true;
-
-  // 1. Patch ResizeObserver constructor
+if (typeof window !== 'undefined') {
+  // 1. Patch ResizeObserver to prevent loop errors
   const OriginalResizeObserver = window.ResizeObserver;
   if (OriginalResizeObserver) {
     window.ResizeObserver = class extends OriginalResizeObserver {
@@ -25,7 +19,7 @@ import App from "@/App";
             try {
               callback(entries, observer);
             } catch (e) {
-              // Silently ignore
+              // Silently ignore errors
             }
           });
         });
@@ -45,16 +39,15 @@ import App from "@/App";
     return originalConsoleError.apply(console, args);
   };
 
-  // 3. Global onerror handler
-  const originalOnerror = window.onerror;
-  window.onerror = function(message, source, lineno, colno, error) {
+  // 3. Global error handler
+  window.onerror = function(message) {
     const msg = String(message || '');
     if (msg.includes('ResizeObserver') || 
         msg.includes('loop completed') ||
         msg.includes('loop limit')) {
       return true;
     }
-    return originalOnerror ? originalOnerror.apply(this, arguments) : false;
+    return false;
   };
 
   // 4. Error event listener (capture phase)
@@ -78,63 +71,7 @@ import App from "@/App";
       return;
     }
   });
-
-  // 6. CRITICAL: Disable React Error Overlay for ResizeObserver
-  // This intercepts the iframe that React Dev Overlay uses
-  const observer = new MutationObserver(function(mutations) {
-    mutations.forEach(function(mutation) {
-      mutation.addedNodes.forEach(function(node) {
-        if (node.tagName === 'IFRAME' && node.id === 'react-refresh-overlay') {
-          // Check if the error is a ResizeObserver error
-          setTimeout(() => {
-            try {
-              const iframeDoc = node.contentDocument || node.contentWindow?.document;
-              if (iframeDoc) {
-                const bodyText = iframeDoc.body?.innerText || '';
-                if (bodyText.includes('ResizeObserver') || 
-                    bodyText.includes('loop completed') ||
-                    bodyText.includes('loop limit')) {
-                  node.remove();
-                }
-              }
-            } catch (e) {
-              // Cross-origin, try removing anyway if we have flag set
-              if (window.__SUPPRESS_RESIZE_OBSERVER__) {
-                // Check parent document for error
-                const overlays = document.querySelectorAll('[class*="error-overlay"], [id*="error"]');
-                overlays.forEach(el => {
-                  if (el.textContent?.includes('ResizeObserver')) {
-                    el.remove();
-                  }
-                });
-              }
-            }
-          }, 100);
-        }
-      });
-    });
-  });
-
-  observer.observe(document.body || document.documentElement, {
-    childList: true,
-    subtree: true
-  });
-
-  // 7. Also try to catch the webpack overlay
-  if (typeof __webpack_dev_server_client__ !== 'undefined') {
-    try {
-      const originalShowOverlay = window.__REACT_DEVTOOLS_GLOBAL_HOOK__?.showOverlay;
-      if (originalShowOverlay) {
-        window.__REACT_DEVTOOLS_GLOBAL_HOOK__.showOverlay = function(error) {
-          if (error?.message?.includes('ResizeObserver')) {
-            return;
-          }
-          return originalShowOverlay.apply(this, arguments);
-        };
-      }
-    } catch (e) {}
-  }
-})();
+}
 
 // ============================================================
 // React Application Initialization
