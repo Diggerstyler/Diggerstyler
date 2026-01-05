@@ -57,6 +57,18 @@ export default function LandingPage() {
     };
   }, []);
 
+  // Check for standId in URL query parameter (for back navigation)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const standId = params.get('stand');
+    if (standId && stands.length > 0) {
+      const stand = stands.find(s => s.id === standId);
+      if (stand) {
+        setSelectedStand(stand);
+      }
+    }
+  }, [stands]);
+
   useEffect(() => {
     const fetchStands = async () => {
       try {
