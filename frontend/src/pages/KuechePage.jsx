@@ -289,30 +289,40 @@ export default function KuechePage() {
   useEffect(() => {
     fetchData();
     
-    // WebSocket for real-time updates (primary)
-    const wsUrl = `${process.env.REACT_APP_BACKEND_URL?.replace('http', 'ws')}/api/ws/${standId}`;
+    // WebSocket for real-time updates (primary) - LOW LATENCY
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsHost = process.env.REACT_APP_BACKEND_URL?.replace(/^https?:\/\//, '');
+    const wsUrl = `${wsProtocol}//${wsHost}/ws/${standId}`;
     let ws = null;
     let reconnectTimeout = null;
+    let reconnectAttempts = 0;
     
     const connectWebSocket = () => {
       try {
         ws = new WebSocket(wsUrl);
         
         ws.onopen = () => {
-          console.log('WebSocket connected');
+          console.log('WebSocket connected - low latency mode');
+          reconnectAttempts = 0;
         };
         
         ws.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          if (data.type === 'order_created' || data.type === 'order_updated') {
-            // Refresh data when order changes
-            fetchData();
+          try {
+            const data = JSON.parse(event.data);
+            // Immediately refresh on any order update
+            if (data.type === 'new_order' || data.type === 'order_updated') {
+              fetchData();
+            }
+          } catch (e) {
+            console.error('WebSocket message parse error:', e);
           }
         };
         
         ws.onclose = () => {
-          // Reconnect after 5 seconds
-          reconnectTimeout = setTimeout(connectWebSocket, 5000);
+          // Quick reconnect with exponential backoff (max 5s)
+          const delay = Math.min(1000 * Math.pow(1.5, reconnectAttempts), 5000);
+          reconnectAttempts++;
+          reconnectTimeout = setTimeout(connectWebSocket, delay);
         };
         
         ws.onerror = () => {
@@ -325,8 +335,8 @@ export default function KuechePage() {
     
     connectWebSocket();
     
-    // Fallback polling every 10 seconds (reduced from 3s)
-    const interval = setInterval(fetchData, 10000);
+    // Fallback polling every 3 seconds for reliability
+    const interval = setInterval(fetchData, 3000);
     
     return () => {
       clearInterval(interval);
