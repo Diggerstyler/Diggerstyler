@@ -14,14 +14,19 @@ import LiveClock from "@/components/LiveClock";
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const WS_URL = process.env.REACT_APP_BACKEND_URL?.replace('https://', 'wss://').replace('http://', 'ws://');
 
-// Fullscreen utility
-const toggleFullscreen = () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen?.() || 
-    document.documentElement.webkitRequestFullscreen?.();
-  } else {
-    document.exitFullscreen?.() || 
-    document.webkitExitFullscreen?.();
+// Fullscreen utility - with error handling for iframe/permissions policy
+const toggleFullscreen = async () => {
+  try {
+    if (!document.fullscreenElement) {
+      await (document.documentElement.requestFullscreen?.() || 
+        document.documentElement.webkitRequestFullscreen?.());
+    } else {
+      await (document.exitFullscreen?.() || 
+        document.webkitExitFullscreen?.());
+    }
+  } catch (error) {
+    // Fullscreen not allowed (iframe, permissions policy, etc.) - silently ignore
+    console.log('Fullscreen not available:', error.message);
   }
 };
 

@@ -12,16 +12,21 @@ import LiveClock from "@/components/LiveClock";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-// Fullscreen utility functions
-const toggleFullscreen = () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen?.() || 
-    document.documentElement.webkitRequestFullscreen?.() ||
-    document.documentElement.mozRequestFullScreen?.();
-  } else {
-    document.exitFullscreen?.() || 
-    document.webkitExitFullscreen?.() ||
-    document.mozCancelFullScreen?.();
+// Fullscreen utility functions - with error handling for iframe/permissions policy
+const toggleFullscreen = async () => {
+  try {
+    if (!document.fullscreenElement) {
+      await (document.documentElement.requestFullscreen?.() || 
+        document.documentElement.webkitRequestFullscreen?.() ||
+        document.documentElement.mozRequestFullScreen?.());
+    } else {
+      await (document.exitFullscreen?.() || 
+        document.webkitExitFullscreen?.() ||
+        document.mozCancelFullScreen?.());
+    }
+  } catch (error) {
+    // Fullscreen not allowed (iframe, permissions policy, etc.) - silently ignore
+    console.log('Fullscreen not available:', error.message);
   }
 };
 
