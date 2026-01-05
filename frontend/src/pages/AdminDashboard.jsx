@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
@@ -23,8 +24,12 @@ import {
   AlertTriangle,
   HelpCircle,
   Layers,
-  FileText
+  FileText,
+  Box,
+  Settings,
+  Clock
 } from "lucide-react";
+import LiveClock from "@/components/LiveClock";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
