@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Package, CheckCircle, RefreshCw, ChevronLeft, ChevronRight, Undo2, Archive, Clock, Maximize, Minimize } from "lucide-react";
+import { ArrowLeft, Package, CheckCircle, RefreshCw, ChevronLeft, ChevronRight, Undo2, Archive, Clock, Maximize, Minimize, Home } from "lucide-react";
 import LiveClock from "@/components/LiveClock";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
