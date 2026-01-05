@@ -404,6 +404,70 @@ async def delete_deposit_group(group_id: str, username: str = Depends(verify_adm
         raise HTTPException(status_code=404, detail="Pfandgruppe nicht gefunden")
     return {"message": "Pfandgruppe gelöscht"}
 
+# Settings Routes (Einstellungen)
+@api_router.get("/settings")
+async def get_settings():
+    """Get all settings"""
+    settings = await db.settings.find_one({"id": "global"}, {"_id": 0})
+    if not settings:
+        # Default settings
+        settings = {
+            "id": "global",
+            "timezone": "Europe/Berlin",
+            "event_name": "Karnbachs Event OS"
+        }
+        await db.settings.insert_one(settings)
+    return settings
+
+@api_router.put("/settings")
+async def update_settings(settings: dict, username: str = Depends(verify_admin)):
+    """Update settings"""
+    allowed_fields = ["timezone", "event_name"]
+    update_data = {k: v for k, v in settings.items() if k in allowed_fields}
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Keine gültigen Einstellungen")
+    
+    await db.settings.update_one(
+        {"id": "global"},
+        {"$set": update_data},
+        upsert=True
+    )
+    
+    updated = await db.settings.find_one({"id": "global"}, {"_id": 0})
+    return updated
+
+@api_router.get("/timezones")
+async def get_available_timezones():
+    """Get list of available timezones"""
+    return AVAILABLE_TIMEZONES
+
+@api_router.get("/server-time")
+async def get_server_time():
+    """Get current server time in configured timezone"""
+    from zoneinfo import ZoneInfo
+    
+    settings = await db.settings.find_one({"id": "global"}, {"_id": 0})
+    tz_name = settings.get("timezone", "Europe/Berlin") if settings else "Europe/Berlin"
+    
+    try:
+        tz = ZoneInfo(tz_name)
+        now = datetime.now(tz)
+        return {
+            "time": now.strftime("%H:%M:%S"),
+            "date": now.strftime("%d.%m.%Y"),
+            "datetime": now.isoformat(),
+            "timezone": tz_name
+        }
+    except Exception:
+        now = datetime.now(timezone.utc)
+        return {
+            "time": now.strftime("%H:%M:%S"),
+            "date": now.strftime("%d.%m.%Y"),
+            "datetime": now.isoformat(),
+            "timezone": "UTC"
+        }
+
 # Stock Unit Routes (Einheiten-Vorlagen)
 def calculate_sales_units_per_large(unit_data: dict) -> float:
     """Berechnet Verkaufseinheiten pro Großeinheit"""
