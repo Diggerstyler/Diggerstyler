@@ -305,6 +305,9 @@ export default function OneManShowPage() {
       showOrderCompletionOverlay(response.data.order_number, total);
       toast.success(`Bestellung #${response.data.order_number} abgeschlossen!`);
       setCart([]);
+      
+      // Refresh articles to update stock info
+      refetchArticles();
     } catch (error) {
       toast.error("Fehler beim Erstellen der Bestellung");
     } finally {
