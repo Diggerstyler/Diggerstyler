@@ -1517,7 +1517,8 @@ async def export_all_data(username: str = Depends(verify_admin)):
 class PinVerification(BaseModel):
     pin: str
 
-RESET_PIN = "200183"
+# Reset PIN (from environment with default)
+RESET_PIN = os.environ.get("RESET_PIN", "200183")
 
 @api_router.post("/admin/verify-pin")
 async def verify_reset_pin(pin_data: PinVerification, username: str = Depends(verify_admin)):
