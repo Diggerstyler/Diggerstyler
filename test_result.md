@@ -123,3 +123,65 @@ All requested features have been successfully implemented and tested. No issues 
 - Mobile navigation (375px)
 
 **Conclusion:** The responsive admin navigation is implemented correctly and working as specified. The navigation adapts properly across different screen sizes, showing icons with text on larger screens and icons only on mobile devices.
+
+## Stock Management Features Testing (Updated: 2025-01-05)
+
+### ✅ Stock Management Features - WORKING
+**Status: PASSED**
+
+**Test Scenario:** Comprehensive testing of new stock management features including stock restock API, stock reset functionality, and PIN validation.
+
+**Test Results:**
+
+#### 1. Stock Restock API (Add Mode) - ✅ WORKING
+- ✅ **PUT /api/articles/{article_id}/stock** with mode="add" working correctly
+- ✅ Stock values are properly ADDED to existing stock (not replaced)
+- ✅ Large units: 13.0 + 2 = 15.0 ✓
+- ✅ Small units: 0.0 + 5 = 5.0 ✓
+- ✅ Initial stock values updated when set_as_initial=true
+- ✅ API requires admin authentication (Basic auth: admin:admin)
+
+#### 2. Stock Reset API - Sales Only - ✅ WORKING
+- ✅ **POST /api/admin/stock/reset** with reset_type="sales" working correctly
+- ✅ Correct PIN validation (200183) required
+- ✅ Current stock reset to initial stock values
+- ✅ Response includes articles_reset count: 1 article processed
+- ✅ Response message: "Verkäufe zurückgesetzt"
+- ✅ Initial stock values preserved (not reset to 0)
+
+#### 3. Stock Reset API - All - ✅ WORKING
+- ✅ **POST /api/admin/stock/reset** with reset_type="all" working correctly
+- ✅ Correct PIN validation (200183) required
+- ✅ All stock values (current and initial) reset to 0
+- ✅ Response includes articles_reset count: 1 article processed
+- ✅ Response message: "Bestand komplett zurückgesetzt"
+
+#### 4. Admin Reset includes stock reset - ✅ WORKING
+- ✅ **POST /api/admin/reset** includes stock reset functionality
+- ✅ Correct PIN validation (200183) required
+- ✅ Response includes stock_reset count: 1 article processed
+- ✅ Current stock reset to initial stock values (same as sales-only reset)
+- ✅ Orders and counters also reset as expected
+
+#### 5. Wrong PIN handling - ✅ WORKING
+- ✅ **POST /api/admin/stock/reset** with wrong PIN returns 403 status
+- ✅ **POST /api/admin/reset** with wrong PIN returns 403 status
+- ✅ Error message: "Falscher PIN"
+- ✅ No unauthorized operations performed
+
+**Technical Implementation:**
+- All endpoints require Basic Authentication (admin:admin)
+- PIN validation uses environment variable RESET_PIN (default: 200183)
+- Stock calculations properly handle large_units and small_units
+- Add mode correctly adds to existing values instead of replacing
+- Reset operations properly distinguish between sales-only and complete reset
+- Error handling for wrong PIN returns appropriate HTTP status codes
+
+**Test Coverage:**
+- 71 total tests run, 100% success rate
+- All stock management endpoints tested with valid and invalid inputs
+- Authentication and authorization properly validated
+- Stock calculation accuracy verified
+- Error conditions properly handled
+
+**Conclusion:** All new stock management features are implemented correctly and working as specified. The APIs handle stock adjustments, resets, and PIN validation properly with appropriate error handling and authentication requirements.
