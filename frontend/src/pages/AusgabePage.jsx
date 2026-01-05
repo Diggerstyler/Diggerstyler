@@ -106,24 +106,38 @@ export default function AusgabePage() {
   useEffect(() => {
     fetchOrders();
     
-    // WebSocket for real-time updates
-    const wsUrl = `${process.env.REACT_APP_BACKEND_URL?.replace('http', 'ws')}/api/ws/${standId}`;
+    // WebSocket for real-time updates - LOW LATENCY
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsHost = process.env.REACT_APP_BACKEND_URL?.replace(/^https?:\/\//, '');
+    const wsUrl = `${wsProtocol}//${wsHost}/ws/${standId}`;
     let ws = null;
     let reconnectTimeout = null;
+    let reconnectAttempts = 0;
     
     const connectWebSocket = () => {
       try {
         ws = new WebSocket(wsUrl);
         
+        ws.onopen = () => {
+          console.log('WebSocket connected - low latency mode');
+          reconnectAttempts = 0;
+        };
+        
         ws.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          if (data.type === 'order_created' || data.type === 'order_updated' || data.type === 'new_order') {
-            fetchOrders();
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'new_order' || data.type === 'order_updated') {
+              fetchOrders();
+            }
+          } catch (e) {
+            console.error('WebSocket parse error:', e);
           }
         };
         
         ws.onclose = () => {
-          reconnectTimeout = setTimeout(connectWebSocket, 5000);
+          const delay = Math.min(1000 * Math.pow(1.5, reconnectAttempts), 5000);
+          reconnectAttempts++;
+          reconnectTimeout = setTimeout(connectWebSocket, delay);
         };
         
         ws.onerror = () => ws?.close();
@@ -134,8 +148,8 @@ export default function AusgabePage() {
     
     connectWebSocket();
     
-    // Fallback polling every 10 seconds
-    const interval = setInterval(fetchOrders, 10000);
+    // Fallback polling every 3 seconds
+    const interval = setInterval(fetchOrders, 3000);
     
     return () => {
       clearInterval(interval);
