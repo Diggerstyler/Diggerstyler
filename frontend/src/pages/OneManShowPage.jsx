@@ -139,6 +139,16 @@ export default function OneManShowPage() {
     return num.toString().padStart(2, '0');
   };
 
+  // Function to refetch articles (for stock updates)
+  const refetchArticles = async () => {
+    try {
+      const articlesRes = await axios.get(`${API}/stands/${standId}/articles`);
+      setArticles(articlesRes.data);
+    } catch (error) {
+      console.error("Fehler beim Aktualisieren der Artikel");
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
