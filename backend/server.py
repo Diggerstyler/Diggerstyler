@@ -1163,13 +1163,17 @@ async def create_order(order: OrderCreate):
         **order_dict
     )
     doc = order_obj.model_dump()
-    await db.orders.insert_one(doc)
     
-    # Broadcast to all connected clients for this stand
-    await manager.broadcast_to_stand(order.stand_id, {
-        "type": "new_order",
-        "order": doc
-    })
+    # Insert order and broadcast simultaneously for lower latency
+    async def broadcast_new_order():
+        await manager.broadcast_to_stand(order.stand_id, {
+            "type": "new_order",
+            "order": doc
+        })
+    
+    # Run both in parallel - don't wait for broadcast to complete
+    await db.orders.insert_one(doc)
+    asyncio.create_task(broadcast_new_order())
     
     return order_obj
 
