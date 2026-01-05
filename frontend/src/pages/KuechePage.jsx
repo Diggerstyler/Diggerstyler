@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, Clock, Hammer, Check, RefreshCw, ListOrdered, Star, CheckCircle2, Volume2, VolumeX, Maximize, Minimize } from "lucide-react";
+import LiveClock from "@/components/LiveClock";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
