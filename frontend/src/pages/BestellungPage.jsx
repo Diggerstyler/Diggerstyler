@@ -535,6 +535,7 @@ export default function BestellungPage() {
           <p className="text-xs sm:text-sm text-muted-foreground truncate">{standInfo?.name}</p>
         </div>
         <div className="flex items-center gap-2">
+          <LiveClock className="hidden sm:flex" />
           <Button
             variant="outline"
             size="sm"
