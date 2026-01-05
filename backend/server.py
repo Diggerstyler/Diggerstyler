@@ -414,6 +414,7 @@ async def health_check():
     return {
         "status": "healthy",
         "database": db_status,
+        "websocket_connections": manager.get_connection_count(),
         "version": "1.0.0"
     }
 
