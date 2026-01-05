@@ -111,6 +111,17 @@ ROLES = [
     {"id": "onemanshow", "name": "OneManShow", "description": "Direkt buchen & abrechnen"}
 ]
 
+# Available Timezones for selection
+AVAILABLE_TIMEZONES = [
+    {"id": "Europe/Berlin", "name": "Berlin (MEZ/MESZ)"},
+    {"id": "Europe/Vienna", "name": "Wien (MEZ/MESZ)"},
+    {"id": "Europe/Zurich", "name": "Zürich (MEZ/MESZ)"},
+    {"id": "Europe/London", "name": "London (GMT/BST)"},
+    {"id": "Europe/Paris", "name": "Paris (MEZ/MESZ)"},
+    {"id": "Europe/Amsterdam", "name": "Amsterdam (MEZ/MESZ)"},
+    {"id": "UTC", "name": "UTC"}
+]
+
 # Models
 class DepositGroup(BaseModel):
     model_config = ConfigDict(extra="ignore")
