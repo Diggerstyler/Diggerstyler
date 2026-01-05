@@ -93,9 +93,9 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
-# Admin credentials
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "admin"
+# Admin credentials (from environment with defaults)
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin")
 
 # Default Stand Types
 DEFAULT_STAND_TYPES = [
