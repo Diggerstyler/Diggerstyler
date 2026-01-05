@@ -524,15 +524,27 @@ export default function BestellungPage() {
       </Dialog>
 
       <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => navigate("/")}
-          data-testid="back-btn"
-          className="shrink-0"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate("/")}
+            title="Zur Startseite"
+            className="shrink-0"
+          >
+            <Home className="w-5 h-5" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate(-1)}
+            data-testid="back-btn"
+            title="Zurück"
+            className="shrink-0"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+        </div>
         <div className="min-w-0 flex-1">
           <h1 className="font-display text-lg sm:text-xl font-bold uppercase tracking-tight truncate">
             Bestellung
