@@ -222,14 +222,25 @@ export default function AusgabePage() {
     <div className="min-h-screen bg-background">
       <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate("/")}
-            data-testid="back-btn"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate("/")}
+              title="Zur Startseite"
+            >
+              <Home className="w-5 h-5" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate(-1)}
+              data-testid="back-btn"
+              title="Zurück"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </div>
           <div className="flex items-center gap-3">
             <Package className="w-5 sm:w-6 h-5 sm:h-6 text-accent" />
             <div>
