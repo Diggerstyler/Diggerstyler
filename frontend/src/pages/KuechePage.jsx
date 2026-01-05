@@ -433,9 +433,9 @@ export default function KuechePage() {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(`/?stand=${standId}`)}
               data-testid="back-btn"
-              title="Zurück"
+              title="Zurück zur Rollenauswahl"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
