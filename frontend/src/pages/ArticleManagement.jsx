@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, Pencil, Trash2, Package, Coins, Check, Box, AlertTriangle, TrendingDown, Beer, Wine } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, Package, Coins, Check, Box, AlertTriangle, TrendingDown, Beer, Wine, ArrowUpDown, ArrowUp, ArrowDown, Search, Filter, X } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -31,6 +31,23 @@ export default function ArticleManagement() {
   const [editingDeposit, setEditingDeposit] = useState(null);
   const [editingStockUnit, setEditingStockUnit] = useState(null);
   const [stockArticle, setStockArticle] = useState(null);
+  
+  // Filter & Sort States - Articles
+  const [articleSearch, setArticleSearch] = useState("");
+  const [articleCategoryFilter, setArticleCategoryFilter] = useState("all");
+  const [articleDepositFilter, setArticleDepositFilter] = useState("all");
+  const [articleStockFilter, setArticleStockFilter] = useState("all");
+  const [articleStatusFilter, setArticleStatusFilter] = useState("all");
+  const [articleSort, setArticleSort] = useState({ field: "name", direction: "asc" });
+  
+  // Filter & Sort States - Stock Units
+  const [unitSearch, setUnitSearch] = useState("");
+  const [unitTypeFilter, setUnitTypeFilter] = useState("all");
+  const [unitSort, setUnitSort] = useState({ field: "name", direction: "asc" });
+  
+  // Filter & Sort States - Deposits
+  const [depositSearch, setDepositSearch] = useState("");
+  const [depositSort, setDepositSort] = useState({ field: "name", direction: "asc" });
   
   const [formData, setFormData] = useState({
     name: "",
@@ -94,6 +111,255 @@ export default function ArticleManagement() {
       setIsLoading(false);
     }
   };
+
+  // === Helper functions ===
+  const getDepositName = (depositId) => {
+    const deposit = depositGroups.find(d => d.id === depositId);
+    return deposit ? `${deposit.name} (${deposit.amount.toFixed(2)}€)` : "-";
+  };
+
+  const getStockUnit = (unitId) => {
+    return stockUnits.find(u => u.id === unitId);
+  };
+
+  const getTotalStock = (article) => {
+    const unit = getStockUnit(article.stock_unit_id);
+    const large = article.stock_large_units || 0;
+    const small = article.stock_small_units || 0;
+    const unitsPerLarge = unit?.sales_units_per_large || 1;
+    return (large * unitsPerLarge) + small;
+  };
+
+  const formatStock = (article) => {
+    const unit = getStockUnit(article.stock_unit_id);
+    if (!unit) return `${article.stock_small_units || 0} Stück`;
+    
+    const large = article.stock_large_units || 0;
+    const small = article.stock_small_units || 0;
+    
+    if (large === 0 && small === 0) return "0";
+    
+    const parts = [];
+    if (large > 0) parts.push(`${large} ${unit.large_unit_name}${large !== 1 ? 'n' : ''}`);
+    if (small > 0) parts.push(`${Math.round(small)} ${unit.small_unit_name}${small !== 1 ? 'n' : ''}`);
+    
+    return parts.join(" + ");
+  };
+
+  const isLowStock = (article) => {
+    if (!article.track_stock || !article.stock_warning_threshold) return false;
+    return getTotalStock(article) <= article.stock_warning_threshold;
+  };
+
+  const isSoldOut = (article) => {
+    if (!article.track_stock) return false;
+    return getTotalStock(article) <= 0;
+  };
+
+  // === Sorting & Filtering - Articles ===
+  const toggleArticleSort = (field) => {
+    setArticleSort(prev => ({
+      field,
+      direction: prev.field === field && prev.direction === "asc" ? "desc" : "asc"
+    }));
+  };
+
+  const getSortIcon = (sortState, field) => {
+    if (sortState.field !== field) return <ArrowUpDown className="w-3 h-3 ml-1 opacity-50" />;
+    return sortState.direction === "asc" 
+      ? <ArrowUp className="w-3 h-3 ml-1 text-primary" />
+      : <ArrowDown className="w-3 h-3 ml-1 text-primary" />;
+  };
+
+  const filteredAndSortedArticles = useMemo(() => {
+    let result = [...articles];
+    
+    // Apply filters
+    if (articleSearch) {
+      const search = articleSearch.toLowerCase();
+      result = result.filter(a => a.name.toLowerCase().includes(search));
+    }
+    
+    if (articleCategoryFilter !== "all") {
+      result = result.filter(a => a.category === articleCategoryFilter);
+    }
+    
+    if (articleDepositFilter !== "all") {
+      if (articleDepositFilter === "none") {
+        result = result.filter(a => !a.deposit_group_id);
+      } else if (articleDepositFilter === "has") {
+        result = result.filter(a => a.deposit_group_id);
+      } else {
+        result = result.filter(a => a.deposit_group_id === articleDepositFilter);
+      }
+    }
+    
+    if (articleStockFilter !== "all") {
+      if (articleStockFilter === "tracked") {
+        result = result.filter(a => a.track_stock);
+      } else if (articleStockFilter === "not_tracked") {
+        result = result.filter(a => !a.track_stock);
+      } else if (articleStockFilter === "low") {
+        result = result.filter(a => a.track_stock && isLowStock(a) && !isSoldOut(a));
+      } else if (articleStockFilter === "sold_out") {
+        result = result.filter(a => a.track_stock && isSoldOut(a));
+      } else if (articleStockFilter === "ok") {
+        result = result.filter(a => a.track_stock && !isLowStock(a) && !isSoldOut(a));
+      }
+    }
+    
+    if (articleStatusFilter !== "all") {
+      result = result.filter(a => articleStatusFilter === "active" ? a.active : !a.active);
+    }
+    
+    // Apply sorting
+    result.sort((a, b) => {
+      let aVal, bVal;
+      
+      switch (articleSort.field) {
+        case "name":
+          aVal = a.name.toLowerCase();
+          bVal = b.name.toLowerCase();
+          break;
+        case "category":
+          aVal = a.category;
+          bVal = b.category;
+          break;
+        case "price":
+          aVal = a.price;
+          bVal = b.price;
+          break;
+        case "deposit":
+          const depA = depositGroups.find(d => d.id === a.deposit_group_id);
+          const depB = depositGroups.find(d => d.id === b.deposit_group_id);
+          aVal = depA?.amount || 0;
+          bVal = depB?.amount || 0;
+          break;
+        case "stock":
+          aVal = a.track_stock ? getTotalStock(a) : -1;
+          bVal = b.track_stock ? getTotalStock(b) : -1;
+          break;
+        case "active":
+          aVal = a.active ? 1 : 0;
+          bVal = b.active ? 1 : 0;
+          break;
+        default:
+          aVal = a.name.toLowerCase();
+          bVal = b.name.toLowerCase();
+      }
+      
+      if (aVal < bVal) return articleSort.direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return articleSort.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+    
+    return result;
+  }, [articles, articleSearch, articleCategoryFilter, articleDepositFilter, articleStockFilter, articleStatusFilter, articleSort, depositGroups]);
+
+  // === Sorting & Filtering - Stock Units ===
+  const toggleUnitSort = (field) => {
+    setUnitSort(prev => ({
+      field,
+      direction: prev.field === field && prev.direction === "asc" ? "desc" : "asc"
+    }));
+  };
+
+  const filteredAndSortedUnits = useMemo(() => {
+    let result = [...stockUnits];
+    
+    if (unitSearch) {
+      const search = unitSearch.toLowerCase();
+      result = result.filter(u => u.name.toLowerCase().includes(search));
+    }
+    
+    if (unitTypeFilter !== "all") {
+      result = result.filter(u => u.unit_type === unitTypeFilter);
+    }
+    
+    result.sort((a, b) => {
+      let aVal, bVal;
+      
+      switch (unitSort.field) {
+        case "name":
+          aVal = a.name.toLowerCase();
+          bVal = b.name.toLowerCase();
+          break;
+        case "type":
+          aVal = a.unit_type;
+          bVal = b.unit_type;
+          break;
+        case "units":
+          aVal = a.sales_units_per_large || 0;
+          bVal = b.sales_units_per_large || 0;
+          break;
+        case "loss":
+          aVal = a.loss_percent || 0;
+          bVal = b.loss_percent || 0;
+          break;
+        default:
+          aVal = a.name.toLowerCase();
+          bVal = b.name.toLowerCase();
+      }
+      
+      if (aVal < bVal) return unitSort.direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return unitSort.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+    
+    return result;
+  }, [stockUnits, unitSearch, unitTypeFilter, unitSort]);
+
+  // === Sorting & Filtering - Deposits ===
+  const toggleDepositSort = (field) => {
+    setDepositSort(prev => ({
+      field,
+      direction: prev.field === field && prev.direction === "asc" ? "desc" : "asc"
+    }));
+  };
+
+  const filteredAndSortedDeposits = useMemo(() => {
+    let result = [...depositGroups];
+    
+    if (depositSearch) {
+      const search = depositSearch.toLowerCase();
+      result = result.filter(d => d.name.toLowerCase().includes(search));
+    }
+    
+    result.sort((a, b) => {
+      let aVal, bVal;
+      
+      switch (depositSort.field) {
+        case "name":
+          aVal = a.name.toLowerCase();
+          bVal = b.name.toLowerCase();
+          break;
+        case "amount":
+          aVal = a.amount;
+          bVal = b.amount;
+          break;
+        default:
+          aVal = a.name.toLowerCase();
+          bVal = b.name.toLowerCase();
+      }
+      
+      if (aVal < bVal) return depositSort.direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return depositSort.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+    
+    return result;
+  }, [depositGroups, depositSearch, depositSort]);
+
+  // Clear all filters
+  const clearArticleFilters = () => {
+    setArticleSearch("");
+    setArticleCategoryFilter("all");
+    setArticleDepositFilter("all");
+    setArticleStockFilter("all");
+    setArticleStatusFilter("all");
+  };
+
+  const hasActiveArticleFilters = articleSearch || articleCategoryFilter !== "all" || articleDepositFilter !== "all" || articleStockFilter !== "all" || articleStatusFilter !== "all";
 
   // === Article handlers ===
   const handleSubmit = async (e) => {
@@ -375,49 +641,18 @@ export default function ArticleManagement() {
     }
   };
 
-  // === Helper functions ===
-  const getDepositName = (depositId) => {
-    const deposit = depositGroups.find(d => d.id === depositId);
-    return deposit ? `${deposit.name} (${deposit.amount.toFixed(2)}€)` : "-";
-  };
-
-  const getStockUnit = (unitId) => {
-    return stockUnits.find(u => u.id === unitId);
-  };
-
-  const getTotalStock = (article) => {
-    const unit = getStockUnit(article.stock_unit_id);
-    const large = article.stock_large_units || 0;
-    const small = article.stock_small_units || 0;
-    const unitsPerLarge = unit?.sales_units_per_large || 1;
-    return (large * unitsPerLarge) + small;
-  };
-
-  const formatStock = (article) => {
-    const unit = getStockUnit(article.stock_unit_id);
-    if (!unit) return `${article.stock_small_units || 0} Stück`;
-    
-    const large = article.stock_large_units || 0;
-    const small = article.stock_small_units || 0;
-    
-    if (large === 0 && small === 0) return "0";
-    
-    const parts = [];
-    if (large > 0) parts.push(`${large} ${unit.large_unit_name}${large !== 1 ? 'n' : ''}`);
-    if (small > 0) parts.push(`${Math.round(small)} ${unit.small_unit_name}${small !== 1 ? 'n' : ''}`);
-    
-    return parts.join(" + ");
-  };
-
-  const isLowStock = (article) => {
-    if (!article.track_stock || !article.stock_warning_threshold) return false;
-    return getTotalStock(article) <= article.stock_warning_threshold;
-  };
-
-  const isSoldOut = (article) => {
-    if (!article.track_stock) return false;
-    return getTotalStock(article) <= 0;
-  };
+  // Sortable Table Header Component
+  const SortableHeader = ({ children, field, sortState, onSort, className = "" }) => (
+    <TableHead 
+      className={`cursor-pointer hover:bg-muted/50 select-none ${className}`}
+      onClick={() => onSort(field)}
+    >
+      <div className="flex items-center">
+        {children}
+        {getSortIcon(sortState, field)}
+      </div>
+    </TableHead>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -439,210 +674,294 @@ export default function ArticleManagement() {
         </div>
       </header>
 
-      <main className="p-4 sm:p-6 max-w-6xl mx-auto">
+      <main className="p-4 sm:p-6 max-w-7xl mx-auto">
         <Tabs defaultValue="articles" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 max-w-lg">
-            <TabsTrigger value="articles">Artikel</TabsTrigger>
-            <TabsTrigger value="stock-units">Einheiten</TabsTrigger>
-            <TabsTrigger value="deposit">Pfand</TabsTrigger>
+            <TabsTrigger value="articles">Artikel ({filteredAndSortedArticles.length})</TabsTrigger>
+            <TabsTrigger value="stock-units">Einheiten ({filteredAndSortedUnits.length})</TabsTrigger>
+            <TabsTrigger value="deposit">Pfand ({filteredAndSortedDeposits.length})</TabsTrigger>
           </TabsList>
 
           {/* === ARTICLES TAB === */}
-          <TabsContent value="articles" className="space-y-6">
-            <div className="flex justify-end">
-              <Dialog open={isDialogOpen} onOpenChange={(open) => {
-                setIsDialogOpen(open);
-                if (!open) resetForm();
-              }}>
-                <DialogTrigger asChild>
-                  <Button className="neon-primary">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Neuer Artikel
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle className="font-display uppercase">
-                      {editingArticle ? "Artikel bearbeiten" : "Neuer Artikel"}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2 col-span-2">
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                          id="name"
-                          value={formData.name}
-                          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                          placeholder="z.B. Bier 0,5l"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="price">Preis (€)</Label>
-                        <Input
-                          id="price"
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={formData.price}
-                          onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                          placeholder="0.00"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="category">Kategorie</Label>
-                        <Select 
-                          value={formData.category} 
-                          onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="getraenke">Getränke</SelectItem>
-                            <SelectItem value="speisen">Speisen</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="deposit">Pfandgruppe</Label>
-                      <Select 
-                        value={formData.deposit_group_id || "none"} 
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, deposit_group_id: value === "none" ? "" : value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Kein Pfand" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Kein Pfand</SelectItem>
-                          {depositGroups.filter(d => d.active).map(deposit => (
-                            <SelectItem key={deposit.id} value={deposit.id}>
-                              {deposit.name} ({deposit.amount.toFixed(2)} €)
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Bestandsverwaltung */}
-                    <div className="border-t border-border pt-4 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Box className="w-4 h-4 text-secondary" />
-                          <Label htmlFor="track_stock" className="font-medium">Bestandsverwaltung</Label>
-                        </div>
-                        <Switch
-                          id="track_stock"
-                          checked={formData.track_stock}
-                          onCheckedChange={(checked) => setFormData(prev => ({ ...prev, track_stock: checked }))}
-                        />
-                      </div>
-
-                      {formData.track_stock && (
-                        <div className="space-y-4 pl-6 border-l-2 border-secondary/30">
+          <TabsContent value="articles" className="space-y-4">
+            {/* Filter Bar */}
+            <Card className="bg-card border-border">
+              <CardContent className="p-4">
+                <div className="flex flex-wrap gap-3 items-center">
+                  <div className="relative flex-1 min-w-[200px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Artikel suchen..."
+                      value={articleSearch}
+                      onChange={(e) => setArticleSearch(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                  
+                  <Select value={articleCategoryFilter} onValueChange={setArticleCategoryFilter}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Kategorie" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Alle Kategorien</SelectItem>
+                      <SelectItem value="getraenke">Getränke</SelectItem>
+                      <SelectItem value="speisen">Speisen</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={articleDepositFilter} onValueChange={setArticleDepositFilter}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Pfand" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Alle</SelectItem>
+                      <SelectItem value="has">Mit Pfand</SelectItem>
+                      <SelectItem value="none">Ohne Pfand</SelectItem>
+                      {depositGroups.map(d => (
+                        <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={articleStockFilter} onValueChange={setArticleStockFilter}>
+                    <SelectTrigger className="w-[150px]">
+                      <SelectValue placeholder="Bestand" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Alle</SelectItem>
+                      <SelectItem value="tracked">Mit Bestandsv.</SelectItem>
+                      <SelectItem value="not_tracked">Ohne Bestandsv.</SelectItem>
+                      <SelectItem value="ok">Bestand OK</SelectItem>
+                      <SelectItem value="low">Bestand knapp</SelectItem>
+                      <SelectItem value="sold_out">Ausverkauft</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={articleStatusFilter} onValueChange={setArticleStatusFilter}>
+                    <SelectTrigger className="w-[120px]">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Alle</SelectItem>
+                      <SelectItem value="active">Aktiv</SelectItem>
+                      <SelectItem value="inactive">Inaktiv</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  {hasActiveArticleFilters && (
+                    <Button variant="ghost" size="sm" onClick={clearArticleFilters}>
+                      <X className="w-4 h-4 mr-1" />
+                      Filter löschen
+                    </Button>
+                  )}
+                  
+                  <div className="ml-auto">
+                    <Dialog open={isDialogOpen} onOpenChange={(open) => {
+                      setIsDialogOpen(open);
+                      if (!open) resetForm();
+                    }}>
+                      <DialogTrigger asChild>
+                        <Button className="neon-primary">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Neuer Artikel
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="font-display uppercase">
+                            {editingArticle ? "Artikel bearbeiten" : "Neuer Artikel"}
+                          </DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2 col-span-2">
+                              <Label htmlFor="name">Name</Label>
+                              <Input
+                                id="name"
+                                value={formData.name}
+                                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                                placeholder="z.B. Bier 0,5l"
+                                required
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="price">Preis (€)</Label>
+                              <Input
+                                id="price"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={formData.price}
+                                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                                placeholder="0.00"
+                                required
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="category">Kategorie</Label>
+                              <Select 
+                                value={formData.category} 
+                                onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="getraenke">Getränke</SelectItem>
+                                  <SelectItem value="speisen">Speisen</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          
                           <div className="space-y-2">
-                            <Label>Einheit/Gebinde</Label>
+                            <Label htmlFor="deposit">Pfandgruppe</Label>
                             <Select 
-                              value={formData.stock_unit_id || "none"} 
-                              onValueChange={(value) => setFormData(prev => ({ ...prev, stock_unit_id: value === "none" ? "" : value }))}
+                              value={formData.deposit_group_id || "none"} 
+                              onValueChange={(value) => setFormData(prev => ({ ...prev, deposit_group_id: value === "none" ? "" : value }))}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Einheit wählen" />
+                                <SelectValue placeholder="Kein Pfand" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="none">Keine Einheit (Stückzählung)</SelectItem>
-                                {stockUnits.filter(u => u.active !== false).map(unit => (
-                                  <SelectItem key={unit.id} value={unit.id}>
-                                    {unit.name} ({Math.round(unit.sales_units_per_large)} {unit.small_unit_name}/{unit.large_unit_name})
+                                <SelectItem value="none">Kein Pfand</SelectItem>
+                                {depositGroups.filter(d => d.active).map(deposit => (
+                                  <SelectItem key={deposit.id} value={deposit.id}>
+                                    {deposit.name} ({deposit.amount.toFixed(2)} €)
                                   </SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
                           </div>
 
-                          <div className="space-y-2">
-                            <Label htmlFor="warning">Warnschwelle (VK-Einheiten)</Label>
-                            <Input
-                              id="warning"
-                              type="number"
-                              min="0"
-                              value={formData.stock_warning_threshold}
-                              onChange={(e) => setFormData(prev => ({ ...prev, stock_warning_threshold: e.target.value }))}
-                              placeholder="z.B. 50"
+                          {/* Bestandsverwaltung */}
+                          <div className="border-t border-border pt-4 space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Box className="w-4 h-4 text-secondary" />
+                                <Label htmlFor="track_stock" className="font-medium">Bestandsverwaltung</Label>
+                              </div>
+                              <Switch
+                                id="track_stock"
+                                checked={formData.track_stock}
+                                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, track_stock: checked }))}
+                              />
+                            </div>
+
+                            {formData.track_stock && (
+                              <div className="space-y-4 pl-6 border-l-2 border-secondary/30">
+                                <div className="space-y-2">
+                                  <Label>Einheit/Gebinde</Label>
+                                  <Select 
+                                    value={formData.stock_unit_id || "none"} 
+                                    onValueChange={(value) => setFormData(prev => ({ ...prev, stock_unit_id: value === "none" ? "" : value }))}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Einheit wählen" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="none">Keine Einheit (Stückzählung)</SelectItem>
+                                      {stockUnits.filter(u => u.active !== false).map(unit => (
+                                        <SelectItem key={unit.id} value={unit.id}>
+                                          {unit.name} ({Math.round(unit.sales_units_per_large)} {unit.small_unit_name}/{unit.large_unit_name})
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label htmlFor="warning">Warnschwelle (VK-Einheiten)</Label>
+                                  <Input
+                                    id="warning"
+                                    type="number"
+                                    min="0"
+                                    value={formData.stock_warning_threshold}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, stock_warning_threshold: e.target.value }))}
+                                    placeholder="z.B. 50"
+                                  />
+                                  <p className="text-xs text-muted-foreground">
+                                    Bei diesem Bestand wird "knapp" angezeigt
+                                  </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label>Verhalten bei Ausverkauf</Label>
+                                  <Select 
+                                    value={formData.stock_sold_out_behavior} 
+                                    onValueChange={(value) => setFormData(prev => ({ ...prev, stock_sold_out_behavior: value }))}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="disable">Automatisch deaktivieren</SelectItem>
+                                      <SelectItem value="mark">Rot markieren (buchbar)</SelectItem>
+                                      <SelectItem value="allow">Normal buchbar lassen</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex items-center justify-between border-t border-border pt-4">
+                            <Label htmlFor="active">Artikel aktiv</Label>
+                            <Switch
+                              id="active"
+                              checked={formData.active}
+                              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, active: checked }))}
                             />
-                            <p className="text-xs text-muted-foreground">
-                              Bei diesem Bestand wird "knapp" angezeigt
-                            </p>
                           </div>
+                          
+                          <Button type="submit" className="w-full neon-primary">
+                            {editingArticle ? "Aktualisieren" : "Erstellen"}
+                          </Button>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-                          <div className="space-y-2">
-                            <Label>Verhalten bei Ausverkauf</Label>
-                            <Select 
-                              value={formData.stock_sold_out_behavior} 
-                              onValueChange={(value) => setFormData(prev => ({ ...prev, stock_sold_out_behavior: value }))}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="disable">Automatisch deaktivieren</SelectItem>
-                                <SelectItem value="mark">Rot markieren (buchbar)</SelectItem>
-                                <SelectItem value="allow">Normal buchbar lassen</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between border-t border-border pt-4">
-                      <Label htmlFor="active">Artikel aktiv</Label>
-                      <Switch
-                        id="active"
-                        checked={formData.active}
-                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, active: checked }))}
-                      />
-                    </div>
-                    
-                    <Button type="submit" className="w-full neon-primary">
-                      {editingArticle ? "Aktualisieren" : "Erstellen"}
-                    </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </div>
-
+            {/* Articles Table */}
             <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="font-display uppercase">
-                  Artikel ({articles.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 {isLoading ? (
                   <div className="text-center py-8 text-muted-foreground">Laden...</div>
-                ) : articles.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">Keine Artikel vorhanden</div>
+                ) : filteredAndSortedArticles.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {hasActiveArticleFilters ? "Keine Artikel mit diesen Filtern gefunden" : "Keine Artikel vorhanden"}
+                  </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Name</TableHead>
-                          <TableHead className="hidden sm:table-cell">Kategorie</TableHead>
-                          <TableHead className="text-right">Preis</TableHead>
-                          <TableHead className="hidden md:table-cell">Pfand</TableHead>
-                          <TableHead className="hidden lg:table-cell">Bestand</TableHead>
-                          <TableHead className="text-center">Status</TableHead>
+                          <SortableHeader field="name" sortState={articleSort} onSort={toggleArticleSort}>
+                            Name
+                          </SortableHeader>
+                          <SortableHeader field="category" sortState={articleSort} onSort={toggleArticleSort} className="hidden sm:table-cell">
+                            Kategorie
+                          </SortableHeader>
+                          <SortableHeader field="price" sortState={articleSort} onSort={toggleArticleSort} className="text-right">
+                            Preis
+                          </SortableHeader>
+                          <SortableHeader field="deposit" sortState={articleSort} onSort={toggleArticleSort} className="hidden md:table-cell">
+                            Pfand
+                          </SortableHeader>
+                          <SortableHeader field="stock" sortState={articleSort} onSort={toggleArticleSort} className="hidden lg:table-cell">
+                            Bestand
+                          </SortableHeader>
+                          <SortableHeader field="active" sortState={articleSort} onSort={toggleArticleSort} className="text-center">
+                            Status
+                          </SortableHeader>
                           <TableHead className="text-right">Aktionen</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {articles.map(article => (
+                        {filteredAndSortedArticles.map(article => (
                           <TableRow key={article.id} className={isSoldOut(article) ? "opacity-50" : ""}>
                             <TableCell className="font-medium">
                               <div className="flex items-center gap-2">
@@ -768,236 +1087,286 @@ export default function ArticleManagement() {
           </TabsContent>
 
           {/* === STOCK UNITS TAB === */}
-          <TabsContent value="stock-units" className="space-y-6">
-            <div className="flex justify-end">
-              <Dialog open={isStockUnitDialogOpen} onOpenChange={(open) => {
-                setIsStockUnitDialogOpen(open);
-                if (!open) resetStockUnitForm();
-              }}>
-                <DialogTrigger asChild>
-                  <Button className="neon-secondary">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Neue Einheit
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle className="font-display uppercase">
-                      {editingStockUnit ? "Einheit bearbeiten" : "Neue Einheit"}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleStockUnitSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="unit-name">Name</Label>
-                      <Input
-                        id="unit-name"
-                        value={stockUnitFormData.name}
-                        onChange={(e) => setStockUnitFormData(prev => ({ ...prev, name: e.target.value }))}
-                        placeholder="z.B. Kiste 24x0,5l"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Typ</Label>
-                      <Select 
-                        value={stockUnitFormData.unit_type} 
-                        onValueChange={(value) => setStockUnitFormData(prev => ({ 
-                          ...prev, 
-                          unit_type: value,
-                          large_unit_name: value === "container" ? "Kiste" : "Fass",
-                          small_unit_name: value === "container" ? "Flasche" : "Glas",
-                          loss_percent: value === "barrel" ? "7" : "0"
-                        }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="container">
-                            <div className="flex items-center gap-2">
-                              <Wine className="w-4 h-4" />
-                              Gebinde (Kiste/Karton)
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="barrel">
-                            <div className="flex items-center gap-2">
-                              <Beer className="w-4 h-4" />
-                              Fass (mit Schankverlust)
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Name Großeinheit</Label>
-                        <Input
-                          value={stockUnitFormData.large_unit_name}
-                          onChange={(e) => setStockUnitFormData(prev => ({ ...prev, large_unit_name: e.target.value }))}
-                          placeholder="z.B. Kiste"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Name Verkaufseinheit</Label>
-                        <Input
-                          value={stockUnitFormData.small_unit_name}
-                          onChange={(e) => setStockUnitFormData(prev => ({ ...prev, small_unit_name: e.target.value }))}
-                          placeholder="z.B. Flasche"
-                        />
-                      </div>
-                    </div>
-
-                    {stockUnitFormData.unit_type === "container" ? (
-                      <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-                        <h4 className="font-medium flex items-center gap-2">
-                          <Wine className="w-4 h-4" />
-                          Gebinde-Einstellungen
-                        </h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label>Stück pro Gebinde</Label>
-                            <Input
-                              type="number"
-                              min="1"
-                              value={stockUnitFormData.units_per_container}
-                              onChange={(e) => setStockUnitFormData(prev => ({ ...prev, units_per_container: e.target.value }))}
-                              placeholder="24"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Volumen/Stück (l)</Label>
-                            <Input
-                              type="number"
-                              step="0.1"
-                              min="0"
-                              value={stockUnitFormData.volume_per_unit}
-                              onChange={(e) => setStockUnitFormData(prev => ({ ...prev, volume_per_unit: e.target.value }))}
-                              placeholder="0.5"
-                            />
-                          </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          = {stockUnitFormData.units_per_container || 0} {stockUnitFormData.small_unit_name} pro {stockUnitFormData.large_unit_name}
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-                        <h4 className="font-medium flex items-center gap-2">
-                          <Beer className="w-4 h-4" />
-                          Fass-Einstellungen
-                        </h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label>Fassvolumen (Liter)</Label>
-                            <Input
-                              type="number"
-                              step="1"
-                              min="1"
-                              value={stockUnitFormData.total_volume_liters}
-                              onChange={(e) => setStockUnitFormData(prev => ({ ...prev, total_volume_liters: e.target.value }))}
-                              placeholder="30"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Ausschank (Liter)</Label>
-                            <Input
-                              type="number"
-                              step="0.1"
-                              min="0.1"
-                              value={stockUnitFormData.serving_size_liters}
-                              onChange={(e) => setStockUnitFormData(prev => ({ ...prev, serving_size_liters: e.target.value }))}
-                              placeholder="0.5"
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="flex items-center gap-2">
-                            <TrendingDown className="w-4 h-4 text-yellow-500" />
-                            Schankverlust (%)
-                          </Label>
-                          <Input
-                            type="number"
-                            step="0.5"
-                            min="0"
-                            max="30"
-                            value={stockUnitFormData.loss_percent}
-                            onChange={(e) => setStockUnitFormData(prev => ({ ...prev, loss_percent: e.target.value }))}
-                            placeholder="7"
-                          />
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          = ~{Math.round((parseFloat(stockUnitFormData.total_volume_liters) || 0) * (1 - (parseFloat(stockUnitFormData.loss_percent) || 0) / 100) / (parseFloat(stockUnitFormData.serving_size_liters) || 0.5))} {stockUnitFormData.small_unit_name} pro {stockUnitFormData.large_unit_name}
-                        </p>
-                      </div>
-                    )}
-
-                    <Button type="submit" className="w-full neon-secondary">
-                      {editingStockUnit ? "Aktualisieren" : "Erstellen"}
-                    </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </div>
-
+          <TabsContent value="stock-units" className="space-y-4">
+            {/* Filter Bar */}
             <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="font-display uppercase flex items-center gap-2">
-                  <Box className="w-5 h-5 text-secondary" />
-                  Einheiten-Vorlagen ({stockUnits.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {stockUnits.length === 0 ? (
+              <CardContent className="p-4">
+                <div className="flex flex-wrap gap-3 items-center">
+                  <div className="relative flex-1 min-w-[200px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Einheit suchen..."
+                      value={unitSearch}
+                      onChange={(e) => setUnitSearch(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                  
+                  <Select value={unitTypeFilter} onValueChange={setUnitTypeFilter}>
+                    <SelectTrigger className="w-[150px]">
+                      <SelectValue placeholder="Typ" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Alle Typen</SelectItem>
+                      <SelectItem value="container">Gebinde (Kiste)</SelectItem>
+                      <SelectItem value="barrel">Fass</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <div className="ml-auto">
+                    <Dialog open={isStockUnitDialogOpen} onOpenChange={(open) => {
+                      setIsStockUnitDialogOpen(open);
+                      if (!open) resetStockUnitForm();
+                    }}>
+                      <DialogTrigger asChild>
+                        <Button className="neon-secondary">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Neue Einheit
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="font-display uppercase">
+                            {editingStockUnit ? "Einheit bearbeiten" : "Neue Einheit"}
+                          </DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleStockUnitSubmit} className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="unit-name">Name</Label>
+                            <Input
+                              id="unit-name"
+                              value={stockUnitFormData.name}
+                              onChange={(e) => setStockUnitFormData(prev => ({ ...prev, name: e.target.value }))}
+                              placeholder="z.B. Kiste 24x0,5l"
+                              required
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Typ</Label>
+                            <Select 
+                              value={stockUnitFormData.unit_type} 
+                              onValueChange={(value) => setStockUnitFormData(prev => ({ 
+                                ...prev, 
+                                unit_type: value,
+                                large_unit_name: value === "container" ? "Kiste" : "Fass",
+                                small_unit_name: value === "container" ? "Flasche" : "Glas",
+                                loss_percent: value === "barrel" ? "7" : "0"
+                              }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="container">
+                                  <div className="flex items-center gap-2">
+                                    <Wine className="w-4 h-4" />
+                                    Gebinde (Kiste/Karton)
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="barrel">
+                                  <div className="flex items-center gap-2">
+                                    <Beer className="w-4 h-4" />
+                                    Fass (mit Schankverlust)
+                                  </div>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Name Großeinheit</Label>
+                              <Input
+                                value={stockUnitFormData.large_unit_name}
+                                onChange={(e) => setStockUnitFormData(prev => ({ ...prev, large_unit_name: e.target.value }))}
+                                placeholder="z.B. Kiste"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Name Verkaufseinheit</Label>
+                              <Input
+                                value={stockUnitFormData.small_unit_name}
+                                onChange={(e) => setStockUnitFormData(prev => ({ ...prev, small_unit_name: e.target.value }))}
+                                placeholder="z.B. Flasche"
+                              />
+                            </div>
+                          </div>
+
+                          {stockUnitFormData.unit_type === "container" ? (
+                            <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+                              <h4 className="font-medium flex items-center gap-2">
+                                <Wine className="w-4 h-4" />
+                                Gebinde-Einstellungen
+                              </h4>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label>Stück pro Gebinde</Label>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    value={stockUnitFormData.units_per_container}
+                                    onChange={(e) => setStockUnitFormData(prev => ({ ...prev, units_per_container: e.target.value }))}
+                                    placeholder="24"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Volumen/Stück (l)</Label>
+                                  <Input
+                                    type="number"
+                                    step="0.1"
+                                    min="0"
+                                    value={stockUnitFormData.volume_per_unit}
+                                    onChange={(e) => setStockUnitFormData(prev => ({ ...prev, volume_per_unit: e.target.value }))}
+                                    placeholder="0.5"
+                                  />
+                                </div>
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                = {stockUnitFormData.units_per_container || 0} {stockUnitFormData.small_unit_name} pro {stockUnitFormData.large_unit_name}
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+                              <h4 className="font-medium flex items-center gap-2">
+                                <Beer className="w-4 h-4" />
+                                Fass-Einstellungen
+                              </h4>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label>Fassvolumen (Liter)</Label>
+                                  <Input
+                                    type="number"
+                                    step="1"
+                                    min="1"
+                                    value={stockUnitFormData.total_volume_liters}
+                                    onChange={(e) => setStockUnitFormData(prev => ({ ...prev, total_volume_liters: e.target.value }))}
+                                    placeholder="30"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Ausschank (Liter)</Label>
+                                  <Input
+                                    type="number"
+                                    step="0.1"
+                                    min="0.1"
+                                    value={stockUnitFormData.serving_size_liters}
+                                    onChange={(e) => setStockUnitFormData(prev => ({ ...prev, serving_size_liters: e.target.value }))}
+                                    placeholder="0.5"
+                                  />
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="flex items-center gap-2">
+                                  <TrendingDown className="w-4 h-4 text-yellow-500" />
+                                  Schankverlust (%)
+                                </Label>
+                                <Input
+                                  type="number"
+                                  step="0.5"
+                                  min="0"
+                                  max="30"
+                                  value={stockUnitFormData.loss_percent}
+                                  onChange={(e) => setStockUnitFormData(prev => ({ ...prev, loss_percent: e.target.value }))}
+                                  placeholder="7"
+                                />
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                = ~{Math.round((parseFloat(stockUnitFormData.total_volume_liters) || 0) * (1 - (parseFloat(stockUnitFormData.loss_percent) || 0) / 100) / (parseFloat(stockUnitFormData.serving_size_liters) || 0.5))} {stockUnitFormData.small_unit_name} pro {stockUnitFormData.large_unit_name}
+                              </p>
+                            </div>
+                          )}
+
+                          <Button type="submit" className="w-full neon-secondary">
+                            {editingStockUnit ? "Aktualisieren" : "Erstellen"}
+                          </Button>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Units Table */}
+            <Card className="bg-card border-border">
+              <CardContent className="p-0">
+                {filteredAndSortedUnits.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Box className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>Keine Einheiten vorhanden</p>
-                    <p className="text-sm mt-1">Erstelle Einheiten wie "Kiste 24x0,5l" oder "Fass 30l"</p>
+                    <p>Keine Einheiten gefunden</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {stockUnits.map(unit => (
-                      <div key={unit.id} className="p-4 rounded-lg bg-muted/50 border border-border">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              {unit.unit_type === "barrel" ? (
-                                <Beer className="w-4 h-4 text-amber-500" />
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <SortableHeader field="name" sortState={unitSort} onSort={toggleUnitSort}>
+                            Name
+                          </SortableHeader>
+                          <SortableHeader field="type" sortState={unitSort} onSort={toggleUnitSort}>
+                            Typ
+                          </SortableHeader>
+                          <SortableHeader field="units" sortState={unitSort} onSort={toggleUnitSort} className="text-right">
+                            VK/Einheit
+                          </SortableHeader>
+                          <SortableHeader field="loss" sortState={unitSort} onSort={toggleUnitSort} className="text-right hidden sm:table-cell">
+                            Verlust
+                          </SortableHeader>
+                          <TableHead className="text-right">Aktionen</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredAndSortedUnits.map(unit => (
+                          <TableRow key={unit.id}>
+                            <TableCell className="font-medium">
+                              <div className="flex items-center gap-2">
+                                {unit.unit_type === "barrel" ? (
+                                  <Beer className="w-4 h-4 text-amber-500" />
+                                ) : (
+                                  <Wine className="w-4 h-4 text-blue-500" />
+                                )}
+                                {unit.name}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">
+                                {unit.unit_type === "barrel" ? "Fass" : "Gebinde"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right font-mono">
+                              {Math.round(unit.sales_units_per_large)} {unit.small_unit_name}/{unit.large_unit_name}
+                            </TableCell>
+                            <TableCell className="text-right hidden sm:table-cell">
+                              {unit.unit_type === "barrel" && unit.loss_percent > 0 ? (
+                                <span className="text-yellow-500">{unit.loss_percent}%</span>
                               ) : (
-                                <Wine className="w-4 h-4 text-blue-500" />
+                                <span className="text-muted-foreground">-</span>
                               )}
-                              <h3 className="font-medium">{unit.name}</h3>
-                            </div>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              1 {unit.large_unit_name} = {Math.round(unit.sales_units_per_large)} {unit.small_unit_name}
-                            </p>
-                            {unit.unit_type === "barrel" && (
-                              <p className="text-xs text-yellow-500 mt-1">
-                                inkl. {unit.loss_percent}% Schankverlust
-                              </p>
-                            )}
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEditStockUnit(unit)}
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive"
-                              onClick={() => handleDeleteStockUnit(unit.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleEditStockUnit(unit)}
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-destructive"
+                                  onClick={() => handleDeleteStockUnit(unit.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 )}
               </CardContent>
@@ -1005,106 +1374,144 @@ export default function ArticleManagement() {
           </TabsContent>
 
           {/* === DEPOSIT TAB === */}
-          <TabsContent value="deposit" className="space-y-6">
-            <div className="flex justify-end">
-              <Dialog open={isDepositDialogOpen} onOpenChange={(open) => {
-                setIsDepositDialogOpen(open);
-                if (!open) resetDepositForm();
-              }}>
-                <DialogTrigger asChild>
-                  <Button className="neon-success">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Neue Pfandgruppe
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="bg-card border-border max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="font-display uppercase">
-                      {editingDeposit ? "Pfandgruppe bearbeiten" : "Neue Pfandgruppe"}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleDepositSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="deposit-name">Name</Label>
-                      <Input
-                        id="deposit-name"
-                        value={depositFormData.name}
-                        onChange={(e) => setDepositFormData(prev => ({ ...prev, name: e.target.value }))}
-                        placeholder="z.B. Glas 0,5l"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="deposit-amount">Pfandbetrag (€)</Label>
-                      <Input
-                        id="deposit-amount"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={depositFormData.amount}
-                        onChange={(e) => setDepositFormData(prev => ({ ...prev, amount: e.target.value }))}
-                        placeholder="2.00"
-                        required
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="deposit-active">Aktiv</Label>
-                      <Switch
-                        id="deposit-active"
-                        checked={depositFormData.active}
-                        onCheckedChange={(checked) => setDepositFormData(prev => ({ ...prev, active: checked }))}
-                      />
-                    </div>
-                    <Button type="submit" className="w-full neon-success">
-                      {editingDeposit ? "Aktualisieren" : "Erstellen"}
-                    </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </div>
-
+          <TabsContent value="deposit" className="space-y-4">
+            {/* Filter Bar */}
             <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="font-display uppercase flex items-center gap-2">
-                  <Coins className="w-5 h-5 text-green-500" />
-                  Pfandgruppen ({depositGroups.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {depositGroups.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4 text-sm">
-                    Keine Pfandgruppen vorhanden
-                  </p>
+              <CardContent className="p-4">
+                <div className="flex flex-wrap gap-3 items-center">
+                  <div className="relative flex-1 min-w-[200px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Pfandgruppe suchen..."
+                      value={depositSearch}
+                      onChange={(e) => setDepositSearch(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                  
+                  <div className="ml-auto">
+                    <Dialog open={isDepositDialogOpen} onOpenChange={(open) => {
+                      setIsDepositDialogOpen(open);
+                      if (!open) resetDepositForm();
+                    }}>
+                      <DialogTrigger asChild>
+                        <Button className="neon-success">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Neue Pfandgruppe
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-card border-border max-w-md">
+                        <DialogHeader>
+                          <DialogTitle className="font-display uppercase">
+                            {editingDeposit ? "Pfandgruppe bearbeiten" : "Neue Pfandgruppe"}
+                          </DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleDepositSubmit} className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="deposit-name">Name</Label>
+                            <Input
+                              id="deposit-name"
+                              value={depositFormData.name}
+                              onChange={(e) => setDepositFormData(prev => ({ ...prev, name: e.target.value }))}
+                              placeholder="z.B. Glas 0,5l"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="deposit-amount">Pfandbetrag (€)</Label>
+                            <Input
+                              id="deposit-amount"
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={depositFormData.amount}
+                              onChange={(e) => setDepositFormData(prev => ({ ...prev, amount: e.target.value }))}
+                              placeholder="2.00"
+                              required
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="deposit-active">Aktiv</Label>
+                            <Switch
+                              id="deposit-active"
+                              checked={depositFormData.active}
+                              onCheckedChange={(checked) => setDepositFormData(prev => ({ ...prev, active: checked }))}
+                            />
+                          </div>
+                          <Button type="submit" className="w-full neon-success">
+                            {editingDeposit ? "Aktualisieren" : "Erstellen"}
+                          </Button>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Deposits Table */}
+            <Card className="bg-card border-border">
+              <CardContent className="p-0">
+                {filteredAndSortedDeposits.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Coins className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Keine Pfandgruppen gefunden</p>
+                  </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {depositGroups.map(deposit => (
-                      <div 
-                        key={deposit.id}
-                        className="flex items-center justify-between p-3 rounded-sm bg-muted/50"
-                      >
-                        <div>
-                          <p className="font-medium">{deposit.name}</p>
-                          <p className="font-mono text-green-500">{deposit.amount.toFixed(2)} €</p>
-                        </div>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEditDeposit(deposit)}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive"
-                            onClick={() => handleDeleteDeposit(deposit.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <SortableHeader field="name" sortState={depositSort} onSort={toggleDepositSort}>
+                            Name
+                          </SortableHeader>
+                          <SortableHeader field="amount" sortState={depositSort} onSort={toggleDepositSort} className="text-right">
+                            Betrag
+                          </SortableHeader>
+                          <TableHead className="text-center">Status</TableHead>
+                          <TableHead className="text-right">Aktionen</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredAndSortedDeposits.map(deposit => (
+                          <TableRow key={deposit.id}>
+                            <TableCell className="font-medium">
+                              <div className="flex items-center gap-2">
+                                <Coins className="w-4 h-4 text-green-500" />
+                                {deposit.name}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right font-mono text-green-500">
+                              {deposit.amount.toFixed(2)} €
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant={deposit.active ? "default" : "secondary"}>
+                                {deposit.active ? "Aktiv" : "Inaktiv"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleEditDeposit(deposit)}
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-destructive"
+                                  onClick={() => handleDeleteDeposit(deposit.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 )}
               </CardContent>
