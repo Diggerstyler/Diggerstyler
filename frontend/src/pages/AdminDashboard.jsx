@@ -178,6 +178,7 @@ export default function AdminDashboard() {
             </h1>
           </div>
           <div className="flex flex-wrap items-center gap-1 sm:gap-2 sm:ml-auto">
+            <LiveClock className="hidden md:flex mr-2" />
             <Button
               variant="ghost"
               size="sm"
@@ -200,6 +201,16 @@ export default function AdminDashboard() {
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => navigate("/admin/stock")}
+              data-testid="stock-nav-btn"
+              className="h-8 px-2"
+              title="Bestandsübersicht"
+            >
+              <Box className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate("/admin/stations")}
               data-testid="stations-nav-btn"
               className="h-8 px-2"
@@ -215,6 +226,16 @@ export default function AdminDashboard() {
               className="h-8 px-2"
             >
               <BarChart3 className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/admin/settings")}
+              data-testid="settings-nav-btn"
+              className="h-8 px-2"
+              title="Einstellungen"
+            >
+              <Settings className="w-4 h-4" />
             </Button>
             <Button
               variant="ghost"
