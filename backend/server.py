@@ -391,7 +391,10 @@ async def websocket_endpoint(websocket: WebSocket, stand_id: str):
             data = await websocket.receive_text()
             # Echo back or handle commands if needed
     except WebSocketDisconnect:
-        manager.disconnect(websocket, stand_id)
+        await manager.disconnect(websocket, stand_id)
+    except Exception as e:
+        logging.error(f"WebSocket error: {e}")
+        await manager.disconnect(websocket, stand_id)
 
 # Routes
 @api_router.get("/")
