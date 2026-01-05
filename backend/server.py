@@ -389,6 +389,153 @@ async def delete_deposit_group(group_id: str, username: str = Depends(verify_adm
         raise HTTPException(status_code=404, detail="Pfandgruppe nicht gefunden")
     return {"message": "Pfandgruppe gelöscht"}
 
+# Stock Unit Routes (Einheiten-Vorlagen)
+def calculate_sales_units_per_large(unit_data: dict) -> float:
+    """Berechnet Verkaufseinheiten pro Großeinheit"""
+    if unit_data.get("unit_type") == "container":
+        return float(unit_data.get("units_per_container", 1))
+    elif unit_data.get("unit_type") == "barrel":
+        total_volume = unit_data.get("total_volume_liters", 0)
+        serving_size = unit_data.get("serving_size_liters", 0.5)
+        loss_percent = unit_data.get("loss_percent", 0)
+        if serving_size > 0 and total_volume > 0:
+            effective_volume = total_volume * (1 - loss_percent / 100)
+            return effective_volume / serving_size
+    return 1
+
+def get_total_stock_units(article: dict, stock_unit: dict = None) -> float:
+    """Berechnet Gesamtbestand in Verkaufseinheiten"""
+    large = article.get("stock_large_units", 0)
+    small = article.get("stock_small_units", 0)
+    if stock_unit:
+        units_per_large = calculate_sales_units_per_large(stock_unit)
+    else:
+        units_per_large = 1
+    return (large * units_per_large) + small
+
+@api_router.get("/stock-units")
+async def get_stock_units():
+    units = await db.stock_units.find({}, {"_id": 0}).to_list(100)
+    # Berechne sales_units_per_large für jede Einheit
+    for unit in units:
+        unit["sales_units_per_large"] = calculate_sales_units_per_large(unit)
+    return units
+
+@api_router.get("/stock-units/{unit_id}")
+async def get_stock_unit(unit_id: str):
+    unit = await db.stock_units.find_one({"id": unit_id}, {"_id": 0})
+    if not unit:
+        raise HTTPException(status_code=404, detail="Einheit nicht gefunden")
+    unit["sales_units_per_large"] = calculate_sales_units_per_large(unit)
+    return unit
+
+@api_router.post("/stock-units", response_model=StockUnit)
+async def create_stock_unit(unit: StockUnitCreate, username: str = Depends(verify_admin)):
+    unit_dict = unit.model_dump()
+    unit_dict["sales_units_per_large"] = calculate_sales_units_per_large(unit_dict)
+    unit_obj = StockUnit(**unit_dict)
+    await db.stock_units.insert_one(unit_obj.model_dump())
+    return unit_obj
+
+@api_router.put("/stock-units/{unit_id}", response_model=StockUnit)
+async def update_stock_unit(unit_id: str, unit: StockUnitUpdate, username: str = Depends(verify_admin)):
+    update_data = {k: v for k, v in unit.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Keine Daten zum Aktualisieren")
+    
+    # Hole aktuelle Daten für Neuberechnung
+    current = await db.stock_units.find_one({"id": unit_id}, {"_id": 0})
+    if not current:
+        raise HTTPException(status_code=404, detail="Einheit nicht gefunden")
+    
+    merged = {**current, **update_data}
+    update_data["sales_units_per_large"] = calculate_sales_units_per_large(merged)
+    
+    await db.stock_units.update_one({"id": unit_id}, {"$set": update_data})
+    updated = await db.stock_units.find_one({"id": unit_id}, {"_id": 0})
+    return StockUnit(**updated)
+
+@api_router.delete("/stock-units/{unit_id}")
+async def delete_stock_unit(unit_id: str, username: str = Depends(verify_admin)):
+    # Prüfe ob Einheit noch verwendet wird
+    articles_using = await db.articles.count_documents({"stock_unit_id": unit_id})
+    if articles_using > 0:
+        raise HTTPException(status_code=400, detail=f"Einheit wird noch von {articles_using} Artikel(n) verwendet")
+    
+    result = await db.stock_units.delete_one({"id": unit_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Einheit nicht gefunden")
+    return {"message": "Einheit gelöscht"}
+
+# Stock adjustment endpoint (manuelle Bestandskorrektur)
+class StockAdjustment(BaseModel):
+    large_units: Optional[float] = None
+    small_units: Optional[float] = None
+    set_as_initial: bool = False  # Setzt auch als Anfangsbestand
+
+@api_router.put("/articles/{article_id}/stock")
+async def adjust_article_stock(article_id: str, adjustment: StockAdjustment, username: str = Depends(verify_admin)):
+    article = await db.articles.find_one({"id": article_id}, {"_id": 0})
+    if not article:
+        raise HTTPException(status_code=404, detail="Artikel nicht gefunden")
+    
+    update_data = {}
+    if adjustment.large_units is not None:
+        update_data["stock_large_units"] = adjustment.large_units
+        if adjustment.set_as_initial:
+            update_data["stock_initial_large"] = adjustment.large_units
+    if adjustment.small_units is not None:
+        update_data["stock_small_units"] = adjustment.small_units
+        if adjustment.set_as_initial:
+            update_data["stock_initial_small"] = adjustment.small_units
+    
+    if update_data:
+        await db.articles.update_one({"id": article_id}, {"$set": update_data})
+    
+    updated = await db.articles.find_one({"id": article_id}, {"_id": 0})
+    return updated
+
+# Bestandsübersicht für Admin
+@api_router.get("/admin/stock-overview")
+async def get_stock_overview(username: str = Depends(verify_admin)):
+    articles = await db.articles.find({"track_stock": True}, {"_id": 0}).to_list(1000)
+    stock_units = await db.stock_units.find({}, {"_id": 0}).to_list(100)
+    unit_map = {u["id"]: u for u in stock_units}
+    
+    overview = []
+    for article in articles:
+        unit = unit_map.get(article.get("stock_unit_id"))
+        if unit:
+            unit["sales_units_per_large"] = calculate_sales_units_per_large(unit)
+        
+        total_stock = get_total_stock_units(article, unit)
+        initial_stock = (
+            (article.get("stock_initial_large", 0) * (unit["sales_units_per_large"] if unit else 1)) +
+            article.get("stock_initial_small", 0)
+        ) if unit else article.get("stock_initial_small", 0)
+        
+        sold = initial_stock - total_stock if initial_stock > 0 else 0
+        
+        overview.append({
+            "article_id": article["id"],
+            "article_name": article["name"],
+            "category": article["category"],
+            "price": article["price"],
+            "stock_unit": unit,
+            "stock_large_units": article.get("stock_large_units", 0),
+            "stock_small_units": article.get("stock_small_units", 0),
+            "total_stock_sales_units": total_stock,
+            "initial_stock_sales_units": initial_stock,
+            "sold_units": sold,
+            "sold_revenue": sold * article["price"],
+            "warning_threshold": article.get("stock_warning_threshold", 0),
+            "is_low": total_stock <= article.get("stock_warning_threshold", 0) and article.get("stock_warning_threshold", 0) > 0,
+            "is_sold_out": total_stock <= 0,
+            "sold_out_behavior": article.get("stock_sold_out_behavior", "mark")
+        })
+    
+    return overview
+
 # Stand Routes
 @api_router.get("/stands")
 async def get_stands(active_only: bool = False):
