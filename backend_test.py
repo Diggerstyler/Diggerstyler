@@ -568,14 +568,26 @@ class FestivalAPITester:
         if container_unit_id:
             cleanup_settings = {
                 "track_stock": False,
-                "stock_unit_id": None
+                "stock_unit_id": None,
+                "stock_large_units": 0,
+                "stock_small_units": 0
             }
-            self.run_test("Disable Stock Tracking for Cleanup", "PUT", f"articles/{article_id}", 200, cleanup_settings, auth=True)
+            success, cleaned_article = self.run_test("Disable Stock Tracking for Cleanup", "PUT", f"articles/{article_id}", 200, cleanup_settings, auth=True)
+            if success and cleaned_article:
+                print(f"   Cleaned up article: track_stock={cleaned_article.get('track_stock')}, stock_unit_id={cleaned_article.get('stock_unit_id')}")
             
             # Now try to delete the stock unit (should succeed)
             success, delete_response = self.run_test("Delete Unused Stock Unit", "DELETE", f"stock-units/{container_unit_id}", 200, auth=True)
             if success:
                 print("   ✅ Unused stock unit deleted successfully")
+            else:
+                print("   ⚠️ Stock unit deletion still failed - may be cached reference")
+        
+        # Also clean up the barrel unit
+        if barrel_unit_id:
+            success, delete_barrel = self.run_test("Delete Barrel Stock Unit", "DELETE", f"stock-units/{barrel_unit_id}", 200, auth=True)
+            if success:
+                print("   ✅ Barrel stock unit deleted successfully")
         
         print("   🎯 Stock/Inventory Management testing completed")
 
