@@ -223,8 +223,22 @@ export default function LandingPage() {
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           )}
+          {settings?.logo_url ? (
+            <img 
+              src={settings.logo_url} 
+              alt="Event Logo" 
+              className="h-8 sm:h-10 w-auto object-contain"
+            />
+          ) : null}
           <h1 className="font-display text-base sm:text-2xl font-bold uppercase tracking-tight">
-            Karnbachs<span className="text-primary">_Event</span>
+            {settings?.event_name ? (
+              <>
+                {settings.event_name.split(' ')[0]}
+                <span className="text-primary">_{settings.event_name.split(' ').slice(1).join(' ') || 'Event'}</span>
+              </>
+            ) : (
+              <>Karnbachs<span className="text-primary">_Event</span></>
+            )}
           </h1>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
