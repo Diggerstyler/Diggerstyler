@@ -364,6 +364,22 @@ async def websocket_endpoint(websocket: WebSocket, stand_id: str):
 async def root():
     return {"message": "Festival OS API"}
 
+@api_router.get("/health")
+async def health_check():
+    """Health check endpoint for deployment verification"""
+    try:
+        # Check database connection
+        await db.command("ping")
+        db_status = "connected"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+    
+    return {
+        "status": "healthy",
+        "database": db_status,
+        "version": "1.0.0"
+    }
+
 @api_router.get("/stand-types")
 async def get_stand_types():
     return DEFAULT_STAND_TYPES
