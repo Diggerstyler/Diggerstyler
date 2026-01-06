@@ -293,6 +293,16 @@ export default function AdminDashboard() {
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => navigate("/admin/docs")}
+              className="h-8 px-2"
+              title="Dokumentation"
+            >
+              <FileText className="w-4 h-4" />
+              <span className="hidden lg:inline ml-1">Doku</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleLogout}
               data-testid="logout-btn"
             >
