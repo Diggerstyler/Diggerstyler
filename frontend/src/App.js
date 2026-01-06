@@ -16,6 +16,7 @@ import StatsPage from "@/pages/StatsPage";
 import OrdersManagement from "@/pages/OrdersManagement";
 import StockOverview from "@/pages/StockOverview";
 import SettingsPage from "@/pages/SettingsPage";
+import DocumentationPage from "@/pages/DocumentationPage";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
               <Route path="/admin/orders" element={<OrdersManagement />} />
               <Route path="/admin/stock" element={<StockOverview />} />
               <Route path="/admin/settings" element={<SettingsPage />} />
+              <Route path="/admin/docs" element={<DocumentationPage />} />
             </Routes>
           </BrowserRouter>
           <Toaster position="top-right" richColors />
