@@ -287,125 +287,241 @@ export default function LandingPage() {
 
       {/* Help Dialog */}
       <Dialog open={showHelp} onOpenChange={setShowHelp}>
-        <DialogContent className="bg-card border-border max-w-lg max-h-[85vh]">
+        <DialogContent className="bg-card border-border max-w-2xl max-h-[85vh]">
           <DialogHeader>
             <DialogTitle className="font-display uppercase flex items-center gap-2">
               <HelpCircle className="w-5 h-5 text-primary" />
-              Anleitung
+              Anleitung - So funktioniert die App
             </DialogTitle>
           </DialogHeader>
-          <ScrollArea className="max-h-[60vh] pr-4">
-            <div className="space-y-5 py-2">
-              {/* Ablauf */}
+          <ScrollArea className="max-h-[65vh] pr-4">
+            <div className="space-y-6 py-2">
+              
+              {/* Einführung */}
+              <section className="bg-primary/5 rounded-lg p-4 border border-primary/20">
+                <h3 className="font-bold text-primary mb-2 text-base">🎪 Willkommen beim Event OS!</h3>
+                <p className="text-sm text-muted-foreground">
+                  Diese App digitalisiert den kompletten Bestell- und Ausgabeprozess für Events und Festivals.
+                  Wähle deinen Stand und deine Rolle, um loszulegen.
+                </p>
+              </section>
+
+              {/* Schnellstart */}
               <section>
-                <h3 className="font-bold text-primary mb-2 text-base">📋 So funktioniert's</h3>
-                <div className="bg-muted/30 rounded-lg p-3 text-sm space-y-2">
-                  <p><strong>1.</strong> Stand auswählen (z.B. "Getränke" oder "Speisen")</p>
-                  <p><strong>2.</strong> Rolle auswählen (je nach deiner Aufgabe)</p>
-                  <p><strong>3.</strong> Loslegen!</p>
+                <h3 className="font-bold text-primary mb-3 text-base">🚀 Schnellstart in 3 Schritten</h3>
+                <div className="bg-muted/30 rounded-lg p-4 text-sm space-y-3">
+                  <div className="flex items-start gap-3">
+                    <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                    <div>
+                      <p className="font-medium">Stand auswählen</p>
+                      <p className="text-xs text-muted-foreground">Tippe auf den Stand, an dem du arbeitest (z.B. "Essensstand")</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                    <div>
+                      <p className="font-medium">Rolle auswählen</p>
+                      <p className="text-xs text-muted-foreground">Wähle deine Aufgabe: Besteller, Macher, Ausgabe oder OneMan</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                    <div>
+                      <p className="font-medium">Loslegen!</p>
+                      <p className="text-xs text-muted-foreground">Bestellungen aufnehmen, zubereiten und ausgeben</p>
+                    </div>
+                  </div>
                 </div>
               </section>
 
-              {/* Rollen erklärt */}
+              {/* Die 4 Rollen - ausführlich */}
               <section>
-                <h3 className="font-bold text-primary mb-2 text-base">👥 Die 4 Rollen</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
-                    <p className="font-bold text-primary mb-1">🛒 Bestellung</p>
-                    <ul className="text-muted-foreground text-xs space-y-1 ml-4 list-disc">
-                      <li>Nimmt Bestellungen der Gäste auf</li>
-                      <li>Artikel antippen = zum Warenkorb hinzufügen</li>
-                      <li>Pfand wird automatisch berechnet</li>
-                      <li>"Bestellung aufgeben" → Bon geht zum Macher</li>
-                      <li><strong>Restgeldrechner:</strong> Optional - berechnet Wechselgeld</li>
-                      <li><strong>Archiv:</strong> Zeigt alle bisherigen Bestellungen</li>
-                    </ul>
+                <h3 className="font-bold text-primary mb-3 text-base">👥 Die 4 Rollen im Detail</h3>
+                <div className="space-y-4 text-sm">
+                  
+                  {/* Besteller */}
+                  <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                    <p className="font-bold text-primary mb-2 flex items-center gap-2">
+                      <ShoppingCart className="w-4 h-4" /> Besteller (Kasse)
+                    </p>
+                    <p className="text-muted-foreground text-xs mb-3">
+                      Der Besteller nimmt Bestellungen der Gäste auf und kassiert.
+                    </p>
+                    <div className="space-y-2">
+                      <p className="font-medium text-xs">So geht's:</p>
+                      <ul className="text-muted-foreground text-xs space-y-1.5 ml-4 list-disc">
+                        <li><strong>Artikel hinzufügen:</strong> Einfach auf den Artikel tippen</li>
+                        <li><strong>Menge ändern:</strong> +/- Buttons im Warenkorb oder lange auf Artikel drücken</li>
+                        <li><strong>Artikel entfernen:</strong> Im Warenkorb nach links wischen</li>
+                        <li><strong>Kategorien filtern:</strong> Oben auf "Speisen" oder "Getränke" tippen</li>
+                        <li><strong>Bestellung aufgeben:</strong> Grünen Button "Bestellung aufgeben" drücken</li>
+                      </ul>
+                      <p className="font-medium text-xs mt-3">Praktische Funktionen:</p>
+                      <ul className="text-muted-foreground text-xs space-y-1.5 ml-4 list-disc">
+                        <li><strong>Restgeldrechner:</strong> Taschenrechner-Icon → Gegebenen Betrag eingeben → Wechselgeld berechnen</li>
+                        <li><strong>Archiv:</strong> Alle bisherigen Bestellungen einsehen</li>
+                        <li><strong>Pfand:</strong> Wird automatisch berechnet und angezeigt</li>
+                        <li><strong>Bestandswarnung:</strong> Gelbes Dreieck = Artikel wird knapp</li>
+                      </ul>
+                    </div>
                   </div>
-                  <div className="p-3 bg-secondary/10 rounded-lg border border-secondary/20">
-                    <p className="font-bold text-secondary mb-1">🔨 Macher</p>
-                    <ul className="text-muted-foreground text-xs space-y-1 ml-4 list-disc">
-                      <li>Sieht eingehende Bestellungen mit Bonnummer</li>
-                      <li>Bereitet die Bestellung zu</li>
-                      <li>"Fertig" klicken → Bon geht zur Ausgabe</li>
-                      <li><strong>Gesamt Offen:</strong> Zeigt alle offenen Artikel kumuliert</li>
-                      <li>Bei Stationen: Nur zugewiesene Artikel sichtbar</li>
-                    </ul>
+                  
+                  {/* Macher */}
+                  <div className="p-4 bg-secondary/10 rounded-lg border border-secondary/20">
+                    <p className="font-bold text-secondary mb-2 flex items-center gap-2">
+                      <Hammer className="w-4 h-4" /> Macher (Küche/Bar)
+                    </p>
+                    <p className="text-muted-foreground text-xs mb-3">
+                      Der Macher sieht eingehende Bestellungen und bereitet sie zu.
+                    </p>
+                    <div className="space-y-2">
+                      <p className="font-medium text-xs">So geht's:</p>
+                      <ul className="text-muted-foreground text-xs space-y-1.5 ml-4 list-disc">
+                        <li><strong>Neue Bestellung:</strong> Erscheint automatisch mit Sound (wenn aktiviert)</li>
+                        <li><strong>Bestellung ansehen:</strong> Bonnummer, Artikel und Mengen werden angezeigt</li>
+                        <li><strong>Fertig melden:</strong> Grünen "Fertig" Button drücken → geht zur Ausgabe</li>
+                      </ul>
+                      <p className="font-medium text-xs mt-3">Praktische Funktionen:</p>
+                      <ul className="text-muted-foreground text-xs space-y-1.5 ml-4 list-disc">
+                        <li><strong>Gesamt Offen:</strong> Zeigt alle offenen Artikel kumuliert (gut für Vorbereitung)</li>
+                        <li><strong>Sound-Benachrichtigung:</strong> Lautsprecher-Icon aktivieren für akustische Signale</li>
+                        <li><strong>Zeitanzeige:</strong> Zeigt wie lange Bestellung wartet</li>
+                        <li><strong>Stationen:</strong> Bei großen Küchen nur zugewiesene Artikel sehen</li>
+                      </ul>
+                    </div>
                   </div>
-                  <div className="p-3 bg-accent/10 rounded-lg border border-accent/20">
-                    <p className="font-bold text-accent mb-1">📦 Ausgabe</p>
-                    <ul className="text-muted-foreground text-xs space-y-1 ml-4 list-disc">
-                      <li>Sieht alle fertigen Bestellungen</li>
-                      <li>Ruft Bonnummer aus und übergibt an Gast</li>
-                      <li>"Übergeben" klicken → Bestellung abgeschlossen</li>
-                    </ul>
+                  
+                  {/* Ausgabe */}
+                  <div className="p-4 bg-accent/10 rounded-lg border border-accent/20">
+                    <p className="font-bold text-accent mb-2 flex items-center gap-2">
+                      <Package className="w-4 h-4" /> Ausgabe
+                    </p>
+                    <p className="text-muted-foreground text-xs mb-3">
+                      Die Ausgabe ruft fertige Bestellungen aus und übergibt sie an die Gäste.
+                    </p>
+                    <div className="space-y-2">
+                      <p className="font-medium text-xs">So geht's:</p>
+                      <ul className="text-muted-foreground text-xs space-y-1.5 ml-4 list-disc">
+                        <li><strong>Bonnummer ausrufen:</strong> Die große Nummer laut ansagen</li>
+                        <li><strong>Artikel prüfen:</strong> Liste zeigt was zur Bestellung gehört</li>
+                        <li><strong>Übergeben:</strong> Grünen Button "Ausgeben" drücken</li>
+                        <li><strong>Navigation:</strong> Mit Pfeilen oder Wischen zwischen Bestellungen wechseln</li>
+                      </ul>
+                      <p className="font-medium text-xs mt-3">Praktische Funktionen:</p>
+                      <ul className="text-muted-foreground text-xs space-y-1.5 ml-4 list-disc">
+                        <li><strong>Rückgängig:</strong> Letzte Ausgabe zurückholen (falls Fehler)</li>
+                        <li><strong>Archiv:</strong> Alle ausgegebenen Bestellungen einsehen</li>
+                      </ul>
+                    </div>
                   </div>
-                  <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-                    <p className="font-bold text-green-500 mb-1">⚡ OneMan</p>
-                    <ul className="text-muted-foreground text-xs space-y-1 ml-4 list-disc">
-                      <li>Alles in einem: Bestellen + Kassieren + Ausgeben</li>
-                      <li>Für kleine Stände oder einfache Artikel</li>
-                      <li>Bestellung wird sofort als "fertig" markiert</li>
-                    </ul>
+                  
+                  {/* OneManShow */}
+                  <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+                    <p className="font-bold text-green-500 mb-2 flex items-center gap-2">
+                      <Zap className="w-4 h-4" /> OneManShow
+                    </p>
+                    <p className="text-muted-foreground text-xs mb-3">
+                      Kombiniert Bestellen und Ausgeben in einem - ideal für einfache Stände.
+                    </p>
+                    <div className="space-y-2">
+                      <p className="font-medium text-xs">So geht's:</p>
+                      <ul className="text-muted-foreground text-xs space-y-1.5 ml-4 list-disc">
+                        <li>Artikel auswählen wie beim Besteller</li>
+                        <li>Kassieren</li>
+                        <li>Bestellung direkt übergeben (kein Bon-System nötig)</li>
+                      </ul>
+                      <p className="font-medium text-xs mt-3">Ideal für:</p>
+                      <ul className="text-muted-foreground text-xs space-y-1.5 ml-4 list-disc">
+                        <li>Kleine Getränkestände</li>
+                        <li>Snack-Stände</li>
+                        <li>Verkaufsstände ohne Zubereitung</li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </section>
 
               {/* Bonnummern */}
               <section>
-                <h3 className="font-bold text-primary mb-2 text-base">🔢 Bonnummern</h3>
-                <div className="bg-muted/30 rounded-lg p-3 text-sm">
-                  <ul className="space-y-1 text-muted-foreground list-disc ml-4">
-                    <li>Nummern von <strong>01 bis 25</strong>, dann wieder bei 01</li>
-                    <li>Nach Bestellung: Große Anzeige mit "Weiter" Button</li>
-                    <li>Bonnummer dem Gast mitteilen</li>
+                <h3 className="font-bold text-primary mb-3 text-base">🔢 Das Bonnummern-System</h3>
+                <div className="bg-muted/30 rounded-lg p-4 text-sm">
+                  <ul className="space-y-2 text-muted-foreground list-disc ml-4">
+                    <li>Jeder Stand hat eigene Nummern von <strong>01 bis 25</strong></li>
+                    <li>Nach 25 beginnt es automatisch wieder bei 01</li>
+                    <li>Nach der Bestellung wird die Nummer groß angezeigt</li>
+                    <li>Diese Nummer dem Gast mitteilen!</li>
+                    <li>Der Gast wird bei der Ausgabe mit dieser Nummer aufgerufen</li>
                   </ul>
                 </div>
               </section>
 
               {/* Kurzer Prozess */}
               <section>
-                <h3 className="font-bold text-primary mb-2 text-base">⚡ Kurzer Prozess</h3>
-                <div className="bg-blue-500/10 rounded-lg p-3 text-sm border border-blue-500/20">
-                  <p className="text-muted-foreground mb-2">
-                    Für Stände mit schneller Ausgabe (z.B. Getränke):
+                <h3 className="font-bold text-primary mb-3 text-base">⚡ Kurzer Prozess</h3>
+                <div className="bg-blue-500/10 rounded-lg p-4 text-sm border border-blue-500/20">
+                  <p className="text-muted-foreground mb-3">
+                    Für Stände mit schneller Ausgabe (z.B. Getränke) kann der Macher übersprungen werden:
                   </p>
-                  <ul className="space-y-1 text-muted-foreground list-disc ml-4">
-                    <li><strong>AN:</strong> Bestellung → direkt zur Ausgabe (ohne Macher)</li>
-                    <li><strong>AUS:</strong> Bestellung → Macher → Ausgabe</li>
-                    <li>Toggle bei Rollenauswahl oder in Standverwaltung</li>
-                  </ul>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 bg-muted/30 rounded-lg">
+                      <p className="font-medium text-xs mb-1">Standard-Prozess:</p>
+                      <p className="text-xs text-muted-foreground">Bestellung → Macher → Ausgabe</p>
+                    </div>
+                    <div className="p-3 bg-blue-500/20 rounded-lg">
+                      <p className="font-medium text-xs mb-1 text-blue-400">Kurzer Prozess:</p>
+                      <p className="text-xs text-muted-foreground">Bestellung → direkt zur Ausgabe</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Der Prozess kann bei der Rollenauswahl oder in der Admin-Standverwaltung umgeschaltet werden.
+                  </p>
                 </div>
               </section>
 
               {/* Pfand */}
               <section>
-                <h3 className="font-bold text-primary mb-2 text-base">🍺 Pfand</h3>
-                <div className="bg-muted/30 rounded-lg p-3 text-sm">
-                  <ul className="space-y-1 text-muted-foreground list-disc ml-4">
-                    <li>Artikel mit Pfand zeigen "+X.XX€" Badge</li>
-                    <li>Pfand wird automatisch zum Preis addiert</li>
-                    <li><strong>Pfand zurück:</strong> Bei Glasrückgabe - wird abgezogen</li>
-                    <li>Nur sichtbar wenn Stand Pfand-Artikel hat</li>
+                <h3 className="font-bold text-primary mb-3 text-base">🍺 Pfand-System</h3>
+                <div className="bg-muted/30 rounded-lg p-4 text-sm">
+                  <ul className="space-y-2 text-muted-foreground list-disc ml-4">
+                    <li>Artikel mit Pfand zeigen ein <strong>"+X.XX€"</strong> Badge</li>
+                    <li>Der Pfandbetrag wird automatisch zum Preis addiert</li>
+                    <li><strong>Pfand zurück:</strong> Im Warenkorb gibt es "Pfand zurück" Buttons</li>
+                    <li>Damit werden Glasrückgaben verrechnet (Betrag wird abgezogen)</li>
+                    <li>Pfand-Buttons erscheinen nur, wenn der Stand Pfand-Artikel hat</li>
+                  </ul>
+                </div>
+              </section>
+
+              {/* Navigation */}
+              <section>
+                <h3 className="font-bold text-primary mb-3 text-base">🧭 Navigation</h3>
+                <div className="bg-muted/30 rounded-lg p-4 text-sm">
+                  <ul className="space-y-2 text-muted-foreground list-disc ml-4">
+                    <li><strong>🏠 Haus-Icon:</strong> Zurück zur Startseite (Standauswahl)</li>
+                    <li><strong>← Zurück-Pfeil:</strong> Einen Schritt zurück (zur Rollenauswahl)</li>
+                    <li><strong>Vollbild:</strong> Maximieren-Icon für störungsfreies Arbeiten</li>
                   </ul>
                 </div>
               </section>
 
               {/* Tipps */}
               <section>
-                <h3 className="font-bold text-primary mb-2 text-base">💡 Tipps</h3>
-                <div className="bg-green-500/10 rounded-lg p-3 text-sm border border-green-500/20">
-                  <ul className="space-y-1 text-muted-foreground list-disc ml-4">
-                    <li>Im Warenkorb: Wischen zum Entfernen</li>
-                    <li>Mehrere Geräte können gleichzeitig arbeiten</li>
-                    <li>App als PWA installierbar (Browser-Menü)</li>
-                    <li>Bei Problemen: Seite neu laden</li>
+                <h3 className="font-bold text-primary mb-3 text-base">💡 Profi-Tipps</h3>
+                <div className="bg-green-500/10 rounded-lg p-4 text-sm border border-green-500/20">
+                  <ul className="space-y-2 text-muted-foreground list-disc ml-4">
+                    <li><strong>PWA installieren:</strong> App über Browser-Menü "Zum Startbildschirm" hinzufügen</li>
+                    <li><strong>Mehrere Geräte:</strong> Alle sehen Bestellungen in Echtzeit</li>
+                    <li><strong>Vollbild nutzen:</strong> Weniger Ablenkung, größere Buttons</li>
+                    <li><strong>Sound aktivieren:</strong> Nie eine neue Bestellung verpassen</li>
+                    <li><strong>Bei Problemen:</strong> Seite neu laden löst meist alles</li>
                   </ul>
                 </div>
               </section>
+
             </div>
           </ScrollArea>
-          <Button onClick={() => setShowHelp(false)} className="mt-2">
-            Verstanden
+          <Button onClick={() => setShowHelp(false)} className="mt-2 neon-primary">
+            Verstanden - Los geht's!
           </Button>
         </DialogContent>
       </Dialog>
