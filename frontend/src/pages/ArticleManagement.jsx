@@ -1610,6 +1610,8 @@ export default function ArticleManagement() {
           </DialogContent>
         </Dialog>
       </main>
+
+      <AppFooter />
     </div>
   );
 }
