@@ -599,6 +599,224 @@ async def get_server_time():
             "timezone": "UTC"
         }
 
+# ============================================
+# EVENT MANAGEMENT ROUTES
+# ============================================
+
+def get_event_status_by_date(start_date: str, end_date: str) -> str:
+    """Ermittelt Event-Status basierend auf Start- und Enddatum"""
+    try:
+        today = datetime.now(timezone.utc).date()
+        start = datetime.fromisoformat(start_date.replace('Z', '+00:00')).date()
+        end = datetime.fromisoformat(end_date.replace('Z', '+00:00')).date()
+        
+        if today < start:
+            return "planned"
+        elif today > end:
+            return "completed"
+        else:
+            return "active"
+    except Exception:
+        return "planned"
+
+async def get_active_event_for_date(date_str: str = None) -> Optional[dict]:
+    """Findet das aktive Event für ein bestimmtes Datum"""
+    if date_str is None:
+        date_str = datetime.now(timezone.utc).isoformat()
+    
+    # Nur das Datum extrahieren (ohne Zeit)
+    try:
+        check_date = datetime.fromisoformat(date_str.replace('Z', '+00:00')).date().isoformat()
+    except Exception:
+        check_date = datetime.now(timezone.utc).date().isoformat()
+    
+    # Finde Event wo start_date <= check_date <= end_date
+    events = await db.events.find({}, {"_id": 0}).to_list(100)
+    for event in events:
+        try:
+            start = event.get("start_date", "")[:10]  # Nur YYYY-MM-DD
+            end = event.get("end_date", "")[:10]
+            if start <= check_date <= end:
+                return event
+        except Exception:
+            continue
+    return None
+
+async def update_all_event_statuses():
+    """Aktualisiert Status aller Events basierend auf aktuellem Datum"""
+    events = await db.events.find({}, {"_id": 0}).to_list(100)
+    for event in events:
+        new_status = get_event_status_by_date(event.get("start_date", ""), event.get("end_date", ""))
+        if event.get("status") != new_status:
+            await db.events.update_one(
+                {"id": event["id"]},
+                {"$set": {"status": new_status, "updated_at": datetime.now(timezone.utc).isoformat()}}
+            )
+
+@api_router.get("/events")
+async def get_events():
+    """Liste aller Events mit aktuellem Status"""
+    # Erst Status aktualisieren
+    await update_all_event_statuses()
+    events = await db.events.find({}, {"_id": 0}).sort("start_date", -1).to_list(100)
+    return events
+
+@api_router.get("/events/active")
+async def get_active_event():
+    """Gibt das aktuell aktive Event zurück (falls vorhanden)"""
+    event = await get_active_event_for_date()
+    if event:
+        return event
+    return {"message": "Kein aktives Event", "event": None}
+
+@api_router.get("/events/{event_id}")
+async def get_event(event_id: str):
+    """Einzelnes Event abrufen"""
+    event = await db.events.find_one({"id": event_id}, {"_id": 0})
+    if not event:
+        raise HTTPException(status_code=404, detail="Event nicht gefunden")
+    # Status aktualisieren
+    new_status = get_event_status_by_date(event.get("start_date", ""), event.get("end_date", ""))
+    if event.get("status") != new_status:
+        await db.events.update_one({"id": event_id}, {"$set": {"status": new_status}})
+        event["status"] = new_status
+    return event
+
+@api_router.post("/events", response_model=Event)
+async def create_event(event: EventCreate, username: str = Depends(verify_admin)):
+    """Neues Event erstellen"""
+    # Status basierend auf Datum setzen
+    status = get_event_status_by_date(event.start_date, event.end_date)
+    
+    event_obj = Event(
+        **event.model_dump(),
+        status=status
+    )
+    await db.events.insert_one(event_obj.model_dump())
+    return event_obj
+
+@api_router.put("/events/{event_id}", response_model=Event)
+async def update_event(event_id: str, event: EventUpdate, username: str = Depends(verify_admin)):
+    """Event aktualisieren"""
+    existing = await db.events.find_one({"id": event_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Event nicht gefunden")
+    
+    update_data = {k: v for k, v in event.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    # Status neu berechnen wenn Datum geändert
+    start_date = update_data.get("start_date", existing.get("start_date"))
+    end_date = update_data.get("end_date", existing.get("end_date"))
+    update_data["status"] = get_event_status_by_date(start_date, end_date)
+    
+    await db.events.update_one({"id": event_id}, {"$set": update_data})
+    updated = await db.events.find_one({"id": event_id}, {"_id": 0})
+    return Event(**updated)
+
+@api_router.delete("/events/{event_id}")
+async def delete_event(event_id: str, username: str = Depends(verify_admin)):
+    """Event löschen"""
+    result = await db.events.delete_one({"id": event_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Event nicht gefunden")
+    
+    # Optional: event_id von Bestellungen entfernen
+    await db.orders.update_many({"event_id": event_id}, {"$set": {"event_id": None}})
+    
+    return {"message": "Event gelöscht"}
+
+@api_router.get("/events/{event_id}/stats")
+async def get_event_stats(event_id: str, username: str = Depends(verify_admin)):
+    """Detaillierte Statistiken für ein Event"""
+    event = await db.events.find_one({"id": event_id}, {"_id": 0})
+    if not event:
+        raise HTTPException(status_code=404, detail="Event nicht gefunden")
+    
+    # Bestellungen für dieses Event
+    orders = await db.orders.find({"event_id": event_id}, {"_id": 0}).to_list(10000)
+    
+    # Basis-Statistiken
+    total_orders = len(orders)
+    total_revenue = sum(o.get("total", 0) for o in orders)
+    total_deposit = sum(o.get("deposit_total", 0) for o in orders)
+    total_deposit_return = sum(o.get("deposit_return_total", 0) for o in orders)
+    completed_orders = len([o for o in orders if o.get("status") == "completed"])
+    
+    # Top-Artikel
+    article_stats = {}
+    for order in orders:
+        for item in order.get("items", []):
+            if item.get("is_deposit_return"):
+                continue
+            aid = item.get("article_id")
+            if aid not in article_stats:
+                article_stats[aid] = {
+                    "name": item.get("article_name"),
+                    "quantity": 0,
+                    "revenue": 0
+                }
+            article_stats[aid]["quantity"] += item.get("quantity", 0)
+            article_stats[aid]["revenue"] += item.get("price", 0) * item.get("quantity", 0)
+    
+    top_articles = sorted(article_stats.values(), key=lambda x: x["quantity"], reverse=True)[:10]
+    
+    # Bestellungen pro Stunde
+    orders_by_hour = {}
+    for order in orders:
+        try:
+            created = datetime.fromisoformat(order.get("created_at", "").replace('Z', '+00:00'))
+            hour = created.hour
+            if hour not in orders_by_hour:
+                orders_by_hour[hour] = {"count": 0, "revenue": 0}
+            orders_by_hour[hour]["count"] += 1
+            orders_by_hour[hour]["revenue"] += order.get("total", 0)
+        except Exception:
+            continue
+    
+    # Bestellungen pro Tag
+    orders_by_day = {}
+    for order in orders:
+        try:
+            created = datetime.fromisoformat(order.get("created_at", "").replace('Z', '+00:00'))
+            day = created.strftime("%Y-%m-%d")
+            if day not in orders_by_day:
+                orders_by_day[day] = {"count": 0, "revenue": 0}
+            orders_by_day[day]["count"] += 1
+            orders_by_day[day]["revenue"] += order.get("total", 0)
+        except Exception:
+            continue
+    
+    # Bestellungen pro Stand
+    orders_by_stand = {}
+    for order in orders:
+        stand_name = order.get("stand_name", "Unbekannt")
+        if stand_name not in orders_by_stand:
+            orders_by_stand[stand_name] = {"count": 0, "revenue": 0}
+        orders_by_stand[stand_name]["count"] += 1
+        orders_by_stand[stand_name]["revenue"] += order.get("total", 0)
+    
+    # Durchschnittswerte
+    avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
+    
+    return {
+        "event": event,
+        "summary": {
+            "total_orders": total_orders,
+            "completed_orders": completed_orders,
+            "total_revenue": total_revenue,
+            "total_deposit": total_deposit,
+            "total_deposit_return": total_deposit_return,
+            "net_revenue": total_revenue - total_deposit_return,
+            "avg_order_value": avg_order_value,
+            "completion_rate": (completed_orders / total_orders * 100) if total_orders > 0 else 0
+        },
+        "top_articles": top_articles,
+        "orders_by_hour": dict(sorted(orders_by_hour.items())),
+        "orders_by_day": dict(sorted(orders_by_day.items())),
+        "orders_by_stand": orders_by_stand
+    }
+
 # Stock Unit Routes (Einheiten-Vorlagen)
 def calculate_sales_units_per_large(unit_data: dict) -> float:
     """Berechnet Verkaufseinheiten pro Großeinheit"""
