@@ -1661,7 +1661,80 @@ Diese Dokumentation wurde automatisch generiert.
         doc.setFont('helvetica', 'normal');
         doc.text('Echtzeit-Synchronisation ueber WebSockets (< 30ms Latenz)', pageWidth / 2, y, { align: 'center' });
         
-        y += 25;
+        y += 30;
+        
+        // =====================================================
+        // SCREENSHOT-GALERIE
+        // =====================================================
+        doc.addPage();
+        y = margin;
+        
+        // Screenshots-Überschrift
+        doc.setFillColor(124, 58, 237);
+        doc.rect(0, 0, pageWidth, 20, 'F');
+        doc.setFontSize(16);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Screenshots aller Seiten', pageWidth / 2, 13, { align: 'center' });
+        y = 30;
+        
+        // Lade und füge Screenshots ein
+        for (let i = 0; i < screenshots.length; i++) {
+          const ss = screenshots[i];
+          
+          try {
+            const imgData = await loadImage(`/screenshots/${ss.file}`);
+            
+            if (imgData) {
+              // Prüfe ob neue Seite nötig (für Bild + Beschriftung)
+              if (y + 85 > pageHeight - margin) {
+                doc.addPage();
+                y = margin;
+              }
+              
+              // Titel über dem Bild
+              doc.setFontSize(12);
+              doc.setTextColor(124, 58, 237);
+              doc.setFont('helvetica', 'bold');
+              doc.text(`${i + 1}. ${ss.title}`, margin, y);
+              y += 5;
+              
+              // Beschreibung
+              doc.setFontSize(9);
+              doc.setTextColor(100, 100, 100);
+              doc.setFont('helvetica', 'normal');
+              doc.text(ss.desc, margin, y);
+              y += 6;
+              
+              // Bild einfügen (skaliert auf Seitenbreite)
+              const imgWidth = maxWidth;
+              const imgHeight = 60; // Feste Höhe für konsistentes Layout
+              
+              // Rahmen um Bild
+              doc.setDrawColor(200, 200, 200);
+              doc.setLineWidth(0.3);
+              doc.rect(margin, y, imgWidth, imgHeight, 'S');
+              
+              doc.addImage(imgData, 'JPEG', margin, y, imgWidth, imgHeight);
+              y += imgHeight + 10;
+            }
+          } catch (imgError) {
+            console.log(`Screenshot ${ss.file} nicht verfügbar`);
+          }
+        }
+        
+        // Neue Seite für Textdokumentation
+        doc.addPage();
+        y = margin;
+        
+        // Dokumentations-Überschrift
+        doc.setFillColor(22, 163, 94);
+        doc.rect(0, 0, pageWidth, 20, 'F');
+        doc.setFontSize(16);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Technische Dokumentation', pageWidth / 2, 13, { align: 'center' });
+        y = 30;
         
         // Dokumentationsinhalt
         const lines = fullText.split('\n');
