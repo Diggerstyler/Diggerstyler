@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, WebSocket, WebSocketDisconnect, UploadFile, File
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, WebSocket, WebSocketDisconnect, UploadFile, File, Header, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -9,10 +9,12 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Dict
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import secrets
 import json
 import asyncio
+from collections import OrderedDict
+import hashlib
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -21,14 +23,66 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(
     mongo_url,
-    maxPoolSize=50,  # Support up to 50 concurrent connections
-    minPoolSize=10,  # Keep 10 connections ready
-    maxIdleTimeMS=30000,  # Close idle connections after 30s
+    maxPoolSize=100,  # Increased for 30+ concurrent devices
+    minPoolSize=20,   # Keep more connections ready
+    maxIdleTimeMS=60000,  # 60s idle timeout
     serverSelectionTimeoutMS=5000,  # 5s timeout for server selection
     connectTimeoutMS=10000,  # 10s connection timeout
     retryWrites=True,  # Automatically retry failed writes
+    w='majority',  # Write concern for data durability
 )
 db = client[os.environ['DB_NAME']]
+
+# Request Deduplication Cache (LRU with TTL)
+class RequestDeduplicationCache:
+    """Thread-safe LRU cache with TTL for request deduplication"""
+    def __init__(self, max_size=10000, ttl_seconds=300):
+        self.cache = OrderedDict()
+        self.max_size = max_size
+        self.ttl_seconds = ttl_seconds
+        self._lock = asyncio.Lock()
+    
+    async def get(self, key: str):
+        async with self._lock:
+            if key in self.cache:
+                entry = self.cache[key]
+                if datetime.now(timezone.utc) < entry['expires']:
+                    # Move to end (most recently used)
+                    self.cache.move_to_end(key)
+                    return entry['value']
+                else:
+                    del self.cache[key]
+            return None
+    
+    async def set(self, key: str, value):
+        async with self._lock:
+            if key in self.cache:
+                del self.cache[key]
+            elif len(self.cache) >= self.max_size:
+                # Remove oldest entry
+                self.cache.popitem(last=False)
+            
+            self.cache[key] = {
+                'value': value,
+                'expires': datetime.now(timezone.utc) + timedelta(seconds=self.ttl_seconds)
+            }
+    
+    async def cleanup(self):
+        """Remove expired entries"""
+        async with self._lock:
+            now = datetime.now(timezone.utc)
+            expired = [k for k, v in self.cache.items() if now >= v['expires']]
+            for k in expired:
+                del self.cache[k]
+
+# Initialize deduplication cache
+request_cache = RequestDeduplicationCache(max_size=10000, ttl_seconds=300)
+
+# Periodic cleanup task
+async def cleanup_cache_periodically():
+    while True:
+        await asyncio.sleep(60)  # Every minute
+        await request_cache.cleanup()
 
 app = FastAPI(
     title="Karnbachs Event OS",
