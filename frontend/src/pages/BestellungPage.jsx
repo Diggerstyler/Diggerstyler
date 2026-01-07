@@ -986,6 +986,7 @@ export default function BestellungPage() {
           </div>
         )}
       </div>
+      <AppFooter />
     </div>
   );
 }
