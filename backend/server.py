@@ -2143,7 +2143,10 @@ logger = logging.getLogger(__name__)
 async def startup_db_client():
     """Initialize database indexes on startup for better performance"""
     await create_indexes()
+    # Start cache cleanup task
+    asyncio.create_task(cleanup_cache_periodically())
     logger.info("Database initialized with performance indexes")
+    logger.info("Request deduplication cache initialized")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
