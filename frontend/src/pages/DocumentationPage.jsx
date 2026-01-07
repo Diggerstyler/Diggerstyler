@@ -1287,10 +1287,88 @@ export default function DocumentationPage() {
 
   const { swipeHandlers } = useAdminSwipe();
 
+  const handleLogout = () => {
+    sessionStorage.removeItem("adminAuth");
+    navigate("/");
+  };
+
+  // Export Funktion mit Format-Auswahl
+  const handleExport = async (format) => {
+    const timestamp = new Date().toISOString().split('T')[0];
+    const fileName = `event-os-dokumentation_${timestamp}`;
+    
+    // Sammle alle Dokumentation-Inhalte
+    let content = '';
+    Object.values(DOCUMENTATION).forEach(section => {
+      content += section.content + '\n\n';
+    });
+    
+    if (format === 'txt') {
+      // TXT Export
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${fileName}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Dokumentation als TXT heruntergeladen');
+      
+    } else if (format === 'html') {
+      // HTML Export mit Styling
+      const htmlContent = `
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Karnbachs Event OS - Dokumentation</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; background: #0a0a0b; color: #e5e5e5; }
+    h1 { color: #a855f7; border-bottom: 2px solid #a855f7; padding-bottom: 10px; }
+    h2 { color: #22c55e; margin-top: 30px; }
+    h3 { color: #eab308; }
+    pre { background: #1a1a1b; padding: 15px; border-radius: 8px; overflow-x: auto; border: 1px solid #333; }
+    code { font-family: 'Fira Code', monospace; font-size: 14px; }
+    .section { margin-bottom: 40px; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-right: 8px; }
+    .primary { background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #a855f7; }
+    .secondary { background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #22c55e; }
+    img { max-width: 100%; border-radius: 8px; border: 1px solid #333; }
+  </style>
+</head>
+<body>
+  <h1>🎪 Karnbachs Event OS - Dokumentation</h1>
+  <p><span class="badge primary">Version 1.0</span><span class="badge secondary">Erstellt: ${timestamp}</span></p>
+  <pre>${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+</body>
+</html>`;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${fileName}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Dokumentation als HTML heruntergeladen');
+      
+    } else if (format === 'pdf') {
+      // PDF Export - Info zeigen
+      toast.info('PDF Export: Bitte drucken Sie die HTML-Version als PDF (Strg+P → Als PDF speichern)');
+      // Öffne Print-Dialog
+      window.print();
+    }
+    
+    setShowExportDialog(false);
+  };
+
+  const [showExportDialog, setShowExportDialog] = useState(false);
+
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
+      {/* Einheitlicher Header - nur Navigation + Hilfe + Logout */}
       <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-3 shrink-0">
             <BookOpen className="w-5 h-5 text-primary" />
             <h1 className="font-display text-sm sm:text-base font-bold uppercase tracking-tight hidden sm:block">
@@ -1298,22 +1376,76 @@ export default function DocumentationPage() {
             </h1>
           </div>
           
-          <div className="flex-1 ">
-            <AdminNavBar />
-          </div>
-          
-          <Button 
-            onClick={handleDownload}
-            size="sm"
-            className="shrink-0 neon-primary"
-          >
-            <Download className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Download</span>
-          </Button>
+          {/* Admin Navigation + Hilfe + Logout */}
+          <AdminNavBar 
+            onHelp={() => toast.info("Dies ist die Dokumentations-Seite. Wählen Sie einen Tab für Details.")}
+            onLogout={handleLogout}
+          />
         </div>
       </header>
 
       <main className="p-4 sm:p-6 max-w-6xl mx-auto flex-1">
+        {/* Action Buttons - jetzt im Main Content */}
+        <div className="flex flex-wrap gap-3 mb-6">
+          <Button 
+            onClick={() => setShowExportDialog(true)}
+            className="neon-primary"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Dokumentation herunterladen
+          </Button>
+        </div>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="bg-card border-border">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-primary" />
+                Dokumentation herunterladen
+              </DialogTitle>
+              <DialogDescription>
+                Wählen Sie das gewünschte Format für den Download:
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-3 py-4">
+              <Button
+                onClick={() => handleExport('txt')}
+                variant="outline"
+                className="justify-start h-auto py-4"
+              >
+                <FileText className="w-8 h-8 mr-4 text-muted-foreground" />
+                <div className="text-left">
+                  <div className="font-bold">TXT (Text)</div>
+                  <div className="text-xs text-muted-foreground">Reiner Text ohne Formatierung</div>
+                </div>
+              </Button>
+              <Button
+                onClick={() => handleExport('html')}
+                variant="outline"
+                className="justify-start h-auto py-4"
+              >
+                <Code className="w-8 h-8 mr-4 text-green-500" />
+                <div className="text-left">
+                  <div className="font-bold">HTML (Webseite)</div>
+                  <div className="text-xs text-muted-foreground">Mit Styling und Formatierung</div>
+                </div>
+              </Button>
+              <Button
+                onClick={() => handleExport('pdf')}
+                variant="outline"
+                className="justify-start h-auto py-4"
+              >
+                <FileText className="w-8 h-8 mr-4 text-red-500" />
+                <div className="text-left">
+                  <div className="font-bold">PDF (Drucken)</div>
+                  <div className="text-xs text-muted-foreground">Öffnet Druck-Dialog → Als PDF speichern</div>
+                </div>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Laden...</div>
         ) : (
