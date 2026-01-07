@@ -27,7 +27,8 @@ import {
   FileText,
   Box,
   Settings,
-  Clock
+  Clock,
+  Calendar
 } from "lucide-react";
 import LiveClock from "@/components/LiveClock";
 
