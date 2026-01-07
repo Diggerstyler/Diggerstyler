@@ -170,7 +170,9 @@ export default function StatsPage() {
         </Button>
       </header>
 
-      <main className="p-4 sm:p-6 max-w-7xl mx-auto">
+      <SwipeIndicator currentIndex={currentIndex} totalPages={totalPages} prevLabel={prevLabel} nextLabel={nextLabel} />
+
+      <main className="p-4 sm:p-6 max-w-7xl mx-auto flex-1">
         {/* Filters */}
         <Card className="bg-card border-border mb-6">
           <CardHeader className="p-4 sm:p-6">
