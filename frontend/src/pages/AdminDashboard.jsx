@@ -170,7 +170,7 @@ export default function AdminDashboard() {
   ] : [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div className="flex items-center gap-3">
