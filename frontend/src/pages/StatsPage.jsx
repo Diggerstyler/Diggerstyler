@@ -176,7 +176,31 @@ export default function StatsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs sm:text-sm">Event</Label>
+                <Select 
+                  value={filters.event_id} 
+                  onValueChange={(value) => setFilters(prev => ({ ...prev, event_id: value }))}
+                >
+                  <SelectTrigger className="text-sm" data-testid="event-filter">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Events</SelectItem>
+                    <SelectItem value="none">Ohne Event</SelectItem>
+                    {events.map(event => (
+                      <SelectItem key={event.id} value={event.id}>
+                        <span className="flex items-center gap-2">
+                          <CalendarEvent className="w-3 h-3" />
+                          {event.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="space-y-2">
                 <Label className="text-xs sm:text-sm">Startdatum</Label>
                 <Popover>
@@ -268,6 +292,7 @@ export default function StatsPage() {
               onClick={() => setFilters({
                 stand_id: "all",
                 status: "all",
+                event_id: "all",
                 start_date: null,
                 end_date: null
               })}
