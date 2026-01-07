@@ -31,6 +31,7 @@ import {
   Calendar
 } from "lucide-react";
 import LiveClock from "@/components/LiveClock";
+import AppFooter from "@/components/AppFooter";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
