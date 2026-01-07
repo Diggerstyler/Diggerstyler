@@ -362,6 +362,7 @@ export default function AdminDashboard() {
               </section>
             </div>
           </ScrollArea>
+          <Button onClick={() => setShowHelp(false)} className="mt-2">Schließen</Button>
         </DialogContent>
       </Dialog>
 
