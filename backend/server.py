@@ -1833,12 +1833,18 @@ async def get_admin_orders(
     limit: int = 100,
     offset: int = 0,
     stand_id: Optional[str] = None,
+    event_id: Optional[str] = None,  # Event-Filter hinzufügen
     username: str = Depends(verify_admin)
 ):
     """Get all orders for admin view with optional filtering"""
     query = {}
     if stand_id:
         query["stand_id"] = stand_id
+    if event_id:
+        if event_id == "none":
+            query["event_id"] = None
+        else:
+            query["event_id"] = event_id
     
     total_count = await db.orders.count_documents(query)
     orders = await db.orders.find(query, {"_id": 0}).sort("created_at", -1).skip(offset).limit(limit).to_list(limit)
@@ -1851,6 +1857,8 @@ async def get_admin_orders(
             order["deposit_total"] = 0
         if "deposit_return_total" not in order:
             order["deposit_return_total"] = 0
+        if "event_id" not in order:
+            order["event_id"] = None
     
     return {
         "orders": orders,
