@@ -177,28 +177,17 @@ export default function AdminDashboard() {
       className="min-h-screen bg-background flex flex-col"
       {...swipeHandlers}
     >
-      {/* Einheitlicher Header - nur Navigation + Hilfe + Logout */}
+      {/* Einheitlicher Header - Navigation links, Hilfe+Logout rechts */}
       <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
-        <div className="flex items-center gap-2">
-          {/* Logo/Title */}
-          <div className="flex items-center gap-2 shrink-0">
-            <LayoutDashboard className="w-5 h-5 text-primary" />
-            <h1 className="font-display text-sm sm:text-base font-bold uppercase tracking-tight hidden sm:block">
-              Admin
-            </h1>
-          </div>
-          
-          {/* Admin Navigation + Hilfe + Logout */}
-          <AdminNavBar 
-            onHelp={() => setShowHelp(true)}
-            onLogout={handleLogout}
-          />
-        </div>
+        <AdminNavBar 
+          onHelp={() => setShowHelp(true)}
+          onLogout={handleLogout}
+        />
       </header>
 
-      {/* Main Content */}
+      {/* Main Content - Linksbündig */}
       <main className="flex-1 px-4 sm:px-6 py-6 pb-20">
-        {/* Action Buttons - jetzt im Main Content */}
+        {/* Action Buttons */}
         <div className="flex flex-wrap gap-3 mb-6">
           <Button
             onClick={handleExport}
