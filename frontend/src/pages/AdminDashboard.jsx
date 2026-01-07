@@ -177,8 +177,9 @@ export default function AdminDashboard() {
       className="min-h-screen bg-background flex flex-col"
       {...swipeHandlers}
     >
+      {/* Einheitlicher Header - nur Navigation + Hilfe + Logout */}
       <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
           {/* Logo/Title */}
           <div className="flex items-center gap-2 shrink-0">
             <LayoutDashboard className="w-5 h-5 text-primary" />
@@ -187,19 +188,36 @@ export default function AdminDashboard() {
             </h1>
           </div>
           
-          {/* Admin Navigation - 2 Reihen */}
-          <div className="flex-1">
-            <AdminNavBar />
-          </div>
-          
-          {/* Action Buttons - 2 Reihen mit Beschriftung */}
-          <AdminActions
-            onExport={handleExport}
-            onReset={() => setShowResetDialog(true)}
+          {/* Admin Navigation + Hilfe + Logout */}
+          <AdminNavBar 
             onHelp={() => setShowHelp(true)}
             onLogout={handleLogout}
-            isExporting={isExporting}
           />
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 px-4 sm:px-6 py-6 pb-20">
+        {/* Action Buttons - jetzt im Main Content */}
+        <div className="flex flex-wrap gap-3 mb-6">
+          <Button
+            onClick={handleExport}
+            disabled={isExporting}
+            variant="outline"
+            className="border-green-500/50 text-green-500 hover:bg-green-500/10"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            {isExporting ? "Exportiere..." : "Daten exportieren"}
+          </Button>
+          <Button
+            onClick={() => setShowResetDialog(true)}
+            variant="outline"
+            className="border-destructive/50 text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Daten zurücksetzen
+          </Button>
+        </div>
         </div>
       </header>
 
