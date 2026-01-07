@@ -383,6 +383,8 @@ class Order(BaseModel):
     # Station tracking for multi-station workflow
     station_status: Dict[str, bool] = {}  # station_id -> completed (True/False)
     has_linked_articles: bool = False  # Whether this order has linked articles
+    # Event tracking
+    event_id: Optional[str] = None  # ID des zugehörigen Events (None = ohne Event)
 
 class OrderCreate(BaseModel):
     stand_id: str
