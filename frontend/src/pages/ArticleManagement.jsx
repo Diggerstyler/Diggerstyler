@@ -666,8 +666,10 @@ export default function ArticleManagement() {
     </TableHead>
   );
 
+  const { swipeHandlers, currentIndex, totalPages, prevLabel, nextLabel } = useAdminSwipe();
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
       <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div className="flex items-center gap-4 w-full sm:w-auto">
           <Button 
@@ -686,7 +688,9 @@ export default function ArticleManagement() {
         </div>
       </header>
 
-      <main className="p-4 sm:p-6 max-w-7xl mx-auto">
+      <SwipeIndicator currentIndex={currentIndex} totalPages={totalPages} prevLabel={prevLabel} nextLabel={nextLabel} />
+
+      <main className="p-4 sm:p-6 max-w-7xl mx-auto flex-1">
         <Tabs defaultValue="articles" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 max-w-lg">
             <TabsTrigger value="articles">Artikel ({filteredAndSortedArticles.length})</TabsTrigger>
