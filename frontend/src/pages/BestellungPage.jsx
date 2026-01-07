@@ -375,6 +375,9 @@ export default function BestellungPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Offline Banner */}
+      <OfflineBanner standId={standId} />
+      
       {/* Order Completion Bottom Sheet */}
       {completedOrderNumber !== null && (
         <div 
