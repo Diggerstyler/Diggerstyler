@@ -186,7 +186,9 @@ export default function EventManagement() {
         </div>
       </header>
 
-      <main className="p-4 sm:p-6 max-w-6xl mx-auto">
+      <SwipeIndicator currentIndex={currentIndex} totalPages={totalPages} prevLabel={prevLabel} nextLabel={nextLabel} />
+
+      <main className="p-4 sm:p-6 max-w-6xl mx-auto flex-1">
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Laden...</div>
         ) : events.length === 0 ? (
