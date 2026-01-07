@@ -381,10 +381,10 @@ export default function BestellungPage() {
       {/* Order Completion Bottom Sheet */}
       {completedOrderNumber !== null && (
         <div 
-          className="fixed inset-0 z-[100] bg-black/80"
+          className="fixed inset-0 z-[10000] bg-black/80"
           onClick={!showChangeCalc ? dismissOverlay : undefined}
         >
-          {/* Bottom Sheet Container - full height on mobile */}
+          {/* Bottom Sheet Container - full height on mobile, above footer */}
           <div 
             className="absolute bottom-0 left-0 right-0 bg-card rounded-t-3xl animate-in slide-in-from-bottom duration-300 max-h-[95vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
@@ -394,8 +394,8 @@ export default function BestellungPage() {
               <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
             </div>
             
-            {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto px-4 pb-6">
+            {/* Scrollable content - extra padding at bottom for footer */}
+            <div className="flex-1 overflow-y-auto px-4 pb-20">
               {/* Header with Bonnummer - sticky */}
               <div className="sticky top-0 bg-card pb-4 z-10">
                 <div className="flex items-center justify-between gap-3">
