@@ -308,16 +308,23 @@ export default function OneManShowPage() {
         direct_complete: true  // This makes the order go directly to "completed"
       };
 
-      const response = await axios.post(`${API}/orders`, order);
-      setLastOrder(response.data);
-      showOrderCompletionOverlay(response.data.order_number, total);
-      toast.success(`Bestellung #${response.data.order_number} abgeschlossen!`);
+      // Use OrderService for reliable delivery with retry
+      const result = await submitOrderService(order);
+      
+      if (result.queued) {
+        showOrderCompletionOverlay("WARTEND", total);
+        toast.info(result.message);
+      } else {
+        setLastOrder(result);
+        showOrderCompletionOverlay(result.order_number, total);
+        toast.success(`Bestellung #${result.order_number} abgeschlossen!`);
+      }
       setCart([]);
       
       // Refresh articles to update stock info
       refetchArticles();
     } catch (error) {
-      toast.error("Fehler beim Erstellen der Bestellung");
+      toast.error("Fehler beim Erstellen der Bestellung. Bitte erneut versuchen.");
     } finally {
       setIsSubmitting(false);
     }
