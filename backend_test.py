@@ -1364,6 +1364,7 @@ class FestivalAPITester:
             self.test_stock_inventory_management()  # Add stock inventory management test
             self.test_new_features_message_456()  # Add new features test
             self.test_stock_management_features()  # Add new stock management features test
+            self.test_event_management_features()  # Add event management features test
             
         except KeyboardInterrupt:
             print("\n⚠️ Tests interrupted by user")
