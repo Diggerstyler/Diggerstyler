@@ -165,7 +165,7 @@ export default function StockOverview() {
     return Math.round((item.total_stock_sales_units / item.initial_stock_sales_units) * 100);
   };
 
-  const { swipeHandlers, currentIndex, totalPages, prevLabel, nextLabel } = useAdminSwipe();
+  const { swipeHandlers } = useAdminSwipe();
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>

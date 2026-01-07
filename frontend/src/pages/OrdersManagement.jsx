@@ -165,7 +165,7 @@ export default function OrdersManagement() {
 
   const totalPages = Math.ceil(totalOrders / pageSize);
 
-  const { swipeHandlers, currentIndex, totalPages: swipeTotalPages, prevLabel, nextLabel } = useAdminSwipe();
+  const { swipeHandlers } = useAdminSwipe();
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>

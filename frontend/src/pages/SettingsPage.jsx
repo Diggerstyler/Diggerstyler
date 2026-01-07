@@ -187,7 +187,7 @@ export default function SettingsPage() {
     }
   }, [settings.primary_color, settings.secondary_color, settings.accent_color]);
 
-  const { swipeHandlers, currentIndex, totalPages, prevLabel, nextLabel } = useAdminSwipe();
+  const { swipeHandlers } = useAdminSwipe();
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>

@@ -183,7 +183,7 @@ export default function StationManagement() {
     return article?.name || "Unbekannt";
   };
 
-  const { swipeHandlers, currentIndex, totalPages, prevLabel, nextLabel } = useAdminSwipe();
+  const { swipeHandlers } = useAdminSwipe();
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col" {...swipeHandlers}>

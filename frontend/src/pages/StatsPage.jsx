@@ -138,7 +138,7 @@ export default function StatsPage() {
     completed: { label: "Abgeholt", color: "default" }
   };
 
-  const { swipeHandlers, currentIndex, totalPages, prevLabel, nextLabel } = useAdminSwipe();
+  const { swipeHandlers } = useAdminSwipe();
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
