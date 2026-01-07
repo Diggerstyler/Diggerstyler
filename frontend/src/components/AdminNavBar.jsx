@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, Calendar, Store, Package, Box, Layers, 
   BarChart3, FileText, Settings, BookOpen,
-  HelpCircle, LogOut
+  HelpCircle, LogOut, Wifi, WifiOff
 } from "lucide-react";
 
 // Admin Navigation Items
@@ -21,11 +21,14 @@ const ADMIN_NAV_ITEMS = [
 
 /**
  * AdminNavBar - Einheitlicher Header für alle Admin-Seiten
- * Layout: Navigation (links) | Hilfe + Logout (rechts)
+ * Layout: Navigation (links) | Verbindungsstatus + Hilfe + Logout (rechts)
  */
 export default function AdminNavBar({ onHelp, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Verbindungsstatus basierend auf Browser online Status
+  const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
 
   // Split into 2 rows: 5 items each
   const row1 = ADMIN_NAV_ITEMS.slice(0, 5);
@@ -79,12 +82,26 @@ export default function AdminNavBar({ onHelp, onLogout }) {
         </div>
       </div>
       
-      {/* Hilfe + Logout - Rechts */}
+      {/* Verbindungsstatus + Hilfe + Logout - Rechts */}
       <div className="flex flex-col gap-0.5 ml-auto">
         <div className="flex items-center gap-0.5">
+          {/* Verbindungsstatus */}
+          <div 
+            className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${
+              isOnline ? 'bg-green-500/10' : 'bg-yellow-500/10'
+            }`}
+            title={isOnline ? 'Verbunden' : 'Offline'}
+          >
+            <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-yellow-500'}`} />
+            {isOnline ? (
+              <Wifi className="w-3.5 h-3.5 text-green-500" />
+            ) : (
+              <WifiOff className="w-3.5 h-3.5 text-yellow-500" />
+            )}
+          </div>
           {renderActionButton(HelpCircle, "Hilfe", onHelp || (() => navigate("/admin/docs")), "help-btn")}
         </div>
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-0.5 justify-end">
           {renderActionButton(LogOut, "Logout", onLogout || (() => {
             sessionStorage.removeItem("adminAuth");
             navigate("/");
