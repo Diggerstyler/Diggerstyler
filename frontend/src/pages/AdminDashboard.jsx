@@ -218,8 +218,6 @@ export default function AdminDashboard() {
             Daten zurücksetzen
           </Button>
         </div>
-        </div>
-      </header>
 
       {/* Admin Help Dialog */}
       <Dialog open={showHelp} onOpenChange={setShowHelp}>
