@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ArrowLeft, FileText, Download, Book, Code, Palette, Database, 
   Settings, Users, ShoppingCart, Hammer, Package, Zap, Box,
-  BarChart3, Clock, Globe, Smartphone, Monitor, Server
+  BarChart3, Clock, Globe, Smartphone, Monitor, Server, BookOpen
 } from "lucide-react";
 import LiveClock from "@/components/LiveClock";
 import AppFooter from "@/components/AppFooter";
