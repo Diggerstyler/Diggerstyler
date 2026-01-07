@@ -177,47 +177,43 @@ export default function StandManagement() {
     return articles.filter(a => standType.categories.includes(a.category));
   };
 
-  const { swipeHandlers, currentIndex, totalPages, prevLabel, nextLabel } = useAdminSwipe();
+  const { swipeHandlers } = useAdminSwipe();
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
-      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate("/admin")}
-            data-testid="back-btn"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex items-center gap-3">
-            <Store className="w-6 h-6 text-primary" />
-            <h1 className="font-display text-lg sm:text-xl font-bold uppercase tracking-tight">
-              Standverwaltung
+      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 shrink-0">
+            <Store className="w-5 h-5 text-primary" />
+            <h1 className="font-display text-base sm:text-lg font-bold uppercase tracking-tight">
+              Stände
             </h1>
           </div>
-        </div>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
-          setIsDialogOpen(open);
-          if (!open) resetForm();
-        }}>
-          <DialogTrigger asChild>
-            <Button className="w-full sm:w-auto sm:ml-auto neon-primary" data-testid="add-stand-btn">
-              <Plus className="w-4 h-4 mr-2" />
-              Neuer Stand
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-card border-border max-w-md">
-            <DialogHeader>
-              <DialogTitle className="font-display uppercase">
-                {editingStand ? "Stand bearbeiten" : "Neuer Stand"}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
+          
+          <div className="flex-1 overflow-x-auto scrollbar-hide">
+            <AdminNavBar />
+          </div>
+          
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) resetForm();
+          }}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="shrink-0 neon-primary" data-testid="add-stand-btn">
+                <Plus className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Neuer Stand</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-card border-border max-w-md">
+              <DialogHeader>
+                <DialogTitle className="font-display uppercase">
+                  {editingStand ? "Stand bearbeiten" : "Neuer Stand"}
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
