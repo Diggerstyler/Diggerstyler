@@ -194,49 +194,13 @@ export default function AdminDashboard() {
           </div>
           
           {/* Action Buttons - 2 Reihen mit Beschriftung */}
-          <div className="flex flex-col gap-0.5 shrink-0">
-            <div className="flex items-center gap-0.5">
-              <button
-                onClick={handleExport}
-                disabled={isExporting}
-                data-testid="export-btn"
-                className="flex flex-col items-center justify-center px-2 py-1 rounded-lg text-green-500 hover:bg-green-500/10 min-w-[52px] disabled:opacity-50"
-                title="Export"
-              >
-                <Download className="w-4 h-4" />
-                <span className="text-[9px] mt-0.5 leading-tight">Export</span>
-              </button>
-              <button
-                onClick={() => setShowResetDialog(true)}
-                data-testid="reset-btn"
-                className="flex flex-col items-center justify-center px-2 py-1 rounded-lg text-destructive hover:bg-destructive/10 min-w-[52px]"
-                title="Reset"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span className="text-[9px] mt-0.5 leading-tight">Reset</span>
-              </button>
-            </div>
-            <div className="flex items-center gap-0.5">
-              <button
-                onClick={() => setShowHelp(true)}
-                data-testid="help-btn"
-                className="flex flex-col items-center justify-center px-2 py-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 min-w-[52px]"
-                title="Hilfe"
-              >
-                <HelpCircle className="w-4 h-4" />
-                <span className="text-[9px] mt-0.5 leading-tight">Hilfe</span>
-              </button>
-              <button
-                onClick={handleLogout}
-                data-testid="logout-btn"
-                className="flex flex-col items-center justify-center px-2 py-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 min-w-[52px]"
-                title="Abmelden"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="text-[9px] mt-0.5 leading-tight">Logout</span>
-              </button>
-            </div>
-          </div>
+          <AdminActions
+            onExport={handleExport}
+            onReset={() => setShowResetDialog(true)}
+            onHelp={() => setShowHelp(true)}
+            onLogout={handleLogout}
+            isExporting={isExporting}
+          />
         </div>
       </header>
 
