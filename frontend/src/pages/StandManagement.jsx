@@ -259,9 +259,7 @@ export default function StandManagement() {
           </DialogContent>
         </Dialog>
         </div>
-      </header>
 
-      <main className="p-4 sm:p-6 max-w-6xl mx-auto flex-1">
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="font-display uppercase">
