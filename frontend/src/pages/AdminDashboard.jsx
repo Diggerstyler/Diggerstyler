@@ -245,14 +245,6 @@ export default function AdminDashboard() {
       </header>
 
       {/* Admin Help Dialog */}
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Admin Help Dialog */}
       <Dialog open={showHelp} onOpenChange={setShowHelp}>
         <DialogContent className="bg-card border-border max-w-2xl max-h-[85vh]">
           <DialogHeader>
