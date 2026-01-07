@@ -465,6 +465,8 @@ export default function StandManagement() {
           </DialogContent>
         </Dialog>
       </main>
+
+      <AppFooter />
     </div>
   );
 }
