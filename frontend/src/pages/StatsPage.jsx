@@ -138,6 +138,11 @@ export default function StatsPage() {
     completed: { label: "Abgeholt", color: "default" }
   };
 
+  const handleLogout = () => {
+    sessionStorage.removeItem("adminAuth");
+    navigate("/");
+  };
+
   const { swipeHandlers } = useAdminSwipe();
 
   return (
@@ -155,17 +160,13 @@ export default function StatsPage() {
             <AdminNavBar />
           </div>
           
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 shrink-0"
-            onClick={exportCSV}
-            disabled={orders.length === 0}
-            data-testid="export-btn"
-            title="CSV Export"
-          >
-            <Download className="w-4 h-4" />
-          </Button>
+          <AdminActions
+            onExport={exportCSV}
+            onHelp={() => toast.info("Statistik-Seite: Filtern und exportieren Sie Ihre Bestelldaten.")}
+            onLogout={handleLogout}
+            isExporting={orders.length === 0}
+            showReset={false}
+          />
         </div>
       </header>
 
