@@ -69,6 +69,13 @@ async def create_indexes():
         # Stock units collection
         await db.stock_units.create_index("active")
         
+        # Events collection
+        await db.events.create_index("status")
+        await db.events.create_index([("start_date", 1), ("end_date", 1)])
+        
+        # Orders - event_id index
+        await db.orders.create_index("event_id")
+        
         logging.info("Database indexes created successfully")
     except Exception as e:
         logging.error(f"Error creating indexes: {e}")
