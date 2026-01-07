@@ -1520,9 +1520,41 @@ Diese Dokumentation wurde automatisch generiert.
     } else if (format === 'pdf') {
       setIsGeneratingPdf(true);
       setShowExportDialog(false);
-      toast.info('PDF wird generiert... Bitte warten.');
+      toast.info('PDF wird generiert mit Screenshots... Bitte warten.');
       
       try {
+        // Screenshot-Definitionen
+        const screenshots = [
+          { file: '01_landing.png', title: 'Landing Page', desc: 'Startseite mit Stand-Auswahl und Rollen-Buttons' },
+          { file: '02_admin_login.png', title: 'Admin Login', desc: 'Sicherer Zugang zum Verwaltungsbereich' },
+          { file: '03_admin_dashboard.png', title: 'Admin Dashboard', desc: 'Übersicht mit Statistiken und Top-Artikeln' },
+          { file: '04_events.png', title: 'Event-Verwaltung', desc: 'Events erstellen, bearbeiten und Statistiken abrufen' },
+          { file: '05_stands.png', title: 'Stand-Verwaltung', desc: 'Verkaufsstände konfigurieren' },
+          { file: '06_articles.png', title: 'Artikel-Verwaltung', desc: 'Artikel, Preise, Pfand und Bestand verwalten' },
+          { file: '07_stats.png', title: 'Statistiken', desc: 'Detaillierte Auswertungen und Diagramme' },
+          { file: '08_orders.png', title: 'Bestellungen', desc: 'Alle Bestellungen einsehen und verwalten' },
+          { file: '09_settings.png', title: 'Einstellungen', desc: 'Logo, Farben und globale Konfiguration' },
+          { file: '10_stock.png', title: 'Bestandsübersicht', desc: 'Lagerbestand aller Artikel auf einen Blick' },
+        ];
+        
+        // Lade alle Screenshots als Base64
+        const loadImage = (src) => {
+          return new Promise((resolve, reject) => {
+            const img = new window.Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0);
+              resolve(canvas.toDataURL('image/jpeg', 0.85));
+            };
+            img.onerror = () => resolve(null);
+            img.src = src;
+          });
+        };
+        
         // Erstelle PDF mit jsPDF
         const doc = new jsPDF({
           orientation: 'portrait',
