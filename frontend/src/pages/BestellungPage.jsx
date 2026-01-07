@@ -11,9 +11,11 @@ import { ArrowLeft, Plus, Minus, ShoppingCart, Beer, UtensilsCrossed, RotateCcw,
 import { Input } from "@/components/ui/input";
 import LiveClock from "@/components/LiveClock";
 import AppFooter from "@/components/AppFooter";
+import { ConnectionStatus, OfflineBanner } from "@/components/ConnectionStatus";
+import wsService from "@/services/WebSocketService";
+import { submitOrder as submitOrderService, getPendingOrdersCount } from "@/services/OrderService";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
-const WS_URL = process.env.REACT_APP_BACKEND_URL?.replace('https://', 'wss://').replace('http://', 'ws://');
 
 // Fullscreen utility functions - with error handling for iframe/permissions policy
 const toggleFullscreen = async () => {
