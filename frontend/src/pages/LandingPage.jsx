@@ -8,8 +8,9 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ShoppingCart, Hammer, Package, Settings, Zap, ArrowLeft, Store, UtensilsCrossed, Beer, Sparkles, HelpCircle, FastForward, Star, Maximize, Minimize } from "lucide-react";
+import { ShoppingCart, Hammer, Package, Settings, Zap, ArrowLeft, Store, UtensilsCrossed, Beer, Sparkles, HelpCircle, FastForward, Star, Maximize, Minimize, Home } from "lucide-react";
 import LiveClock from "@/components/LiveClock";
+import AppFooter from "@/components/AppFooter";
 import { useTheme } from "@/components/ThemeProvider";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
