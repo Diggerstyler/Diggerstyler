@@ -683,8 +683,15 @@ export default function LandingPage() {
         )}
       </main>
 
-      <footer className="glass px-4 py-2 text-center text-[10px] sm:text-xs text-muted-foreground">
-        Karnbachs Event OS
+      {/* Footer mit Platz für Emergent Badge */}
+      <footer className="glass border-t border-border/50 px-4 py-3 sm:py-2">
+        <div className="flex items-center justify-between max-w-4xl mx-auto">
+          <span className="text-[10px] sm:text-xs text-muted-foreground">
+            {settings?.event_name || "Karnbachs Event OS"}
+          </span>
+          {/* Platzhalter für Emergent Badge (rechte Seite) */}
+          <span className="w-[140px] sm:w-[160px]"></span>
+        </div>
       </footer>
     </div>
   );
