@@ -1505,57 +1505,74 @@ Diese Dokumentation wurde automatisch generiert.
       toast.success('Dokumentation als TXT heruntergeladen');
       setShowExportDialog(false);
       
-    } else if (format === 'html' || format === 'pdf') {
-      setIsGeneratingPdf(format === 'pdf');
-      if (format === 'pdf') {
-        toast.info('PDF wird generiert... Dies kann einige Sekunden dauern.');
-      }
+    } else if (format === 'html') {
+      const htmlContent = generateHtmlDocument(fullText, timestamp, false);
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${fileName}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Dokumentation als HTML heruntergeladen');
+      setShowExportDialog(false);
+      
+    } else if (format === 'pdf') {
+      setIsGeneratingPdf(true);
+      toast.info('PDF wird generiert... Bitte warten.');
+      setShowExportDialog(false);
       
       try {
-        const htmlContent = generateHtmlDocument(fullText, timestamp, format === 'pdf');
+        // Erstelle sichtbaren Container für PDF-Rendering
+        const htmlContent = generateHtmlDocument(fullText, timestamp, true);
         
-        if (format === 'html') {
-          const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${fileName}.html`;
-          a.click();
-          URL.revokeObjectURL(url);
-          toast.success('Dokumentation als HTML heruntergeladen');
-        } else {
-          // PDF generieren
-          const container = document.createElement('div');
-          container.innerHTML = htmlContent;
-          container.style.position = 'absolute';
-          container.style.left = '-9999px';
-          container.style.width = '800px';
-          document.body.appendChild(container);
-          
-          const opt = {
-            margin: [15, 15, 15, 15],
-            filename: `${fileName}.pdf`,
-            image: { type: 'jpeg', quality: 0.95 },
-            html2canvas: { 
-              scale: 2, 
-              useCORS: true, 
-              logging: false,
-              letterRendering: true
-            },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-          };
-          
-          await html2pdf().set(opt).from(container).save();
-          document.body.removeChild(container);
-          toast.success('PDF erfolgreich heruntergeladen!');
-        }
+        // Erstelle iframe für sauberes Rendering
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '210mm';
+        iframe.style.height = '297mm';
+        iframe.style.border = 'none';
+        iframe.style.zIndex = '-9999';
+        iframe.style.opacity = '0';
+        document.body.appendChild(iframe);
+        
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(htmlContent);
+        iframeDoc.close();
+        
+        // Warten bis alles geladen ist
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const opt = {
+          margin: [10, 10, 10, 10],
+          filename: `${fileName}.pdf`,
+          image: { type: 'jpeg', quality: 0.92 },
+          html2canvas: { 
+            scale: 1.5,
+            useCORS: true,
+            logging: true,
+            letterRendering: true,
+            allowTaint: true,
+            foreignObjectRendering: false,
+            windowWidth: 794, // A4 width in pixels at 96dpi
+            windowHeight: 1123 // A4 height
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: 'avoid-all' }
+        };
+        
+        await html2pdf().set(opt).from(iframeDoc.body).save();
+        
+        document.body.removeChild(iframe);
+        toast.success('PDF erfolgreich heruntergeladen!');
       } catch (error) {
-        console.error('Export error:', error);
-        toast.error('Export fehlgeschlagen. Bitte versuchen Sie es erneut.');
+        console.error('PDF Export error:', error);
+        toast.error('PDF-Export fehlgeschlagen: ' + error.message);
       } finally {
         setIsGeneratingPdf(false);
-        setShowExportDialog(false);
       }
     }
   };
