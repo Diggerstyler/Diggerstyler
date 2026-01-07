@@ -1410,6 +1410,8 @@ export default function DocumentationPage() {
           </div>
         )}
       </main>
+
+      <AppFooter />
     </div>
   );
 }
