@@ -36,15 +36,15 @@ export default function AdminNavBar() {
       <button
         key={item.path}
         onClick={() => navigate(item.path)}
-        className={`flex flex-col items-center justify-center px-2 py-1 rounded-lg transition-all min-w-[52px] ${
+        className={`flex flex-col items-center justify-center px-1 sm:px-2 py-1 rounded-lg transition-all min-w-[40px] sm:min-w-[52px] ${
           isActive 
             ? "bg-yellow-500/20 text-yellow-500" 
             : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
         }`}
         title={item.label}
       >
-        <Icon className="w-4 h-4" />
-        <span className="text-[9px] mt-0.5 leading-tight">{item.label}</span>
+        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        <span className="text-[8px] sm:text-[9px] mt-0.5 leading-tight truncate max-w-[38px] sm:max-w-none">{item.label}</span>
       </button>
     );
   };
