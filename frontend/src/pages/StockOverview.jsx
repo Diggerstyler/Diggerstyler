@@ -169,40 +169,35 @@ export default function StockOverview() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
-      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate("/admin")}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex items-center gap-3">
-            <Box className="w-6 h-6 text-secondary" />
-            <h1 className="font-display text-lg sm:text-xl font-bold uppercase tracking-tight">
-              Bestandsübersicht
+      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 shrink-0">
+            <Box className="w-5 h-5 text-secondary" />
+            <h1 className="font-display text-base sm:text-lg font-bold uppercase tracking-tight">
+              Bestand
             </h1>
           </div>
-        </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
-          <LiveClock />
-          <Button variant="outline" size="sm" onClick={fetchStock}>
-            <RefreshCw className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">Aktualisieren</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="text-destructive border-destructive/50 hover:bg-destructive/10"
-            onClick={() => setShowResetDialog(true)}
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">Reset</span>
-          </Button>
+          
+          <div className="flex-1 overflow-x-auto scrollbar-hide">
+            <AdminNavBar />
+          </div>
+          
+          <div className="flex items-center gap-1 shrink-0">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={fetchStock} title="Aktualisieren">
+              <RefreshCw className="w-4 h-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0 text-destructive"
+              onClick={() => setShowResetDialog(true)}
+              title="Reset"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </header>
-
 
       <main className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 flex-1">
         {/* Summary Cards */}
