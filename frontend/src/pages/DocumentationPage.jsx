@@ -433,13 +433,22 @@ API-Struktur:
 ├── /stands          # CRUD für Stände
 ├── /articles        # CRUD für Artikel
 ├── /orders          # CRUD für Bestellungen
+├── /events          # CRUD für Events (NEU)
+│   ├── GET /         # Alle Events abrufen
+│   ├── GET /active   # Aktuell aktives Event
+│   ├── GET /{id}     # Einzelnes Event
+│   ├── GET /{id}/stats # Detaillierte Statistiken
+│   ├── POST /        # Event erstellen (Admin)
+│   ├── PUT /{id}     # Event bearbeiten (Admin)
+│   └── DELETE /{id}  # Event löschen (Admin)
 ├── /stock-units     # CRUD für Bestandseinheiten
 ├── /deposit-groups  # CRUD für Pfandgruppen
 ├── /stations        # CRUD für Stationen
 ├── /settings        # App-Einstellungen
-├── /stats           # Statistik-Endpoints
+├── /stats           # Statistik-Endpoints (mit Event-Filter)
 ├── /admin/          # Admin-Funktionen
 │   ├── /login       # Authentifizierung
+│   ├── /orders      # Bestellverwaltung (mit Event-Filter)
 │   ├── /reset       # Daten zurücksetzen
 │   └── /stock/reset # Bestand zurücksetzen
 ├── /ws              # WebSocket-Endpoint
