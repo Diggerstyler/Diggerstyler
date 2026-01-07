@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ArrowLeft, Plus, Minus, ShoppingCart, Beer, UtensilsCrossed, RotateCcw, X, Trash2, Zap, Check, Archive, Clock, Calculator, Maximize, Minimize, AlertTriangle, Home } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import LiveClock from "@/components/LiveClock";
+import AppFooter from "@/components/AppFooter";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const WS_URL = process.env.REACT_APP_BACKEND_URL?.replace('https://', 'wss://').replace('http://', 'ws://');
