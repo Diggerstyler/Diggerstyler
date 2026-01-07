@@ -156,30 +156,29 @@ export default function EventManagement() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
-      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 shrink-0">
+      <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Calendar className="w-5 h-5 text-primary" />
-            <h1 className="font-display text-base sm:text-lg font-bold uppercase tracking-tight">
+            <h1 className="font-display text-sm sm:text-base font-bold uppercase tracking-tight hidden sm:block">
               Events
             </h1>
           </div>
           
-          <div className="flex-1 overflow-x-auto scrollbar-hide">
+          <div className="flex-1">
             <AdminNavBar />
           </div>
           
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="shrink-0">
             <Button 
               onClick={() => {
                 setFormData({ name: "", description: "", start_date: "", end_date: "" });
                 setShowCreateDialog(true);
               }}
               size="sm"
-              className="neon-primary"
+              className="neon-primary h-8"
             >
-              <Plus className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Neues Event</span>
+              <Plus className="w-4 h-4" />
             </Button>
           </div>
         </div>
