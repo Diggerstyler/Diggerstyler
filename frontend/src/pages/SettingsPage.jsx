@@ -191,16 +191,16 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
-      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3">
-        <div className="flex items-center justify-between gap-4">
+      <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-3 shrink-0">
             <Settings className="w-5 h-5 text-primary" />
-            <h1 className="font-display text-base sm:text-lg font-bold uppercase tracking-tight">
+            <h1 className="font-display text-sm sm:text-base font-bold uppercase tracking-tight hidden sm:block">
               Einstellungen
             </h1>
           </div>
           
-          <div className="flex-1 overflow-x-auto scrollbar-hide">
+          <div className="flex-1 ">
             <AdminNavBar />
           </div>
         </div>
@@ -346,7 +346,7 @@ export default function SettingsPage() {
                 {/* Custom Colors */}
                 <div className="space-y-4">
                   <Label>Individuelle Farben</Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div className="space-y-2">
                       <Label htmlFor="primary" className="text-xs text-muted-foreground">
                         Primärfarbe (Buttons, Akzente)
@@ -435,7 +435,7 @@ export default function SettingsPage() {
                       Akzent Button
                     </Button>
                   </div>
-                  <div className="flex gap-4 text-sm">
+                  <div className="flex gap-2 text-sm">
                     <span style={{ color: settings.primary_color }}>● Primärtext</span>
                     <span style={{ color: settings.secondary_color }}>● Sekundärtext</span>
                     <span style={{ color: settings.accent_color }}>● Akzenttext</span>

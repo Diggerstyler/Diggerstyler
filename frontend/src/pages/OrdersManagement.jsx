@@ -169,16 +169,16 @@ export default function OrdersManagement() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
-      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3">
-        <div className="flex items-center justify-between gap-4">
+      <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-3 shrink-0">
             <FileText className="w-5 h-5 text-accent" />
-            <h1 className="font-display text-base sm:text-lg font-bold uppercase tracking-tight">
+            <h1 className="font-display text-sm sm:text-base font-bold uppercase tracking-tight hidden sm:block">
               Bestellungen
             </h1>
           </div>
           
-          <div className="flex-1 overflow-x-auto scrollbar-hide">
+          <div className="flex-1 ">
             <AdminNavBar />
           </div>
         </div>
@@ -188,7 +188,7 @@ export default function OrdersManagement() {
         {/* Filters */}
         <Card className="bg-card border-border mb-6">
           <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
               <div className="flex items-center gap-2">
                 <Search className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">Filter:</span>
@@ -244,7 +244,7 @@ export default function OrdersManagement() {
                 {orders.map(order => (
                   <div 
                     key={order.id}
-                    className="flex items-center gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                    className="flex items-center gap-2 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
                     onClick={() => setSelectedOrder(order)}
                   >
                     {/* Order Number */}

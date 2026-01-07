@@ -1289,16 +1289,16 @@ export default function DocumentationPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
-      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3">
-        <div className="flex items-center justify-between gap-4">
+      <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-3 shrink-0">
             <BookOpen className="w-5 h-5 text-primary" />
-            <h1 className="font-display text-base sm:text-lg font-bold uppercase tracking-tight">
+            <h1 className="font-display text-sm sm:text-base font-bold uppercase tracking-tight hidden sm:block">
               Dokumentation
             </h1>
           </div>
           
-          <div className="flex-1 overflow-x-auto scrollbar-hide">
+          <div className="flex-1 ">
             <AdminNavBar />
           </div>
           
@@ -1321,7 +1321,7 @@ export default function DocumentationPage() {
             {/* Info Card */}
             <Card className="bg-card border-border">
               <CardContent className="p-4">
-                <div className="flex flex-wrap items-center gap-4">
+                <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="outline" className="border-primary text-primary">
                     {settings?.event_name || 'Karnbachs Event OS'}
                   </Badge>
@@ -1371,7 +1371,7 @@ export default function DocumentationPage() {
             </Card>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               <Card className="bg-card border-border">
                 <CardContent className="p-4 text-center">
                   <Monitor className="w-8 h-8 mx-auto mb-2 text-primary" />
