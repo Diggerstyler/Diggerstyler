@@ -1,6 +1,9 @@
 /**
  * useConnectionStatus - Hook for monitoring connection status
  * Provides UI feedback for network and WebSocket state
+ * 
+ * WICHTIG: Status basiert primär auf Browser-Online-Status (HTTP funktioniert)
+ * WebSocket ist nur für Echtzeit-Updates, nicht für Grundfunktionalität
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -13,16 +16,23 @@ export function useConnectionStatus(standId) {
   const [pendingOrders, setPendingOrders] = useState(0);
   const [lastError, setLastError] = useState(null);
   const [reconnectAttempt, setReconnectAttempt] = useState(0);
+  const [httpWorking, setHttpWorking] = useState(true); // Assume HTTP works initially
 
   useEffect(() => {
     // Monitor browser online status
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    const handleOnline = () => {
+      setIsOnline(true);
+      setHttpWorking(true); // Assume HTTP works when online
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      setHttpWorking(false);
+    };
     
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Monitor WebSocket state
+    // Monitor WebSocket state (optional - nicht kritisch für Funktionalität)
     const unsubConnect = wsService.on(standId, 'connected', () => {
       setWsState('connected');
       setLastError(null);
@@ -39,12 +49,13 @@ export function useConnectionStatus(standId) {
     });
 
     const unsubError = wsService.on(standId, 'error', ({ error }) => {
-      setLastError(error?.message || 'Verbindungsfehler');
+      // WebSocket error is not critical - HTTP still works
+      setLastError(null); // Don't show WS errors to user
     });
 
     const unsubMaxReconnect = wsService.on(standId, 'max_reconnect_reached', () => {
       setWsState('failed');
-      setLastError('Maximale Wiederverbindungsversuche erreicht');
+      // Don't set error - HTTP still works
     });
 
     // Check pending orders periodically
@@ -68,27 +79,20 @@ export function useConnectionStatus(standId) {
     wsService.forceReconnect(standId);
   }, [standId]);
 
-  // Computed status
+  // Computed status - PRIORITÄT: HTTP > WebSocket
+  // Wenn Browser online ist, zeigen wir GRÜN (HTTP funktioniert)
+  // WebSocket ist nur für Echtzeit-Updates, nicht für Kernfunktionalität
   const status = !isOnline ? 'offline' 
-    : wsState === 'connected' ? 'connected' 
-    : wsState === 'reconnecting' ? 'reconnecting'
-    : wsState === 'failed' ? 'failed'
-    : 'connecting';
+    : 'connected'; // Wenn online, ist HTTP verfügbar = verbunden
 
   const statusText = {
     offline: 'Offline',
     connected: 'Verbunden',
-    reconnecting: `Verbinde... (${reconnectAttempt})`,
-    failed: 'Verbindung fehlgeschlagen',
-    connecting: 'Verbinde...',
   }[status];
 
   const statusColor = {
     offline: 'bg-yellow-500',
     connected: 'bg-green-500',
-    reconnecting: 'bg-yellow-500',
-    failed: 'bg-red-500',
-    connecting: 'bg-yellow-500',
   }[status];
 
   return {
