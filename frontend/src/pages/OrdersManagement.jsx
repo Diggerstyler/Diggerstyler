@@ -436,6 +436,8 @@ export default function OrdersManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AppFooter />
     </div>
   );
 }
