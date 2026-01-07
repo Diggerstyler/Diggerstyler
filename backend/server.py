@@ -157,6 +157,32 @@ AVAILABLE_TIMEZONES = [
 ]
 
 # Models
+
+# Event Models (für Event-Management)
+class Event(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str = ""
+    start_date: str  # ISO format date string
+    end_date: str    # ISO format date string
+    status: str = "planned"  # planned, active, completed
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class EventCreate(BaseModel):
+    name: str
+    description: str = ""
+    start_date: str
+    end_date: str
+
+class EventUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    status: Optional[str] = None
+
 class DepositGroup(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
