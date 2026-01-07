@@ -1380,7 +1380,24 @@ async def get_orders(
     return orders
 
 @api_router.post("/orders", response_model=Order)
-async def create_order(order: OrderCreate):
+async def create_order(
+    order: OrderCreate,
+    x_request_id: Optional[str] = Header(None, alias="X-Request-ID")
+):
+    """
+    Create a new order with request deduplication.
+    If X-Request-ID header is provided, duplicate requests within 5 minutes
+    will return the same order instead of creating a new one.
+    """
+    
+    # === REQUEST DEDUPLICATION ===
+    # Check if this is a duplicate request
+    if x_request_id:
+        cached_order = await request_cache.get(x_request_id)
+        if cached_order:
+            logging.info(f"Returning cached order for request {x_request_id}")
+            return cached_order
+    
     order_number = await get_next_order_number(order.stand_id)
     
     # Check if direct complete (OneManShow)
