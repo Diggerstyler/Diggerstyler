@@ -174,8 +174,9 @@ export default function OrdersManagement() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
+      {/* Einheitlicher Header - nur Navigation + Hilfe + Logout */}
       <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-3 shrink-0">
             <FileText className="w-5 h-5 text-accent" />
             <h1 className="font-display text-sm sm:text-base font-bold uppercase tracking-tight hidden sm:block">
@@ -183,15 +184,10 @@ export default function OrdersManagement() {
             </h1>
           </div>
           
-          <div className="flex-1 ">
-            <AdminNavBar />
-          </div>
-          
-          <AdminActions
-            onHelp={() => toast.info("Bestellverwaltung: Alle Bestellungen anzeigen und filtern.")}
+          {/* Admin Navigation + Hilfe + Logout */}
+          <AdminNavBar 
+            onHelp={() => navigate("/admin/docs")}
             onLogout={handleLogout}
-            showExport={false}
-            showReset={false}
           />
         </div>
       </header>
