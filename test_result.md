@@ -1,4 +1,28 @@
 frontend:
+  - task: "Global Connection Status Indicator"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/ConnectionStatus.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Connection status indicator added to ALL pages: Landing, Admin header, Bestellung, Macher, Ausgabe, OneManShow"
+
+  - task: "PDF Export with Images"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/DocumentationPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "PDF export with embedded SVG diagrams using html2pdf.js library"
+
   - task: "Admin Dashboard Header Structure"
     implemented: true
     working: true
