@@ -14,7 +14,8 @@ import { ArrowLeft, BarChart3, CalendarIcon, Filter, Download, Clock, Calendar a
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import AppFooter from "@/components/AppFooter";
-import { useAdminSwipe, SwipeIndicator } from "@/components/AdminSwipe";
+import AdminNavBar from "@/components/AdminNavBar";
+import { useAdminSwipe } from "@/components/AdminSwipe";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 

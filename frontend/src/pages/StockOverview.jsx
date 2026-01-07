@@ -14,7 +14,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, Box, TrendingDown, AlertTriangle, Euro, Package, RefreshCw, Trash2, Plus, RotateCcw } from "lucide-react";
 import LiveClock from "@/components/LiveClock";
 import AppFooter from "@/components/AppFooter";
-import { useAdminSwipe, SwipeIndicator } from "@/components/AdminSwipe";
+import AdminNavBar from "@/components/AdminNavBar";
+import { useAdminSwipe } from "@/components/AdminSwipe";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 

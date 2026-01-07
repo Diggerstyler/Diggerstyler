@@ -15,7 +15,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Plus, Pencil, Trash2, Package, Coins, Check, Box, AlertTriangle, TrendingDown, Beer, Wine, ArrowUpDown, ArrowUp, ArrowDown, Search, Filter, X } from "lucide-react";
 import AppFooter from "@/components/AppFooter";
-import { useAdminSwipe, SwipeIndicator } from "@/components/AdminSwipe";
+import AdminNavBar from "@/components/AdminNavBar";
+import { useAdminSwipe } from "@/components/AdminSwipe";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 

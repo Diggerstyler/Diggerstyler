@@ -13,7 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Trash2, Star, Link2, Unlink } from "lucide-react";
 import AppFooter from "@/components/AppFooter";
-import { useAdminSwipe, SwipeIndicator } from "@/components/AdminSwipe";
+import AdminNavBar from "@/components/AdminNavBar";
+import { useAdminSwipe } from "@/components/AdminSwipe";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 

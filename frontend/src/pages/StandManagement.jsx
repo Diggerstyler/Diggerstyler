@@ -14,7 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, Plus, Pencil, Trash2, Store, Settings, FastForward } from "lucide-react";
 import AppFooter from "@/components/AppFooter";
-import { useAdminSwipe, SwipeIndicator } from "@/components/AdminSwipe";
+import AdminNavBar from "@/components/AdminNavBar";
+import { useAdminSwipe } from "@/components/AdminSwipe";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
