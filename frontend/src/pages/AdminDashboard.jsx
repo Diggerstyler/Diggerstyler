@@ -575,6 +575,8 @@ export default function AdminDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AppFooter />
     </div>
   );
 }
