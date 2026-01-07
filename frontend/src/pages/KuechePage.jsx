@@ -297,57 +297,24 @@ export default function KuechePage() {
   useEffect(() => {
     fetchData();
     
-    // WebSocket for real-time updates (primary) - LOW LATENCY
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsHost = process.env.REACT_APP_BACKEND_URL?.replace(/^https?:\/\//, '');
-    const wsUrl = `${wsProtocol}//${wsHost}/ws/${standId}`;
-    let ws = null;
-    let reconnectTimeout = null;
-    let reconnectAttempts = 0;
+    // Use WebSocketService for robust connection management
+    wsService.connect(standId);
     
-    const connectWebSocket = () => {
-      try {
-        ws = new WebSocket(wsUrl);
-        
-        ws.onopen = () => {
-          console.log('WebSocket connected - low latency mode');
-          reconnectAttempts = 0;
-        };
-        
-        ws.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            // Immediately refresh on any order update
-            if (data.type === 'new_order' || data.type === 'order_updated') {
-              fetchData();
-            }
-          } catch (e) {
-            console.error('WebSocket message parse error:', e);
-          }
-        };
-        
-        ws.onclose = () => {
-          // Quick reconnect with exponential backoff (max 5s)
-          const delay = Math.min(1000 * Math.pow(1.5, reconnectAttempts), 5000);
-          reconnectAttempts++;
-          reconnectTimeout = setTimeout(connectWebSocket, delay);
-        };
-        
-        ws.onerror = () => {
-          ws?.close();
-        };
-      } catch (e) {
-        console.log('WebSocket not available, using polling');
+    // Listen for order updates
+    const unsubMessage = wsService.on(standId, 'message', (data) => {
+      // Immediately refresh on any order update
+      if (data.type === 'new_order' || data.type === 'order_updated') {
+        fetchData();
       }
-    };
-    
-    connectWebSocket();
+    });
     
     // Fallback polling every 3 seconds for reliability
     const interval = setInterval(fetchData, 3000);
     
     return () => {
       clearInterval(interval);
+      unsubMessage();
+      wsService.disconnect(standId);
       if (reconnectTimeout) clearTimeout(reconnectTimeout);
       ws?.close();
     };
