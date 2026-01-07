@@ -1518,34 +1518,209 @@ Diese Dokumentation wurde automatisch generiert.
       setShowExportDialog(false);
       
     } else if (format === 'pdf') {
+      setIsGeneratingPdf(true);
       setShowExportDialog(false);
-      toast.info('PDF-Druckansicht wird geöffnet...');
+      toast.info('PDF wird generiert... Bitte warten.');
       
-      // Öffne neues Fenster mit druckbarem HTML
-      const htmlContent = generateHtmlDocument(fullText, timestamp, true);
-      const printWindow = window.open('', '_blank', 'width=900,height=700');
-      
-      if (printWindow) {
-        printWindow.document.write(htmlContent);
-        printWindow.document.close();
+      try {
+        // Erstelle PDF mit jsPDF
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
         
-        // Warten bis Inhalt geladen ist, dann Druckdialog öffnen
-        printWindow.onload = function() {
-          setTimeout(() => {
-            printWindow.print();
-          }, 500);
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 15;
+        const maxWidth = pageWidth - (margin * 2);
+        let y = margin;
+        
+        // Helper: Neue Seite wenn nötig
+        const checkNewPage = (neededHeight = 10) => {
+          if (y + neededHeight > pageHeight - margin) {
+            doc.addPage();
+            y = margin;
+            return true;
+          }
+          return false;
         };
         
-        // Fallback falls onload nicht feuert
-        setTimeout(() => {
-          if (printWindow && !printWindow.closed) {
-            printWindow.print();
+        // Helper: Text mit Zeilenumbruch
+        const addWrappedText = (text, fontSize = 10, color = [30, 30, 30], isBold = false) => {
+          doc.setFontSize(fontSize);
+          doc.setTextColor(...color);
+          if (isBold) {
+            doc.setFont('helvetica', 'bold');
+          } else {
+            doc.setFont('helvetica', 'normal');
           }
-        }, 2000);
+          
+          const lines = doc.splitTextToSize(text, maxWidth);
+          lines.forEach(line => {
+            checkNewPage(fontSize * 0.4);
+            doc.text(line, margin, y);
+            y += fontSize * 0.4;
+          });
+          y += 2;
+        };
         
-        toast.success('Wählen Sie "Als PDF speichern" im Druckdialog');
-      } else {
-        toast.error('Popup wurde blockiert. Bitte erlauben Sie Popups für diese Seite.');
+        // Titelseite
+        doc.setFillColor(124, 58, 237); // Primary purple
+        doc.rect(0, 0, pageWidth, 60, 'F');
+        
+        doc.setFontSize(28);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Karnbachs Event OS', pageWidth / 2, 25, { align: 'center' });
+        
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Vollständige Dokumentation', pageWidth / 2, 38, { align: 'center' });
+        
+        doc.setFontSize(12);
+        doc.text('Stand: ' + timestamp, pageWidth / 2, 50, { align: 'center' });
+        
+        y = 75;
+        
+        // Inhaltsverzeichnis
+        doc.setFontSize(18);
+        doc.setTextColor(124, 58, 237);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Inhaltsverzeichnis', margin, y);
+        y += 12;
+        
+        const chapters = [
+          '1. App-Idee & Vision',
+          '2. Architektur & Technologie',
+          '3. Datenbank-Schema',
+          '4. API-Referenz',
+          '5. Frontend-Seiten',
+          '6. Komponenten & Services',
+          '7. Design-System',
+          '8. n8n Integration',
+          '9. Weiterentwicklung',
+          '10. Installation & Deployment'
+        ];
+        
+        doc.setFontSize(11);
+        doc.setTextColor(50, 50, 50);
+        doc.setFont('helvetica', 'normal');
+        chapters.forEach(chapter => {
+          doc.text(chapter, margin + 5, y);
+          y += 7;
+        });
+        
+        // Workflow-Diagramm als Text-Box
+        y += 10;
+        doc.setFillColor(245, 245, 250);
+        doc.rect(margin, y, maxWidth, 35, 'F');
+        doc.setDrawColor(124, 58, 237);
+        doc.rect(margin, y, maxWidth, 35, 'S');
+        
+        y += 8;
+        doc.setFontSize(12);
+        doc.setTextColor(124, 58, 237);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Workflow: Besteller -> Macher -> Ausgabe -> Fertig', pageWidth / 2, y, { align: 'center' });
+        y += 8;
+        doc.setFontSize(10);
+        doc.setTextColor(80, 80, 80);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Echtzeit-Synchronisation ueber WebSockets (< 30ms Latenz)', pageWidth / 2, y, { align: 'center' });
+        
+        y += 25;
+        
+        // Dokumentationsinhalt
+        const lines = fullText.split('\n');
+        
+        for (const line of lines) {
+          // Skip leere Linien am Anfang einer Seite
+          if (y === margin && line.trim() === '') continue;
+          
+          // Trennlinien
+          if (line.match(/^[═]+$/)) {
+            checkNewPage(15);
+            doc.setDrawColor(124, 58, 237);
+            doc.setLineWidth(0.5);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 8;
+            continue;
+          }
+          
+          if (line.match(/^[─]+$/)) {
+            checkNewPage(8);
+            doc.setDrawColor(180, 180, 180);
+            doc.setLineWidth(0.2);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 5;
+            continue;
+          }
+          
+          // Hauptüberschriften (KAPITEL)
+          if (line.includes('KAPITEL') || line.match(/^[A-ZÄÖÜ\s]{20,}$/)) {
+            checkNewPage(20);
+            doc.setFillColor(124, 58, 237, 20);
+            doc.rect(margin - 2, y - 5, maxWidth + 4, 12, 'F');
+            addWrappedText(line, 14, [124, 58, 237], true);
+            y += 5;
+            continue;
+          }
+          
+          // Unterüberschriften (▸)
+          if (line.startsWith('▸')) {
+            checkNewPage(15);
+            addWrappedText(line.replace('▸ ', ''), 12, [22, 163, 94], true);
+            continue;
+          }
+          
+          // Code-Blöcke (┌│└)
+          if (line.match(/^[┌│└├┐┤┘┬┴┼]/)) {
+            doc.setFont('courier', 'normal');
+            addWrappedText(line, 8, [100, 100, 100], false);
+            doc.setFont('helvetica', 'normal');
+            continue;
+          }
+          
+          // Aufzählungszeichen
+          if (line.match(/^[•✓✗□]/)) {
+            addWrappedText('  ' + line, 9, [70, 70, 70], false);
+            continue;
+          }
+          
+          // Leere Zeilen
+          if (line.trim() === '') {
+            y += 3;
+            continue;
+          }
+          
+          // Normaler Text
+          addWrappedText(line, 9, [50, 50, 50], false);
+        }
+        
+        // Footer auf jeder Seite
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i);
+          doc.setFontSize(8);
+          doc.setTextColor(150, 150, 150);
+          doc.text(
+            `Karnbachs Event OS - Dokumentation | Seite ${i} von ${pageCount}`,
+            pageWidth / 2,
+            pageHeight - 8,
+            { align: 'center' }
+          );
+        }
+        
+        // PDF speichern
+        doc.save(`${fileName}.pdf`);
+        toast.success('PDF erfolgreich heruntergeladen! (' + pageCount + ' Seiten)');
+        
+      } catch (error) {
+        console.error('PDF Export error:', error);
+        toast.error('PDF-Export fehlgeschlagen: ' + error.message);
+      } finally {
+        setIsGeneratingPdf(false);
       }
     }
   };
