@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
@@ -11,12 +11,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { 
   ArrowLeft, FileText, Download, Book, Code, Palette, Database, 
   Settings, Users, ShoppingCart, Hammer, Package, Zap, Box,
-  BarChart3, Clock, Globe, Smartphone, Monitor, Server, BookOpen
+  BarChart3, Clock, Globe, Smartphone, Monitor, Server, BookOpen, Image, Loader2
 } from "lucide-react";
 import LiveClock from "@/components/LiveClock";
 import AppFooter from "@/components/AppFooter";
 import AdminNavBar from "@/components/AdminNavBar";
 import { useAdminSwipe } from "@/components/AdminSwipe";
+import html2pdf from 'html2pdf.js';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
