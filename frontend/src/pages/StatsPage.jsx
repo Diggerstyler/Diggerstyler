@@ -10,11 +10,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { BarChart3, CalendarIcon, Filter, Clock, Calendar as CalendarEvent } from "lucide-react";
+import { BarChart3, CalendarIcon, Filter, Clock, Calendar as CalendarEvent, Download } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import AppFooter from "@/components/AppFooter";
-import AdminNavBar, { AdminActions } from "@/components/AdminNavBar";
+import AdminNavBar from "@/components/AdminNavBar";
 import { useAdminSwipe } from "@/components/AdminSwipe";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
