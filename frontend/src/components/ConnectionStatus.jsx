@@ -68,16 +68,24 @@ export function ConnectionStatus({ standId, showDetails = false }) {
 }
 
 /**
- * Compact status indicator for headers - nur ein grüner/gelber Punkt
+ * Compact status indicator for headers - Punkt + Wifi Icon
  */
 export function ConnectionStatusDot({ standId }) {
   const { status, statusColor } = useConnectionStatus(standId);
+  const StatusIcon = status === 'offline' ? WifiOff : Wifi;
   
   return (
     <div 
-      className={`w-2 h-2 rounded-full ${statusColor}`} 
+      className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${
+        status === 'connected' ? 'bg-green-500/10' : 'bg-yellow-500/10'
+      }`}
       title={status === 'connected' ? 'Verbunden' : 'Offline'}
-    />
+    >
+      <div className={`w-2 h-2 rounded-full ${statusColor}`} />
+      <StatusIcon className={`w-3.5 h-3.5 ${
+        status === 'connected' ? 'text-green-500' : 'text-yellow-500'
+      }`} />
+    </div>
   );
 }
 
