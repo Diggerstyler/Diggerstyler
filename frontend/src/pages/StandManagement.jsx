@@ -181,26 +181,22 @@ export default function StandManagement() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
+      {/* Einheitlicher Header */}
       <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 shrink-0">
-            <Store className="w-5 h-5 text-primary" />
-            <h1 className="font-display text-sm sm:text-base font-bold uppercase tracking-tight hidden sm:block">
-              Stände
-            </h1>
-          </div>
-          
-          <div className="flex-1">
-            <AdminNavBar />
-          </div>
-          
+        <AdminNavBar />
+      </header>
+
+      <main className="p-4 sm:p-6 flex-1">
+        {/* Action Button */}
+        <div className="flex flex-wrap gap-3 mb-6">
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
             if (!open) resetForm();
           }}>
             <DialogTrigger asChild>
-              <Button size="sm" className="shrink-0 neon-primary h-8" data-testid="add-stand-btn">
-                <Plus className="w-4 h-4" />
+              <Button className="neon-primary" data-testid="add-stand-btn">
+                <Plus className="w-4 h-4 mr-2" />
+                Neuer Stand
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-card border-border max-w-md">
