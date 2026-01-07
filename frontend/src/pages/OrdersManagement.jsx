@@ -164,8 +164,10 @@ export default function OrdersManagement() {
 
   const totalPages = Math.ceil(totalOrders / pageSize);
 
+  const { swipeHandlers, currentIndex, totalPages: swipeTotalPages, prevLabel, nextLabel } = useAdminSwipe();
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
       <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-4">
         <Button 
           variant="ghost" 
@@ -185,7 +187,9 @@ export default function OrdersManagement() {
         </div>
       </header>
 
-      <main className="p-4 sm:p-6">
+      <SwipeIndicator currentIndex={currentIndex} totalPages={swipeTotalPages} prevLabel={prevLabel} nextLabel={nextLabel} />
+
+      <main className="p-4 sm:p-6 flex-1">
         {/* Filters */}
         <Card className="bg-card border-border mb-6">
           <CardContent className="p-4">
