@@ -12,6 +12,7 @@ import { ShoppingCart, Hammer, Package, Settings, Zap, ArrowLeft, Store, Utensil
 import LiveClock from "@/components/LiveClock";
 import AppFooter from "@/components/AppFooter";
 import { useTheme } from "@/components/ThemeProvider";
+import { ConnectionStatusDot } from "@/components/ConnectionStatus";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
