@@ -268,7 +268,9 @@ export default function StandManagement() {
         </Dialog>
       </header>
 
-      <main className="p-4 sm:p-6 max-w-6xl mx-auto">
+      <SwipeIndicator currentIndex={currentIndex} totalPages={totalPages} prevLabel={prevLabel} nextLabel={nextLabel} />
+
+      <main className="p-4 sm:p-6 max-w-6xl mx-auto flex-1">
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="font-display uppercase">
