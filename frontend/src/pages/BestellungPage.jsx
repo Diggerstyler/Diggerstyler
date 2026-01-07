@@ -900,7 +900,7 @@ export default function BestellungPage() {
       </div>
 
       {/* Mobile Cart - REDESIGNED with prominent order button */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 glass border-t-2 border-primary/50 z-50">
+      <div className="lg:hidden fixed bottom-14 sm:bottom-12 left-0 right-0 glass border-t-2 border-primary/50 z-50">
         {/* ALWAYS visible: Big order button + total */}
         {cart.length > 0 && (
           <div className="p-2 flex items-center gap-3">
