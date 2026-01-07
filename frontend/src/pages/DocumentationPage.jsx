@@ -525,9 +525,11 @@ Verzeichnisstruktur:
 │   ├── StandManagement.jsx  # Standverwaltung
 │   ├── StationManagement.jsx # Stationsverwaltung
 │   ├── StockOverview.jsx    # Bestandsübersicht
-│   ├── StatsPage.jsx        # Statistiken
+│   ├── StatsPage.jsx        # Statistiken (mit Event-Filter)
 │   ├── SettingsPage.jsx     # Einstellungen
-│   ├── OrdersManagement.jsx # Bestellübersicht
+│   ├── OrdersManagement.jsx # Bestellübersicht (mit Event-Filter)
+│   ├── EventManagement.jsx  # Event-Verwaltung (NEU)
+│   ├── EventStatsPage.jsx   # Event-Statistiken (NEU)
 │   └── DocumentationPage.jsx # Diese Dokumentation
 ├── App.js               # Routing & Provider
 ├── index.js             # Entry Point
