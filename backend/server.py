@@ -1728,6 +1728,7 @@ async def get_stats_orders(
     end_date: Optional[str] = None,
     stand_id: Optional[str] = None,
     status: Optional[str] = None,
+    event_id: Optional[str] = None,  # Event-Filter hinzufügen
     username: str = Depends(verify_admin)
 ):
     query = {}
@@ -1743,6 +1744,11 @@ async def get_stats_orders(
         query["stand_id"] = stand_id
     if status:
         query["status"] = status
+    if event_id:
+        if event_id == "none":
+            query["event_id"] = None
+        else:
+            query["event_id"] = event_id
     
     orders = await db.orders.find(query, {"_id": 0}).sort("created_at", -1).to_list(10000)
     return orders
