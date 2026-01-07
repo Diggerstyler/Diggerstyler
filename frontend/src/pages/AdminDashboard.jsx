@@ -178,61 +178,73 @@ export default function AdminDashboard() {
       className="min-h-screen bg-background flex flex-col"
       {...swipeHandlers}
     >
-      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 shrink-0">
+      <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
+        <div className="flex items-center justify-between gap-2">
+          {/* Logo/Title */}
+          <div className="flex items-center gap-2 shrink-0">
             <LayoutDashboard className="w-5 h-5 text-primary" />
-            <h1 className="font-display text-base sm:text-lg font-bold uppercase tracking-tight">
+            <h1 className="font-display text-sm sm:text-base font-bold uppercase tracking-tight hidden sm:block">
               Admin
             </h1>
           </div>
           
-          {/* Admin Navigation - scrollbar horizontal auf Mobile */}
-          <div className="flex-1 overflow-x-auto scrollbar-hide">
+          {/* Admin Navigation - 2 Reihen */}
+          <div className="flex-1">
             <AdminNavBar />
           </div>
           
-          {/* Action Buttons */}
-          <div className="flex items-center gap-1 shrink-0">
-            <LiveClock className="hidden lg:flex mr-2" />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleExport}
-              disabled={isExporting}
-              data-testid="export-btn"
-              className="h-8 w-8 p-0 text-green-500"
-              title="Export"
-            >
-              <Download className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowResetDialog(true)}
-              data-testid="reset-btn"
-              className="h-8 w-8 p-0 text-destructive"
-              title="Reset"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowHelp(true)}
-              data-testid="help-btn"
-              className="h-8 w-8 p-0"
-              title="Hilfe"
-            >
-              <HelpCircle className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              data-testid="logout-btn"
-              className="h-8 w-8 p-0"
-              title="Abmelden"
+          {/* Action Buttons - 2 Reihen */}
+          <div className="flex flex-col gap-1 shrink-0">
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleExport}
+                disabled={isExporting}
+                data-testid="export-btn"
+                className="h-8 w-8 p-0 text-green-500"
+                title="Export"
+              >
+                <Download className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowResetDialog(true)}
+                data-testid="reset-btn"
+                className="h-8 w-8 p-0 text-destructive"
+                title="Reset"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowHelp(true)}
+                data-testid="help-btn"
+                className="h-8 w-8 p-0"
+                title="Hilfe"
+              >
+                <HelpCircle className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                data-testid="logout-btn"
+                className="h-8 w-8 p-0"
+                title="Abmelden"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Admin Help Dialog */}
             >
               <LogOut className="w-4 h-4" />
             </Button>
