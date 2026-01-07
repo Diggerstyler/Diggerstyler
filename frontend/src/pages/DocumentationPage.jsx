@@ -1547,11 +1547,18 @@ export default function DocumentationPage() {
                 onClick={() => handleExport('pdf')}
                 variant="outline"
                 className="justify-start h-auto py-4"
+                disabled={isGeneratingPdf}
               >
-                <FileText className="w-8 h-8 mr-4 text-red-500" />
+                {isGeneratingPdf ? (
+                  <Loader2 className="w-8 h-8 mr-4 text-red-500 animate-spin" />
+                ) : (
+                  <Image className="w-8 h-8 mr-4 text-red-500" />
+                )}
                 <div className="text-left">
-                  <div className="font-bold">PDF (Drucken)</div>
-                  <div className="text-xs text-muted-foreground">Öffnet Druck-Dialog → Als PDF speichern</div>
+                  <div className="font-bold">PDF mit Bildern</div>
+                  <div className="text-xs text-muted-foreground">
+                    {isGeneratingPdf ? 'Generiere PDF...' : 'Vollständige Dokumentation mit Diagrammen'}
+                  </div>
                 </div>
               </Button>
             </div>
