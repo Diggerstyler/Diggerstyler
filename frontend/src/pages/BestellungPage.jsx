@@ -48,7 +48,6 @@ export default function BestellungPage() {
   const [swipingItem, setSwipingItem] = useState(null);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const touchStartX = useRef(0);
-  const wsRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showMobileCart, setShowMobileCart] = useState(false);
   
