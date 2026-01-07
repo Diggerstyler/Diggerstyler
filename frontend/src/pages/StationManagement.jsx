@@ -11,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, Star, Link2, Unlink } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Star, Link2, Unlink, Layers } from "lucide-react";
 import AppFooter from "@/components/AppFooter";
 import AdminNavBar from "@/components/AdminNavBar";
 import { useAdminSwipe } from "@/components/AdminSwipe";
