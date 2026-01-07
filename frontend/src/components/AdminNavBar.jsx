@@ -20,9 +20,8 @@ const ADMIN_NAV_ITEMS = [
 ];
 
 /**
- * AdminNavBar - Einheitliche Navigation für alle Admin-Seiten
- * Enthält nur: Navigation + Hilfe + Logout
- * KEINE Action-Buttons (die kommen in den Main Content)
+ * AdminNavBar - Einheitlicher Header für alle Admin-Seiten
+ * Layout: Navigation (links) | Hilfe + Logout (rechts)
  */
 export default function AdminNavBar({ onHelp, onLogout }) {
   const navigate = useNavigate();
@@ -69,19 +68,19 @@ export default function AdminNavBar({ onHelp, onLogout }) {
   };
 
   return (
-    <div className="flex items-center gap-2">
-      {/* Navigation - 2 Reihen */}
-      <div className="flex flex-col gap-0.5 flex-1">
-        <div className="flex items-center justify-center gap-0.5">
+    <div className="flex items-center justify-between w-full">
+      {/* Navigation - Links */}
+      <div className="flex flex-col gap-0.5">
+        <div className="flex items-center gap-0.5">
           {row1.map(renderNavButton)}
         </div>
-        <div className="flex items-center justify-center gap-0.5">
+        <div className="flex items-center gap-0.5">
           {row2.map(renderNavButton)}
         </div>
       </div>
       
-      {/* Feste Actions: Hilfe + Logout */}
-      <div className="flex flex-col gap-0.5 shrink-0">
+      {/* Hilfe + Logout - Rechts */}
+      <div className="flex flex-col gap-0.5 ml-auto">
         <div className="flex items-center gap-0.5">
           {renderActionButton(HelpCircle, "Hilfe", onHelp || (() => navigate("/admin/docs")), "help-btn")}
         </div>
