@@ -11,7 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { 
   ArrowLeft, FileText, Download, Book, Code, Palette, Database, 
   Settings, Users, ShoppingCart, Hammer, Package, Zap, Box,
-  BarChart3, Clock, Globe, Smartphone, Monitor, Server, BookOpen, Image, Loader2
+  BarChart3, Clock, Globe, Smartphone, Monitor, Server, BookOpen, 
+  Image, Loader2, Workflow, GitBranch, Layers, CheckCircle, 
+  AlertTriangle, Lightbulb, ExternalLink, Cpu, Network
 } from "lucide-react";
 import LiveClock from "@/components/LiveClock";
 import AppFooter from "@/components/AppFooter";
@@ -21,1193 +23,1395 @@ import html2pdf from 'html2pdf.js';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-// Complete documentation content
-const DOCUMENTATION = {
-  overview: {
-    title: "Karnbachs Event OS - Übersicht",
+// ============================================================================
+// VOLLSTÄNDIGE APP-DOKUMENTATION - KARNBACHS EVENT OS
+// ============================================================================
+
+const FULL_DOCUMENTATION = {
+  // -------------------------------------------------------------------------
+  // 1. APP-IDEE & VISION
+  // -------------------------------------------------------------------------
+  idea: {
+    title: "🎪 App-Idee & Vision",
+    icon: Lightbulb,
     content: `
-KARNBACHS EVENT OS
-==================
+═══════════════════════════════════════════════════════════════════════════════
+                        KARNBACHS EVENT OS - DIE VISION
+═══════════════════════════════════════════════════════════════════════════════
 
-Eine vollständige Event- und Festival-Bestellmanagement-Lösung.
+▸ PROBLEMSTELLUNG
+─────────────────────────────────────────────────────────────────────────────
+Auf Festivals, Vereinsfesten und Events werden traditionell Papier-Bons verwendet:
+• Handschriftliche Bestellungen sind fehleranfällig und schlecht lesbar
+• Keine Echtzeit-Übersicht über Bestellstatus
+• Schwierige Koordination zwischen Bestellannahme, Küche und Ausgabe
+• Keine Statistiken oder Auswertungsmöglichkeiten
+• Pfandverwaltung ist manuell und ungenau
+• Bestandsverwaltung erfordert ständiges Nachzählen
 
-ZWECK DER APP
--------------
-Diese App wurde entwickelt, um den gesamten Bestell- und Ausgabeprozess auf Festivals, 
-Vereinsfesten und Events zu digitalisieren. Sie ersetzt traditionelle Papier-Bons durch 
-ein effizientes, echtzeitfähiges System.
+▸ UNSERE LÖSUNG
+─────────────────────────────────────────────────────────────────────────────
+Karnbachs Event OS ist eine vollständig digitale Bestell- und Ausgabelösung:
 
-HAUPTFUNKTIONEN
----------------
-• Digitale Bestellaufnahme mit automatischer Preisberechnung
-• Echtzeit-Synchronisation zwischen allen Geräten (WebSockets)
-• Rollenbasierter Workflow (Bestellung → Macher → Ausgabe)
-• Automatische Pfandberechnung
-• Bestandsverwaltung mit Nachverfolgung
-• Umfassende Statistiken und Export-Funktionen
-• Anpassbares Design (Logo, Farben)
-• PWA-fähig (installierbar auf Smartphones)
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  GAST bestellt → BESTELLER tippt → MACHER bereitet → AUSGABE ruft auf      │
+│                                                                             │
+│  Alles in Echtzeit synchronisiert über WebSockets!                         │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-ZIELGRUPPE
-----------
+▸ KERNFEATURES
+─────────────────────────────────────────────────────────────────────────────
+✓ Digitale Bestellaufnahme mit automatischer Preisberechnung
+✓ Echtzeit-Synchronisation zwischen allen Geräten (< 30ms Latenz)
+✓ Rollenbasierter Workflow: Bestellung → Macher → Ausgabe
+✓ Automatische Pfandberechnung und -verwaltung
+✓ Intelligente Bestandsverwaltung mit Warnungen
+✓ Event-Management mit Statistiken pro Veranstaltung
+✓ Anpassbares Design (Logo, Farben, Themes)
+✓ PWA-fähig (installierbar auf Smartphones)
+✓ Optimiert für 20-30 gleichzeitige Benutzer
+
+▸ ZIELGRUPPE
+─────────────────────────────────────────────────────────────────────────────
 • Festivalorganisatoren
-• Vereinsveranstaltungen
-• Gastronomiebetriebe bei Events
+• Vereine bei Festen (Schützenfest, Sommerfest, Weihnachtsmarkt)
+• Gastronomiebetriebe bei Open-Air-Events
 • Catering-Unternehmen
+• Foodtrucks und mobile Verkaufsstände
 
-TECHNISCHE HIGHLIGHTS
----------------------
-• Echtzeit-Updates ohne Seitenaktualisierung
-• Optimiert für Touch-Bedienung
-• Responsive Design für alle Bildschirmgrößen
-• Offline-tolerant (PWA)
-• Skalierbar für 20+ gleichzeitige Benutzer
+▸ WARUM DIESE APP?
+─────────────────────────────────────────────────────────────────────────────
+ENTSCHEIDUNG: Wir haben uns für eine Web-App (PWA) entschieden, weil:
+  → Keine Installation nötig - funktioniert auf jedem Gerät mit Browser
+  → Keine App-Store-Gebühren oder Freigabeprozesse
+  → Sofortige Updates ohne Benutzeraktion
+  → Funktioniert auf Android, iOS, Windows, macOS gleichermaßen
+  → Offline-fähig durch Service Worker (geplant)
 `
   },
-  
-  workflow: {
-    title: "Workflow & Rollen",
+
+  // -------------------------------------------------------------------------
+  // 2. ARCHITEKTUR & TECHNOLOGIE
+  // -------------------------------------------------------------------------
+  architecture: {
+    title: "🏗️ Architektur & Technologie",
+    icon: Layers,
     content: `
-WORKFLOW & ROLLENKONZEPT
-========================
+═══════════════════════════════════════════════════════════════════════════════
+                           SYSTEM-ARCHITEKTUR
+═══════════════════════════════════════════════════════════════════════════════
 
-ÜBERSICHT DES BESTELLPROZESSES
-------------------------------
+▸ TECHNOLOGIE-STACK
+─────────────────────────────────────────────────────────────────────────────
 
-Standard-Prozess (3 Stufen):
-  [Gast] → [Besteller] → [Macher] → [Ausgabe] → [Gast]
-      1        2            3          4           5
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              FRONTEND                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  React 18          │ Funktionale Komponenten mit Hooks                      │
+│  Tailwind CSS      │ Utility-First CSS Framework                            │
+│  Shadcn/UI         │ Accessible, customizable UI-Komponenten                │
+│  Axios             │ HTTP-Client für API-Kommunikation                      │
+│  React Router      │ Client-seitiges Routing                                │
+│  Sonner            │ Toast-Notifications                                    │
+│  html2pdf.js       │ PDF-Generierung im Browser                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-  1. Gast bestellt beim Besteller
-  2. Besteller tippt Artikel ein, erstellt Bon
-  3. Macher sieht Bon, bereitet Bestellung zu
-  4. Ausgabe ruft Bonnummer aus
-  5. Gast holt Bestellung ab
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              BACKEND                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  FastAPI           │ Async Python Web-Framework (hohe Performance)          │
+│  Motor             │ Async MongoDB-Treiber                                  │
+│  WebSockets        │ Echtzeit-Kommunikation                                 │
+│  Pydantic          │ Datenvalidierung und Serialisierung                    │
+│  Python-dotenv     │ Umgebungsvariablen-Management                          │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-Kurzer Prozess (2 Stufen):
-  [Gast] → [Besteller] → [Ausgabe] → [Gast]
-      1        2            3           4
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              DATENBANK                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  MongoDB           │ NoSQL-Datenbank für flexible Dokumente                 │
+│  Connection Pool   │ 100 max, 20 min Connections für Skalierung             │
+│  Indexes           │ Optimiert für häufige Queries                          │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-  - Überspringt den Macher (z.B. bei Getränken)
-  - Aktivierbar pro Stand
+▸ ARCHITEKTUR-DIAGRAMM
+─────────────────────────────────────────────────────────────────────────────
 
+    ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+    │  Besteller  │     │   Macher    │     │   Ausgabe   │
+    │   (Tablet)  │     │   (Tablet)  │     │   (Tablet)  │
+    └──────┬──────┘     └──────┬──────┘     └──────┬──────┘
+           │                   │                   │
+           │    HTTP/WS        │    HTTP/WS        │    HTTP/WS
+           │                   │                   │
+           └───────────────────┼───────────────────┘
+                               │
+                    ┌──────────▼──────────┐
+                    │    NGINX/Ingress    │
+                    │   (Load Balancer)   │
+                    └──────────┬──────────┘
+                               │
+              ┌────────────────┼────────────────┐
+              │                │                │
+     ┌────────▼────────┐       │       ┌────────▼────────┐
+     │    Frontend     │       │       │    Backend      │
+     │  React (3000)   │       │       │ FastAPI (8001)  │
+     └─────────────────┘       │       └────────┬────────┘
+                               │                │
+                               │       ┌────────▼────────┐
+                               │       │    MongoDB      │
+                               │       │   (Database)    │
+                               │       └─────────────────┘
+                               │
+                    ┌──────────▼──────────┐
+                    │    WebSocket Hub    │
+                    │  (Echtzeit-Updates) │
+                    └─────────────────────┘
 
-DIE 4 ROLLEN IM DETAIL
-======================
+▸ ENTSCHEIDUNGSBEGRÜNDUNGEN
+─────────────────────────────────────────────────────────────────────────────
 
-🛒 BESTELLER (Bestellung)
--------------------------
-Aufgaben:
-• Nimmt Bestellungen der Gäste entgegen
-• Wählt Artikel durch Antippen aus
-• Pfand wird automatisch berechnet
-• Kann Wechselgeld berechnen (Restgeldrechner)
-• Gibt Bonnummer an Gast weiter
+WARUM REACT?
+  → Große Community und Ökosystem
+  → Komponentenbasierte Architektur für Wiederverwendbarkeit
+  → Virtual DOM für performante UI-Updates
+  → Hooks ermöglichen sauberen, funktionalen Code
 
-Funktionen:
-• Artikel nach Kategorie filtern
-• Warenkorb mit Mengenanpassung
-• Wischen zum Entfernen von Artikeln
-• Archiv aller bisherigen Bestellungen
-• Bestandswarnung bei knappen Artikeln
+WARUM FASTAPI?
+  → Native async/await Unterstützung
+  → Automatische API-Dokumentation (OpenAPI/Swagger)
+  → Pydantic-Integration für Typsicherheit
+  → Hohe Performance (vergleichbar mit NodeJS/Go)
 
-Tastenkürzel/Gesten:
-• Tippen = Artikel hinzufügen
-• Langes Drücken = Menge direkt eingeben
-• Wischen im Warenkorb = Artikel entfernen
+WARUM MONGODB?
+  → Flexible Schema für sich ändernde Anforderungen
+  → Gute Performance bei Reads und Writes
+  → Einfache horizontale Skalierung
+  → JSON-natives Format passt zu JavaScript/Python
 
-
-🔨 MACHER (Küche/Bar)
----------------------
-Aufgaben:
-• Sieht eingehende Bestellungen in Echtzeit
-• Bereitet Bestellungen zu
-• Markiert fertige Bestellungen
-
-Funktionen:
-• Echtzeit-Benachrichtigung bei neuen Bestellungen
-• Sound-Benachrichtigung (optional)
-• "Gesamt Offen" zeigt kumulierte Artikelliste
-• Unterstützung für Stationen (bei großen Küchen)
-• Zeitanzeige pro Bestellung
-
-Stationen:
-• Bei komplexen Ständen können Stationen definiert werden
-• Jede Station sieht nur ihre zugewiesenen Artikel
-• Hauptstation sieht alles
-
-
-📦 AUSGABE
-----------
-Aufgaben:
-• Sieht alle fertigen Bestellungen
-• Ruft Bonnummern aus
-• Übergibt Bestellungen an Gäste
-
-Funktionen:
-• Große, gut lesbare Bonnummern
-• Swipe-Navigation zwischen Bestellungen
-• Rückgängig-Funktion (letzte Ausgabe zurückholen)
-• Archiv ausgebebener Bestellungen
-
-
-⚡ ONEMANSHOW
--------------
-Aufgaben:
-• Kombiniert alle Rollen in einer Ansicht
-• Für einfache Stände ohne Arbeitsteilung
-
-Ideal für:
-• Kleine Getränkestände
-• Einfache Snack-Stände
-• Verkaufsstände mit sofortiger Ausgabe
-
-Ablauf:
-• Artikel auswählen
-• Kassieren
-• Sofort übergeben (kein separater Macher/Ausgabe)
-
-
-BONNUMMERN-SYSTEM
-=================
-• Nummern von 01 bis 25 pro Stand
-• Nach 25 beginnt es wieder bei 01
-• Jeder Stand hat eigenen Nummernkreis
-• Große Anzeige nach Bestellaufgabe
-• Automatische Synchronisation
+WARUM WEBSOCKETS?
+  → Echtzeit-Updates ohne Polling
+  → Geringe Latenz (< 30ms)
+  → Bidirektionale Kommunikation
+  → Effizient für viele gleichzeitige Verbindungen
 `
   },
 
-  admin: {
-    title: "Admin-Bereich",
+  // -------------------------------------------------------------------------
+  // 3. DATENBANK-SCHEMA
+  // -------------------------------------------------------------------------
+  database: {
+    title: "🗄️ Datenbank-Schema",
+    icon: Database,
     content: `
-ADMIN-BEREICH - VOLLSTÄNDIGE DOKUMENTATION
-==========================================
+═══════════════════════════════════════════════════════════════════════════════
+                           MONGODB COLLECTIONS
+═══════════════════════════════════════════════════════════════════════════════
 
-ZUGANG
-------
-• URL: /admin/login
-• Standard-Zugangsdaten: admin / admin
-• Änderbar über Umgebungsvariablen
+▸ COLLECTION: stands (Verkaufsstände)
+─────────────────────────────────────────────────────────────────────────────
+{
+  "id": "uuid-string",
+  "name": "Essensstand",
+  "stand_type": "speisestand | getraenkestand | gemischt",
+  "short_process": false,        // Überspringt Macher-Schritt
+  "created_at": "2025-01-07T12:00:00Z"
+}
 
-DASHBOARD ÜBERSICHT
--------------------
-Das Admin-Dashboard zeigt:
-• Anzahl der Stände
-• Anzahl der Artikel
-• Anzahl der Pfandgruppen
-• Anzahl der Bestellungen
+ERKLÄRUNG:
+  • stand_type bestimmt welche Artikel-Kategorien angezeigt werden
+  • short_process: Wenn true, geht Bestellung direkt zur Ausgabe (für Getränke)
 
-Navigation (alle Bereiche):
-• Events - Event-Verwaltung (NEU)
-• Stände - Standverwaltung
-• Artikel - Artikelverwaltung
-• Bestand - Bestandsübersicht
-• Stationen - Stationsverwaltung
-• Statistik - Auswertungen
-• Einstellungen - App-Konfiguration
-• Bestellungen - Bestellübersicht
-• Export - Datenexport
-• Reset - Daten zurücksetzen
-• Hilfe - Diese Anleitung
-• Dokumentation - Vollständige App-Doku
+▸ COLLECTION: articles (Artikel)
+─────────────────────────────────────────────────────────────────────────────
+{
+  "id": "uuid-string",
+  "name": "Schnitzel",
+  "price": 8.00,
+  "category": "speisen | getraenke",
+  "deposit_group_id": "uuid-string | null",
+  "stand_ids": ["stand-uuid-1", "stand-uuid-2"],
+  "track_stock": true,
+  "stock_unit_id": "uuid-string | null",
+  "stock_large_units": 5,        // z.B. 5 Kisten
+  "stock_small_units": 10,       // z.B. 10 einzelne Flaschen
+  "stock_initial_large": 10,
+  "stock_initial_small": 0,
+  "stock_alert_threshold": 20    // Warnung bei < 20 Einheiten
+}
 
+ERKLÄRUNG:
+  • Ein Artikel kann mehreren Ständen zugewiesen sein
+  • Bestandsverwaltung ist optional pro Artikel
+  • Pfandgruppe verlinkt zu deposit_groups Collection
 
-EVENT-VERWALTUNG (/admin/events) - NEU
-======================================
+▸ COLLECTION: orders (Bestellungen)
+─────────────────────────────────────────────────────────────────────────────
+{
+  "id": "uuid-string",
+  "stand_id": "stand-uuid",
+  "stand_name": "Essensstand",
+  "order_number": 1,             // 1-25, dann wieder von vorn
+  "items": [
+    {
+      "article_id": "article-uuid",
+      "article_name": "Schnitzel",
+      "quantity": 2,
+      "price": 8.00,
+      "deposit_amount": 0,
+      "is_deposit_return": false
+    }
+  ],
+  "subtotal": 16.00,
+  "deposit_total": 2.00,
+  "deposit_return_total": 0,
+  "total": 18.00,
+  "status": "created | in_progress | ready | completed",
+  "event_id": "event-uuid | null",
+  "created_by": "Bestellung | OneManShow",
+  "created_at": "2025-01-07T12:00:00Z",
+  "updated_at": "2025-01-07T12:05:00Z",
+  "request_id": "unique-request-id"  // Für Duplikat-Erkennung
+}
 
-ÜBERBLICK
----------
-Die Event-Verwaltung ermöglicht die Definition und Auswertung 
-einzelner Veranstaltungen. Jede Bestellung wird automatisch 
-dem aktuell aktiven Event zugeordnet.
+STATUS-FLOW:
+  created → in_progress → ready → completed
+     │                              │
+     └──────── (OneManShow) ────────┘
 
-VORTEILE
---------
-• Saubere Trennung der Daten zwischen Events
-• Detaillierte Statistiken pro Veranstaltung
-• Vergleichbarkeit zwischen Events
-• Automatische Event-Zuordnung
+▸ COLLECTION: events (Veranstaltungen)
+─────────────────────────────────────────────────────────────────────────────
+{
+  "id": "uuid-string",
+  "name": "Sommerfest 2025",
+  "description": "Jährliches Vereinsfest",
+  "start_date": "2025-07-01",
+  "end_date": "2025-07-03",
+  "status": "planned | active | completed",
+  "created_at": "2025-01-07T12:00:00Z"
+}
 
-EVENTS ERSTELLEN
-----------------
-1. Im Admin-Dashboard auf "Events" klicken
-2. Button "Neues Event" klicken
-3. Pflichtfelder ausfüllen:
-   - Name (z.B. "Sommerfest 2025")
-   - Startdatum
-   - Enddatum
-4. Optional: Beschreibung hinzufügen
-5. "Erstellen" klicken
+ERKLÄRUNG:
+  • Status wird automatisch basierend auf Datum berechnet
+  • Nur EIN Event kann gleichzeitig "active" sein
+  • Alle Bestellungen werden automatisch dem aktiven Event zugeordnet
 
-EVENT-STATUS
-------------
-Der Status wird automatisch basierend auf dem Datum gesetzt:
+▸ COLLECTION: deposit_groups (Pfandgruppen)
+─────────────────────────────────────────────────────────────────────────────
+{
+  "id": "uuid-string",
+  "name": "Becher 0.5L",
+  "amount": 2.00,
+  "active": true
+}
 
-• Geplant (blau):
-  - Startdatum liegt in der Zukunft
-  - Bestellungen können noch nicht zugeordnet werden
-  
-• Aktiv (grün):
-  - Heutiges Datum liegt zwischen Start und Ende
-  - Alle neuen Bestellungen werden diesem Event zugeordnet
-  - WICHTIG: Nur EIN Event kann gleichzeitig aktiv sein!
-  
-• Abgeschlossen (grau):
-  - Enddatum liegt in der Vergangenheit
-  - Keine neuen Bestellungen werden zugeordnet
-  - Statistiken sind weiterhin abrufbar
+▸ COLLECTION: stock_units (Bestandseinheiten)
+─────────────────────────────────────────────────────────────────────────────
+{
+  "id": "uuid-string",
+  "name": "Bierkiste 24x0.5L",
+  "type": "crate | keg | custom",
+  "large_unit_name": "Kisten",
+  "small_unit_name": "Flaschen",
+  "container_size": 24,
+  "serving_size": 1,
+  "wastage_percentage": 5,        // Schankverlust
+  "sales_units_per_large": 24
+}
 
-AUTOMATISCHE ZUORDNUNG
-----------------------
-Wenn eine Bestellung erstellt wird:
-1. System prüft: Gibt es ein aktives Event?
-2. Falls JA: event_id wird automatisch gesetzt
-3. Falls NEIN: event_id bleibt leer ("ohne Event")
+▸ COLLECTION: stations (Küchen-Stationen)
+─────────────────────────────────────────────────────────────────────────────
+{
+  "id": "uuid-string",
+  "name": "Grill-Station",
+  "stand_id": "stand-uuid",
+  "is_main": false,
+  "article_ids": ["article-uuid-1", "article-uuid-2"]
+}
 
-Alte Bestellungen (vor Event-System):
-• Werden als "ohne Event" geführt
-• Sind über Filter "Ohne Event" abrufbar
+ERKLÄRUNG:
+  • Für große Küchen mit Arbeitsteilung
+  • Hauptstation sieht alle Artikel
+  • Nebenstationen sehen nur zugewiesene Artikel
 
-EVENT-STATISTIKEN (/admin/events/{id}/stats)
-============================================
-Detaillierte Auswertung für ein spezifisches Event.
+▸ COLLECTION: settings (Globale Einstellungen)
+─────────────────────────────────────────────────────────────────────────────
+{
+  "id": "global",
+  "event_name": "Karnbachs Event OS",
+  "timezone": "Europe/Berlin",
+  "logo_url": "/uploads/logo.png | null",
+  "primary_color": "#a855f7",
+  "secondary_color": "#22c55e",
+  "accent_color": "#eab308"
+}
 
-ZUSAMMENFASSUNG
----------------
-• Gesamtzahl Bestellungen
-• Abgeschlossene Bestellungen + Quote
-• Gesamtumsatz in Euro
-• Pfand erhalten / zurückgegeben
-• Netto-Umsatz
-• Durchschnittlicher Bestellwert
+▸ COLLECTION: order_counters (Bonnummern-Zähler)
+─────────────────────────────────────────────────────────────────────────────
+{
+  "stand_id": "stand-uuid",
+  "counter": 15                   // Nächste Nummer: 16
+}
 
-TABS IN DER STATISTIK
----------------------
-
-Tab "Übersicht":
-• Top 5 meistverkaufte Artikel
-• Top 5 umsatzstärkste Stände
-• Grafische Übersicht
-
-Tab "Artikel":
-• Alle verkauften Artikel
-• Sortiert nach Menge
-• Umsatz pro Artikel
-• Durchschnittspreis
-
-Tab "Pro Stunde":
-• Bestellungen pro Stunde
-• Umsatz pro Stunde
-• Durchschnittlicher Bestellwert
-• Ideal zur Identifikation der Stoßzeiten
-
-Tab "Pro Tag":
-• Bestellungen pro Tag
-• Umsatz pro Tag
-• Bei mehrtägigen Events sehr hilfreich
-
-Tab "Pro Stand":
-• Vergleich aller Stände
-• Bestellungen und Umsatz
-• Prozentualer Anteil am Gesamtumsatz
-
-EXPORT
-------
-• Button "Export" erstellt CSV-Datei
-• Enthält alle Statistikdaten
-• Kann in Excel geöffnet werden
-
-EVENT-FILTER IN ANDEREN BEREICHEN
-=================================
-
-STATISTIK-SEITE (/admin/stats)
-------------------------------
-Neuer Filter: "Event"
-• "Alle Events" - Alle Daten (Standard)
-• "Ohne Event" - Nur nicht zugeordnete
-• [Event-Name] - Nur dieses Event
-
-BESTELLUNGEN (/admin/orders)
------------------------------
-Neuer Filter: "Event"
-• Funktioniert wie oben
-• Kombinierbar mit Stand-Filter
-
-WICHTIG: Wenn kein Filter gesetzt ist, 
-werden IMMER alle Daten angezeigt!
-
-
-STÄNDE VERWALTEN (/admin/stands)
-================================
-Standtypen:
-• Speisestand - für Essensverkauf
-• Getränkestand - für Getränkeverkauf
-• Gemischt - für beides
-
-Einstellungen pro Stand:
-• Name
-• Typ
-• Kurzer Prozess (AN/AUS)
-• Zugewiesene Artikel
-
-Kurzer Prozess:
-• AN = Bestellung geht direkt zur Ausgabe
-• AUS = Bestellung geht erst zum Macher
-
-
-ARTIKEL VERWALTEN (/admin/articles)
-===================================
-Tab: Artikel
-• Name
-• Preis
-• Kategorie (Speise/Getränk)
-• Pfandgruppe (optional)
-• Bestandsverwaltung (optional)
-
-Tab: Bestandseinheiten
-• Einheiten für Bestandsverwaltung
-• z.B. "Kiste 24x0.5l", "Fass 30l"
-• Schankverlust pro Einheit
-
-Tab: Pfandgruppen
-• Name der Pfandgruppe
-• Pfandbetrag
-• Zuordnung zu Artikeln
-
-Bestandsverwaltung:
-• Aktivierbar pro Artikel
-• Anfangsbestand setzen
-• Warnschwelle definieren
-• Automatische Reduktion bei Verkauf
-
-
-BESTANDSÜBERSICHT (/admin/stock)
-================================
-Zeigt für alle Artikel mit Bestandsverwaltung:
-• Anfangsbestand
-• Verkaufte Menge
-• Restbestand
-• Umsatz
-• Status (OK/Knapp/Ausverkauft)
-
-Aktionen:
-• Bestand aufstocken (+ Button)
-• Reset (nur Verkäufe oder komplett)
-
-
-STATIONEN (/admin/stations)
-===========================
-Für große Küchen mit Arbeitsteilung:
-• Station erstellen
-• Artikel zuweisen
-• Hauptstation festlegen
-
-Beispiel:
-• Station "Grill" → Burger, Steaks
-• Station "Pommes" → Pommes, Wedges
-• Hauptstation → Sieht alles
-
-
-STATISTIKEN (/admin/stats)
-==========================
-Auswertungen:
-• Gesamtumsatz
-• Anzahl Bestellungen
-• Bestellungen pro Stunde (Chart)
-• Top-Artikel
-• Umsatz pro Artikel
-
-Zeitraum: Gesamter Eventzeitraum
-
-
-EINSTELLUNGEN (/admin/settings)
-===============================
-Event-Name:
-• Wird auf Startseite angezeigt
-• Format: "Name_Event"
-
-Logo:
-• Upload möglich (PNG, JPG, SVG, WebP)
-• Max. 2MB
-• Wird auf Startseite angezeigt
-
-Farbschema:
-• 6 vordefinierte Themes
-• Individuelle Farbanpassung möglich
-• Primärfarbe (Buttons, Akzente)
-• Sekundärfarbe (Bestätigungen)
-• Akzentfarbe (Highlights)
-
-Zeitzone:
-• Für alle Uhren in der App
-• Standard: Europe/Berlin
-
-
-BESTELLUNGEN (/admin/orders)
-============================
-Übersicht aller Bestellungen:
-• Bonnummer
-• Stand
-• Status
-• Zeitstempel
-• Artikel
-• Summe
-
-Filter nach Status:
-• Offen
-• In Bearbeitung
-• Fertig
-• Ausgegeben
-
-Aktionen:
-• Status ändern
-• Bestellung löschen
-
-
-EXPORT
-======
-Exportiert alle Daten als JSON:
-• Bestellungen
-• Artikel
-• Stände
-• Statistiken
-
-Format: JSON-Datei zum Download
-
-
-RESET
-=====
-Löscht Bestellungen und Zähler.
-PIN erforderlich (Standard: 200183)
-
-Optionen im Bestandsbereich:
-• Nur Verkäufe zurücksetzen
-• Bestand und Verkäufe zurücksetzen
+ERKLÄRUNG:
+  • Pro Stand ein separater Zähler
+  • Zählt von 1-25, dann wieder von vorn
+  • Atomic Updates verhindern Duplikate
 `
   },
 
-  technical: {
-    title: "Technische Architektur",
-    content: `
-TECHNISCHE ARCHITEKTUR
-======================
-
-STACK ÜBERSICHT
----------------
-Frontend:  React 18 + Tailwind CSS + Shadcn/UI
-Backend:   FastAPI (Python) + Motor (Async MongoDB)
-Datenbank: MongoDB
-Echtzeit:  WebSockets
-
-
-FRONTEND-ARCHITEKTUR
-====================
-
-Framework & Libraries:
-• React 18 mit funktionalen Komponenten
-• React Router für Navigation
-• Axios für HTTP-Requests
-• Tailwind CSS für Styling
-• Shadcn/UI für UI-Komponenten
-• Lucide React für Icons
-
-Verzeichnisstruktur:
-/app/frontend/src/
-├── components/
-│   ├── ui/              # Shadcn UI Komponenten
-│   ├── LiveClock.jsx    # Echtzeit-Uhr
-│   ├── ThemeProvider.jsx # Farbschema-Provider
-│   └── ErrorBoundary.jsx # Fehlerbehandlung
-├── pages/
-│   ├── LandingPage.jsx      # Startseite
-│   ├── BestellungPage.jsx   # Bestellansicht
-│   ├── KuechePage.jsx       # Macher-Ansicht
-│   ├── AusgabePage.jsx      # Ausgabe-Ansicht
-│   ├── OneManShowPage.jsx   # Kombinierte Ansicht
-│   ├── AdminDashboard.jsx   # Admin-Übersicht
-│   ├── ArticleManagement.jsx # Artikelverwaltung
-│   ├── StandManagement.jsx  # Standverwaltung
-│   ├── StationManagement.jsx # Stationsverwaltung
-│   ├── StockOverview.jsx    # Bestandsübersicht
-│   ├── StatsPage.jsx        # Statistiken (mit Event-Filter)
-│   ├── SettingsPage.jsx     # Einstellungen
-│   ├── OrdersManagement.jsx # Bestellübersicht (mit Event-Filter)
-│   ├── EventManagement.jsx  # Event-Verwaltung (NEU)
-│   ├── EventStatsPage.jsx   # Event-Statistiken (NEU)
-│   └── DocumentationPage.jsx # Diese Dokumentation
-├── App.js               # Routing & Provider
-├── index.js             # Entry Point
-└── index.css            # Globale Styles
-
-State Management:
-• React useState für lokalen State
-• React Context für globale Einstellungen (Theme)
-• WebSocket für Echtzeit-Updates
-
-PWA Features:
-• Service Worker für Caching
-• Manifest für Installation
-• Offline-Fallback (geplant)
-
-
-BACKEND-ARCHITEKTUR
-===================
-
-Framework:
-• FastAPI (async Python)
-• Motor für async MongoDB
-• WebSockets für Echtzeit
-
-Hauptdatei: /app/backend/server.py
-
-API-Struktur:
-/api/
-├── /stands          # CRUD für Stände
-├── /articles        # CRUD für Artikel
-├── /orders          # CRUD für Bestellungen
-├── /events          # CRUD für Events (NEU)
-│   ├── GET /         # Alle Events abrufen
-│   ├── GET /active   # Aktuell aktives Event
-│   ├── GET /{id}     # Einzelnes Event
-│   ├── GET /{id}/stats # Detaillierte Statistiken
-│   ├── POST /        # Event erstellen (Admin)
-│   ├── PUT /{id}     # Event bearbeiten (Admin)
-│   └── DELETE /{id}  # Event löschen (Admin)
-├── /stock-units     # CRUD für Bestandseinheiten
-├── /deposit-groups  # CRUD für Pfandgruppen
-├── /stations        # CRUD für Stationen
-├── /settings        # App-Einstellungen
-├── /stats           # Statistik-Endpoints (mit Event-Filter)
-├── /admin/          # Admin-Funktionen
-│   ├── /login       # Authentifizierung
-│   ├── /orders      # Bestellverwaltung (mit Event-Filter)
-│   ├── /reset       # Daten zurücksetzen
-│   └── /stock/reset # Bestand zurücksetzen
-├── /ws              # WebSocket-Endpoint
-└── /health          # Health-Check
-
-Authentifizierung:
-• Basic Auth für Admin-Bereich
-• Credentials in Umgebungsvariablen
-
-WebSocket:
-• Broadcast bei neuen Bestellungen
-• Broadcast bei Statusänderungen
-• Optimiert für <30ms Latenz
-
-
-DATENBANK-SCHEMA
-================
-
-Collection: stands
-{
-  id: string,
-  name: string,
-  stand_type: "speisestand" | "getraenkestand" | "gemischt",
-  short_process: boolean,
-  created_at: datetime
-}
-
-Collection: articles
-{
-  id: string,
-  name: string,
-  price: number,
-  category: "speise" | "getraenk",
-  deposit_group_id: string | null,
-  stand_ids: string[],
-  track_stock: boolean,
-  stock_unit_id: string | null,
-  stock_large_units: number,
-  stock_small_units: number,
-  stock_initial_large: number,
-  stock_initial_small: number,
-  stock_alert_threshold: number
-}
-
-Collection: orders
-{
-  id: string,
-  stand_id: string,
-  order_number: number,
-  items: [{ article_id, article_name, quantity, price }],
-  total: number,
-  status: "pending" | "in_progress" | "ready" | "delivered",
-  event_id: string | null,  // NEU: Zugehöriges Event
-  created_at: datetime,
-  updated_at: datetime
-}
-
-Collection: events (NEU)
-{
-  id: string,
-  name: string,
-  description: string,
-  start_date: string,      // ISO Datum
-  end_date: string,        // ISO Datum
-  status: "planned" | "active" | "completed",
-  created_at: datetime,
-  updated_at: datetime
-}
-
-Collection: deposit_groups
-{
-  id: string,
-  name: string,
-  amount: number
-}
-
-Collection: stock_units
-{
-  id: string,
-  name: string,
-  type: "crate" | "keg" | "custom",
-  large_unit_name: string,
-  small_unit_name: string,
-  container_size: number,
-  serving_size: number,
-  wastage_percentage: number,
-  sales_units_per_large: number
-}
-
-Collection: stations
-{
-  id: string,
-  name: string,
-  stand_id: string,
-  is_main: boolean,
-  article_ids: string[]
-}
-
-Collection: settings
-{
-  id: "global",
-  timezone: string,
-  event_name: string,
-  logo_url: string | null,
-  primary_color: string,
-  secondary_color: string,
-  accent_color: string
-}
-
-Collection: order_counters
-{
-  stand_id: string,
-  counter: number
-}
-
-
-PERFORMANCE-OPTIMIERUNGEN
-=========================
-
-Frontend:
-• Memoization mit useMemo/useCallback
-• Lazy Loading (geplant)
-• Optimistic Updates
-
-Backend:
-• MongoDB Connection Pooling
-• Async Background Tasks für WebSocket
-• Indexed Queries
-
-WebSocket:
-• Debounced Broadcasts
-• Targeted Updates (nicht global)
-• Reconnection-Logik im Frontend
-
-
-UMGEBUNGSVARIABLEN
-==================
-
-Backend (/app/backend/.env):
-• MONGO_URL - MongoDB Verbindung
-• DB_NAME - Datenbankname
-• ADMIN_USERNAME - Admin-Benutzername
-• ADMIN_PASSWORD - Admin-Passwort
-• RESET_PIN - PIN für Reset-Funktionen
-
-Frontend (/app/frontend/.env):
-• REACT_APP_BACKEND_URL - Backend-URL
-`
-  },
-
-  design: {
-    title: "Design & Styling",
-    content: `
-DESIGN-SYSTEM
-=============
-
-DESIGN-PHILOSOPHIE
-------------------
-• Dark Mode als Standard (bessere Lesbarkeit bei Events)
-• Neon-Akzente für wichtige Elemente
-• Große Touch-Targets für mobile Bedienung
-• Klare visuelle Hierarchie
-• Konsistente Abstände und Größen
-
-
-FARBSYSTEM
-==========
-
-Standard-Farbpalette:
-• Primary (Lila): #a855f7 - Hauptaktionen, Buttons
-• Secondary (Grün): #22c55e - Bestätigungen, Erfolg
-• Accent (Gelb): #eab308 - Highlights, Warnungen
-• Destructive (Rot): #ef4444 - Fehler, Löschen
-• Background (Dunkel): #09090b - Hintergrund
-• Card (Dunkelgrau): #18181b - Karten-Hintergrund
-• Muted: Gedämpfte Texte und Borders
-
-Vordefinierte Themes:
-1. Neon Lila (Standard)
-   - Primary: #a855f7
-   - Secondary: #22c55e
-   - Accent: #eab308
-
-2. Ocean Blau
-   - Primary: #3b82f6
-   - Secondary: #06b6d4
-   - Accent: #f59e0b
-
-3. Sunset Orange
-   - Primary: #f97316
-   - Secondary: #ec4899
-   - Accent: #fbbf24
-
-4. Forest Grün
-   - Primary: #22c55e
-   - Secondary: #84cc16
-   - Accent: #14b8a6
-
-5. Royal Rot
-   - Primary: #ef4444
-   - Secondary: #f97316
-   - Accent: #fbbf24
-
-6. Elegant Gold
-   - Primary: #eab308
-   - Secondary: #a855f7
-   - Accent: #f59e0b
-
-
-TYPOGRAFIE
-==========
-
-Schriftfamilien:
-• Display: "Unbounded" - Überschriften, Logo
-• Body: "Manrope" - Fließtext
-• Mono: "JetBrains Mono" - Zahlen, Preise, Code
-
-Größenhierarchie:
-• H1: text-4xl bis text-6xl (responsive)
-• H2: text-lg bis text-xl
-• Body: text-base (mobile: text-sm)
-• Small: text-sm oder text-xs
-
-Besonderheiten:
-• Überschriften: UPPERCASE, tracking-tight
-• Zahlen/Preise: font-mono für Ausrichtung
-• Badges: text-xs bis text-sm
-
-
-KOMPONENTEN-DESIGN
-==================
-
-Buttons:
-• Primär: Gefüllt mit Primary-Farbe, Neon-Glow
-• Sekundär: Outline mit Hover-Effekt
-• Ghost: Transparent, nur Hover-Hintergrund
-• Größen: sm, default, lg, icon
-
-Karten:
-• Dunkler Hintergrund (bg-card)
-• Subtiler Border
-• Hover-Effekt bei interaktiven Karten
-• Neon-Glow bei ausgewählten Karten
-
-Dialoge:
-• Zentriert mit Overlay
-• Max-Width für Lesbarkeit
-• ScrollArea bei langem Inhalt
-• Klare Header-Struktur
-
-Badges:
-• Farbcodiert nach Bedeutung
-• Outline-Stil für Status
-• Filled für Kategorien
-
-Inputs:
-• Dunkler Hintergrund
-• Subtiler Border
-• Focus-Ring in Primary-Farbe
-
-
-NEON-EFFEKTE
-============
-
-CSS-Klassen:
-• neon-primary - Lila Glow
-• neon-secondary - Grüner Glow
-• neon-accent - Gelber Glow
-• neon-success - Grüner Erfolgs-Glow
-
-Anwendung:
-• Aktive Buttons
-• Ausgewählte Karten
-• Wichtige Badges
-• Hervorhebungen
-
-
-RESPONSIVE DESIGN
-=================
-
-Breakpoints (Tailwind):
-• sm: 640px - Kleine Tablets
-• md: 768px - Tablets
-• lg: 1024px - Laptops
-• xl: 1280px - Desktops
-
-Mobile-First Ansatz:
-• Basis-Styles für Mobile
-• Erweiterungen für größere Screens
-
-Navigation:
-• Mobile: Nur Icons
-• Tablet: Icons + wichtige Labels
-• Desktop: Icons + alle Labels
-
-
-ANIMATIONEN
-===========
-
-Verwendete Animationen:
-• Fade-In für Dialoge
-• Slide für Seitenübergänge
-• Pulse für Lade-Indikatoren
-• Scale für Button-Hover
-
-Performance:
-• transform und opacity bevorzugt
-• will-change für komplexe Animationen
-• Reduced-Motion Support
-
-
-GLASSMORPHISM
-=============
-
-Header-Effekt:
-• Backdrop-blur für Transparenz
-• Subtiler Border
-• Sticky positioning
-
-CSS:
-.glass {
-  background: rgba(24, 24, 27, 0.8);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-
-BARRIEREFREIHEIT
-================
-
-Implementiert:
-• Ausreichende Farbkontraste
-• Focus-Indikatoren
-• Touch-Target-Größen (min. 44px)
-• Semantisches HTML
-• ARIA-Labels wo nötig
-`
-  },
-
+  // -------------------------------------------------------------------------
+  // 4. API-REFERENZ
+  // -------------------------------------------------------------------------
   api: {
-    title: "API-Referenz",
+    title: "🔌 API-Referenz",
+    icon: Server,
     content: `
-API-REFERENZ
-============
+═══════════════════════════════════════════════════════════════════════════════
+                              REST API ENDPOINTS
+═══════════════════════════════════════════════════════════════════════════════
 
 BASE URL: /api
 
-AUTHENTIFIZIERUNG
------------------
-Admin-Endpoints benötigen Basic Auth:
-Authorization: Basic base64(username:password)
+▸ AUTHENTIFIZIERUNG
+─────────────────────────────────────────────────────────────────────────────
+Admin-Endpoints erfordern HTTP Basic Auth:
+  Authorization: Basic base64(username:password)
 
+Standard-Credentials (in .env konfigurierbar):
+  Username: admin
+  Password: admin
+  Reset-PIN: 200183
 
-STÄNDE
-======
+▸ STÄNDE (CRUD)
+─────────────────────────────────────────────────────────────────────────────
+GET    /api/stands              → Liste aller Stände
+GET    /api/stands/{id}         → Einzelner Stand
+POST   /api/stands              → Stand erstellen
+PUT    /api/stands/{id}         → Stand aktualisieren
+DELETE /api/stands/{id}         → Stand löschen
 
-GET /api/stands
-  → Liste aller Stände
+POST   /api/stands/{id}/toggle-short-process
+  → Kurzer Prozess umschalten (ohne Macher)
 
-GET /api/stands/{stand_id}
-  → Einzelner Stand
+▸ ARTIKEL (CRUD)
+─────────────────────────────────────────────────────────────────────────────
+GET    /api/articles                    → Alle Artikel
+GET    /api/stands/{id}/articles        → Artikel eines Stands
+POST   /api/articles                    → Artikel erstellen
+PUT    /api/articles/{id}               → Artikel aktualisieren
+DELETE /api/articles/{id}               → Artikel löschen
 
-POST /api/stands
-  Body: { name, stand_type, short_process }
-  → Neuer Stand erstellen
-
-PUT /api/stands/{stand_id}
-  Body: { name?, stand_type?, short_process? }
-  → Stand aktualisieren
-
-DELETE /api/stands/{stand_id}
-  → Stand löschen
-
-PUT /api/stands/{stand_id}/toggle-short-process
-  → Kurzer Prozess umschalten
-
-
-ARTIKEL
-=======
-
-GET /api/articles
-  → Liste aller Artikel
-
-GET /api/stands/{stand_id}/articles
-  → Artikel eines Stands
-
-POST /api/articles
-  Body: { name, price, category, deposit_group_id?, stand_ids }
-  → Neuer Artikel
-
-PUT /api/articles/{article_id}
-  Body: { ... }
-  → Artikel aktualisieren
-
-DELETE /api/articles/{article_id}
-  → Artikel löschen
-
-PUT /api/articles/{article_id}/stock
-  Body: { large_units?, small_units?, mode, set_as_initial }
-  mode: "set" | "add"
+PUT    /api/articles/{id}/stock
+  Body: { large_units, small_units, mode: "set"|"add", set_as_initial }
   → Bestand anpassen
 
-
-BESTELLUNGEN
-============
-
-GET /api/stands/{stand_id}/orders
-  → Bestellungen eines Stands
-
-GET /api/stands/{stand_id}/orders?status=pending
+▸ BESTELLUNGEN
+─────────────────────────────────────────────────────────────────────────────
+GET    /api/stands/{id}/orders          → Bestellungen eines Stands
+GET    /api/stands/{id}/orders?status=pending
   → Gefiltert nach Status
 
-POST /api/orders
-  Body: { stand_id, items: [{ article_id, quantity }] }
-  → Neue Bestellung
+POST   /api/orders
+  Body: {
+    stand_id, stand_name, items: [{article_id, quantity}],
+    subtotal, deposit_total, deposit_return_total, total,
+    created_by, direct_complete, request_id
+  }
+  → Neue Bestellung erstellen
 
-PUT /api/orders/{order_id}/status
-  Body: { status }
-  status: "pending" | "in_progress" | "ready" | "delivered"
-  → Status ändern
+PUT    /api/orders/{id}/status
+  Body: { status: "in_progress"|"ready"|"completed" }
+  → Status ändern (löst WebSocket-Event aus)
 
-DELETE /api/orders/{order_id}
+DELETE /api/orders/{id}
   → Bestellung löschen
 
+GET    /api/stands/{id}/archive?limit=50
+  → Archivierte (abgeschlossene) Bestellungen
 
-PFANDGRUPPEN
-============
+▸ EVENTS
+─────────────────────────────────────────────────────────────────────────────
+GET    /api/events                      → Alle Events
+GET    /api/events/active               → Aktuell aktives Event
+GET    /api/events/{id}                 → Einzelnes Event
+GET    /api/events/{id}/stats           → Detaillierte Event-Statistiken
+POST   /api/events                      → Event erstellen (Admin)
+PUT    /api/events/{id}                 → Event bearbeiten (Admin)
+DELETE /api/events/{id}                 → Event löschen (Admin)
 
-GET /api/deposit-groups
-  → Liste aller Pfandgruppen
+▸ STATISTIKEN
+─────────────────────────────────────────────────────────────────────────────
+GET    /api/stats                       → Übersicht (Umsatz, Bestellungen)
+GET    /api/stats/orders-by-hour        → Bestellungen pro Stunde
+GET    /api/admin/stock-overview        → Bestandsübersicht (Admin)
 
-POST /api/deposit-groups
-  Body: { name, amount }
-  → Neue Pfandgruppe
+▸ EINSTELLUNGEN
+─────────────────────────────────────────────────────────────────────────────
+GET    /api/settings                    → Globale Einstellungen
+PUT    /api/settings                    → Einstellungen speichern (Admin)
+POST   /api/settings/logo               → Logo hochladen (Admin)
+DELETE /api/settings/logo               → Logo löschen (Admin)
 
-PUT /api/deposit-groups/{group_id}
-  Body: { name?, amount? }
-  → Aktualisieren
-
-DELETE /api/deposit-groups/{group_id}
-  → Löschen
-
-
-BESTANDSEINHEITEN
-=================
-
-GET /api/stock-units
-  → Liste aller Einheiten
-
-POST /api/stock-units
-  Body: { name, type, large_unit_name, small_unit_name, 
-          container_size, serving_size, wastage_percentage }
-  → Neue Einheit
-
-PUT /api/stock-units/{unit_id}
-  → Aktualisieren
-
-DELETE /api/stock-units/{unit_id}
-  → Löschen
-
-
-STATIONEN
-=========
-
-GET /api/stations
-  → Liste aller Stationen
-
-GET /api/stands/{stand_id}/stations
-  → Stationen eines Stands
-
-POST /api/stations
-  Body: { name, stand_id, is_main, article_ids }
-  → Neue Station
-
-PUT /api/stations/{station_id}
-  → Aktualisieren
-
-DELETE /api/stations/{station_id}
-  → Löschen
-
-
-EINSTELLUNGEN
-=============
-
-GET /api/settings
-  → Globale Einstellungen
-
-PUT /api/settings (Auth required)
-  Body: { timezone?, event_name?, primary_color?, ... }
-  → Einstellungen speichern
-
-POST /api/settings/logo (Auth required)
-  Body: FormData mit file
-  → Logo hochladen
-
-DELETE /api/settings/logo (Auth required)
-  → Logo löschen
-
-
-STATISTIKEN
-===========
-
-GET /api/stats
-  → Statistik-Übersicht
-
-GET /api/stats/orders-by-hour
-  → Bestellungen pro Stunde
-
-GET /api/admin/stock-overview (Auth required)
-  → Bestandsübersicht
-
-
-ADMIN
-=====
-
-POST /api/admin/login
+▸ ADMIN-FUNKTIONEN
+─────────────────────────────────────────────────────────────────────────────
+POST   /api/admin/login
   Body: { username, password }
-  → Login (gibt Token zurück)
+  → Login prüfen
 
-POST /api/admin/reset (Auth required)
+POST   /api/admin/reset
   Body: { pin }
   → Alle Bestellungen zurücksetzen
 
-POST /api/admin/stock/reset (Auth required)
-  Body: { pin, reset_type }
-  reset_type: "sales" | "all"
+POST   /api/admin/stock/reset
+  Body: { pin, reset_type: "sales"|"all" }
   → Bestand zurücksetzen
 
+▸ WEBSOCKET
+─────────────────────────────────────────────────────────────────────────────
+WS     /api/ws
 
-WEBSOCKET
-=========
+Events (Server → Client):
+  • new_order          → Neue Bestellung erstellt
+  • order_status_changed → Status geändert
+  • order_deleted      → Bestellung gelöscht
+  • stock_update       → Bestand geändert
 
-WS /api/ws
-  Events:
-  • new_order: Neue Bestellung
-  • order_status_changed: Status geändert
-  • order_deleted: Bestellung gelöscht
+Format:
+{
+  "type": "new_order",
+  "data": { /* Order-Objekt */ }
+}
 
+▸ HEALTH CHECK
+─────────────────────────────────────────────────────────────────────────────
+GET    /api/health
+  → { status: "healthy", timestamp, database: "connected", ... }
+`
+  },
 
-SONSTIGE
-========
+  // -------------------------------------------------------------------------
+  // 5. FRONTEND-SEITEN
+  // -------------------------------------------------------------------------
+  pages: {
+    title: "📱 Frontend-Seiten",
+    icon: Monitor,
+    content: `
+═══════════════════════════════════════════════════════════════════════════════
+                         FRONTEND-SEITEN ÜBERSICHT
+═══════════════════════════════════════════════════════════════════════════════
 
-GET /api/timezones
-  → Liste verfügbarer Zeitzonen
+▸ ÖFFENTLICHE SEITEN (Ohne Login)
+─────────────────────────────────────────────────────────────────────────────
 
-GET /api/server-time
-  → Aktuelle Serverzeit
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🏠 LANDING PAGE (/)                                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/LandingPage.jsx                                           │
+│                                                                             │
+│ Funktion:                                                                   │
+│ • Stand-Auswahl (zeigt alle konfigurierten Stände)                          │
+│ • Rollen-Auswahl (Besteller, Macher, Ausgabe, OneManShow)                   │
+│ • Kurzprozess-Toggle (für Stände ohne Küche)                                │
+│ • Hilfe-Dialog mit Erklärungen                                              │
+│                                                                             │
+│ Design: Hintergrundbild mit Glassmorphism-Header                            │
+│ Verbindungsstatus: Grüner Punkt + WiFi-Icon oben rechts                     │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-GET /api/health
-  → Health-Check für Deployment
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🛒 BESTELLUNG (/bestellung/:standId/:standType)                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/BestellungPage.jsx                                        │
+│                                                                             │
+│ Funktion:                                                                   │
+│ • Artikel-Grid nach Kategorien (Speisen/Getränke)                           │
+│ • Warenkorb mit Mengenänderung                                              │
+│ • Pfand-Rücknahme (falls konfiguriert)                                      │
+│ • Bestellung aufgeben → Zeigt Bonnummer                                     │
+│ • Restgeldrechner (Wechselgeld berechnen)                                   │
+│ • Archiv der letzten Bestellungen                                           │
+│                                                                             │
+│ Features:                                                                   │
+│ • Swipe-to-Delete im Warenkorb                                              │
+│ • Bestandswarnung bei knappen Artikeln                                      │
+│ • Offline-Unterstützung (Bestellungen werden gequeued)                      │
+│ • Vollbildmodus                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-POST /api/seed
-  → Initiale Testdaten erstellen
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🔨 MACHER/KÜCHE (/kueche/:standId/:standType/:stationId?)                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/KuechePage.jsx                                            │
+│                                                                             │
+│ Funktion:                                                                   │
+│ • Zeigt eingehende Bestellungen in Echtzeit                                 │
+│ • "Gesamt Offen" - Kumulierte Liste aller offenen Artikel                   │
+│ • Bestellung als "Fertig" markieren                                         │
+│ • Sound-Benachrichtigung bei neuen Bestellungen                             │
+│ • Zeitanzeige pro Bestellung                                                │
+│                                                                             │
+│ Stations-Modus:                                                             │
+│ • Optional können Stationen definiert werden                                │
+│ • Jede Station sieht nur ihre zugewiesenen Artikel                          │
+│ • Hauptstation sieht alles                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 📦 AUSGABE (/ausgabe/:standId/:standType)                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/AusgabePage.jsx                                           │
+│                                                                             │
+│ Funktion:                                                                   │
+│ • Zeigt fertige Bestellungen mit großer Bonnummer                           │
+│ • Tippen = Bestellung übergeben (Status → completed)                        │
+│ • "Zurückholen" Button für letzte übergebene Bestellung                     │
+│ • Archiv der ausgegebenen Bestellungen                                      │
+│                                                                             │
+│ Design: Große, gut lesbare Karten für schnelles Erkennen                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ⚡ ONEMANSHOW (/onemanshow/:standId/:standType)                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/OneManShowPage.jsx                                        │
+│                                                                             │
+│ Funktion:                                                                   │
+│ • Kombiniert Bestellung + Macher + Ausgabe                                  │
+│ • Ideal für einfache Stände ohne Arbeitsteilung                             │
+│ • Bestellung wird sofort als "completed" markiert                           │
+│ • Gleiche Features wie Bestellung (Pfand, Restgeldrechner)                  │
+│                                                                             │
+│ Use Cases:                                                                  │
+│ • Getränkestand mit sofortiger Ausgabe                                      │
+│ • Kleine Snack-Stände                                                       │
+│ • Verkaufsstände ohne Zubereitung                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+▸ ADMIN-BEREICH (Login erforderlich: admin/admin)
+─────────────────────────────────────────────────────────────────────────────
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🔐 ADMIN LOGIN (/admin/login)                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/AdminLoginPage.jsx                                        │
+│ Credentials: admin / admin (konfigurierbar in .env)                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 📊 DASHBOARD (/admin)                                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/AdminDashboard.jsx                                        │
+│                                                                             │
+│ Zeigt:                                                                      │
+│ • Anzahl Bestellungen, Umsatz, Abschlussrate                                │
+│ • Top-Artikel (meistverkauft)                                               │
+│ • Bestellungen pro Stand                                                    │
+│ • Export-Button (JSON)                                                      │
+│ • Reset-Button (löscht alle Bestellungen)                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 📅 EVENTS (/admin/events)                                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/EventManagement.jsx                                       │
+│                                                                             │
+│ Funktion:                                                                   │
+│ • Events erstellen/bearbeiten/löschen                                       │
+│ • Status-Anzeige (Geplant/Aktiv/Abgeschlossen)                              │
+│ • Klick auf Event → Event-Statistiken                                       │
+│                                                                             │
+│ Event-Statistiken (/admin/events/:id/stats):                                │
+│ • Zusammenfassung (Umsatz, Bestellungen)                                    │
+│ • Top-Artikel                                                               │
+│ • Bestellungen pro Stunde/Tag/Stand                                         │
+│ • CSV-Export                                                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🏪 STÄNDE (/admin/stands)                                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/StandManagement.jsx                                       │
+│                                                                             │
+│ Funktion:                                                                   │
+│ • Stände erstellen/bearbeiten/löschen                                       │
+│ • Typ wählen (Speisestand/Getränkestand/Gemischt)                           │
+│ • Kurzprozess aktivieren (überspringt Macher)                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 📦 ARTIKEL (/admin/articles)                                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/ArticleManagement.jsx                                     │
+│                                                                             │
+│ Tabs:                                                                       │
+│ • Artikel: Erstellen, Preise, Kategorien, Stand-Zuordnung                   │
+│ • Bestandseinheiten: Kisten, Fässer, etc. definieren                        │
+│ • Pfandgruppen: Pfandbeträge verwalten                                      │
+│                                                                             │
+│ Bestandsverwaltung pro Artikel:                                             │
+│ • Anfangsbestand setzen                                                     │
+│ • Warnschwelle definieren                                                   │
+│ • Automatische Reduktion bei Verkauf                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 📊 BESTAND (/admin/stock)                                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/StockOverview.jsx                                         │
+│                                                                             │
+│ Zeigt für alle Artikel mit Bestandsverwaltung:                              │
+│ • Anfangsbestand vs. Restbestand                                            │
+│ • Verkaufte Menge                                                           │
+│ • Status (OK/Knapp/Ausverkauft)                                             │
+│ • Bestand aufstocken (+Button)                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🔧 STATIONEN (/admin/stations)                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/StationManagement.jsx                                     │
+│                                                                             │
+│ Für große Küchen:                                                           │
+│ • Stationen pro Stand erstellen                                             │
+│ • Artikel zuweisen                                                          │
+│ • Hauptstation festlegen (sieht alles)                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 📈 STATISTIK (/admin/stats)                                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/StatsPage.jsx                                             │
+│                                                                             │
+│ Filter: Event, Stand                                                        │
+│ Zeigt: Umsatz, Bestellungen, Charts, Top-Artikel                            │
+│ Export: CSV                                                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 📋 BESTELLUNGEN (/admin/orders)                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/OrdersManagement.jsx                                      │
+│                                                                             │
+│ Übersicht aller Bestellungen mit:                                           │
+│ • Filter nach Status, Stand, Event                                          │
+│ • Status ändern                                                             │
+│ • Bestellung löschen                                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ⚙️ EINSTELLUNGEN (/admin/settings)                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/SettingsPage.jsx                                          │
+│                                                                             │
+│ • Event-Name (wird auf Startseite angezeigt)                                │
+│ • Logo hochladen                                                            │
+│ • Farbschema wählen (6 Themes + Custom)                                     │
+│ • Zeitzone                                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 📚 DOKUMENTATION (/admin/docs)                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Datei: /src/pages/DocumentationPage.jsx                                     │
+│                                                                             │
+│ Diese Seite! Vollständige App-Dokumentation mit:                            │
+│ • Export als TXT, HTML, PDF                                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+`
+  },
+
+  // -------------------------------------------------------------------------
+  // 6. KOMPONENTEN & SERVICES
+  // -------------------------------------------------------------------------
+  components: {
+    title: "🧩 Komponenten & Services",
+    icon: Code,
+    content: `
+═══════════════════════════════════════════════════════════════════════════════
+                        WIEDERVERWENDBARE KOMPONENTEN
+═══════════════════════════════════════════════════════════════════════════════
+
+▸ LAYOUT-KOMPONENTEN
+─────────────────────────────────────────────────────────────────────────────
+
+AdminNavBar.jsx
+  Einheitlicher Header für alle Admin-Seiten
+  • Navigation in 2 Reihen (10 Buttons)
+  • Verbindungsstatus (Grün/Gelb)
+  • Hilfe + Logout rechts
+
+AppFooter.jsx
+  Footer mit Branding
+  • Zeigt Event-Namen
+  • Fixed am unteren Rand
+
+LiveClock.jsx
+  Echtzeit-Uhr
+  • Zeigt aktuelle Uhrzeit
+  • Aktualisiert jede Sekunde
+  • Zeitzone aus Einstellungen
+
+▸ FUNKTIONALE KOMPONENTEN
+─────────────────────────────────────────────────────────────────────────────
+
+ConnectionStatus.jsx
+  Verbindungsstatus-Anzeige
+  • ConnectionStatus - Vollständig mit Tooltip
+  • ConnectionStatusDot - Kompakt (nur Punkt + Icon)
+  • OfflineBanner - Banner wenn offline
+
+  Logik:
+  • Basiert auf navigator.onLine (Browser-Status)
+  • Zeigt grün wenn online, gelb wenn offline
+  • Zeigt Anzahl wartender Bestellungen
+
+ThemeProvider.jsx
+  Farbschema-Management
+  • Lädt Einstellungen vom Backend
+  • Setzt CSS-Variablen dynamisch
+  • Ermöglicht Live-Theme-Wechsel
+
+AdminSwipe.jsx (Hook: useAdminSwipe)
+  Swipe-Navigation im Admin-Bereich
+  • Links/Rechts wischen zwischen Seiten
+  • Touch-Support für Tablets
+
+ErrorBoundary.jsx
+  Fehlerbehandlung
+  • Fängt React-Fehler ab
+  • Zeigt benutzerfreundliche Fehlermeldung
+  • Verhindert kompletten App-Absturz
+
+▸ UI-KOMPONENTEN (Shadcn/UI)
+─────────────────────────────────────────────────────────────────────────────
+
+Alle unter /src/components/ui/:
+  Button, Card, Dialog, Badge, Input, ScrollArea,
+  Tabs, Select, Switch, Slider, Table, Tooltip,
+  Alert, Avatar, Dropdown, Popover, etc.
+
+Diese sind vorkonfiguriert und folgen dem Design-System.
+
+═══════════════════════════════════════════════════════════════════════════════
+                              FRONTEND-SERVICES
+═══════════════════════════════════════════════════════════════════════════════
+
+▸ OrderService.js
+─────────────────────────────────────────────────────────────────────────────
+Zweck: Zuverlässige Bestellübermittlung
+
+Features:
+  • Automatische Retry-Logik bei Fehlern
+  • Request-Deduplication (verhindert Duplikate)
+  • Offline-Queue (speichert Bestellungen lokal)
+  • Sendet automatisch wenn wieder online
+
+Verwendung:
+  import { submitOrder } from '@/services/OrderService';
+  const result = await submitOrder(orderData);
+
+▸ WebSocketService.js
+─────────────────────────────────────────────────────────────────────────────
+Zweck: Echtzeit-Kommunikation
+
+Features:
+  • Singleton-Pattern (eine Verbindung pro Stand)
+  • Automatische Reconnection bei Verbindungsverlust
+  • Event-basierte Architektur
+
+Events:
+  • connected - Verbindung hergestellt
+  • disconnected - Verbindung verloren
+  • new_order - Neue Bestellung
+  • order_status_changed - Status geändert
+  • stock_update - Bestand geändert
+
+Verwendung:
+  import wsService from '@/services/WebSocketService';
+  wsService.connect(standId);
+  wsService.on(standId, 'new_order', (data) => { ... });
+
+▸ useConnectionStatus.js (Hook)
+─────────────────────────────────────────────────────────────────────────────
+Zweck: Verbindungsstatus überwachen
+
+Rückgabewerte:
+  • isOnline - Browser online?
+  • status - 'connected' | 'offline'
+  • statusText - 'Verbunden' | 'Offline'
+  • statusColor - CSS-Klasse
+  • pendingOrders - Anzahl wartender Bestellungen
+
+Verwendung:
+  const { status, statusColor } = useConnectionStatus(standId);
+`
+  },
+
+  // -------------------------------------------------------------------------
+  // 7. DESIGN-SYSTEM
+  // -------------------------------------------------------------------------
+  design: {
+    title: "🎨 Design-System",
+    icon: Palette,
+    content: `
+═══════════════════════════════════════════════════════════════════════════════
+                              DESIGN-SYSTEM
+═══════════════════════════════════════════════════════════════════════════════
+
+▸ DESIGN-PHILOSOPHIE
+─────────────────────────────────────────────────────────────────────────────
+• Dark Mode als Standard (bessere Lesbarkeit bei Events, auch nachts)
+• Neon-Akzente für wichtige Elemente (auffällig, modern)
+• Große Touch-Targets für mobile Bedienung (min. 44px)
+• Klare visuelle Hierarchie
+• Konsistente Abstände (4px-Grid)
+
+▸ FARBPALETTE
+─────────────────────────────────────────────────────────────────────────────
+
+Standard-Theme (Neon Lila):
+┌──────────────┬──────────────┬────────────────────────────────────────────┐
+│ Farbe        │ Hex          │ Verwendung                                 │
+├──────────────┼──────────────┼────────────────────────────────────────────┤
+│ Primary      │ #a855f7      │ Hauptaktionen, Buttons, Akzente            │
+│ Secondary    │ #22c55e      │ Bestätigungen, Erfolg, Fertig-Status       │
+│ Accent       │ #eab308      │ Highlights, Warnungen, Ausgabe-Rolle       │
+│ Destructive  │ #ef4444      │ Fehler, Löschen, Ausverkauft               │
+│ Background   │ #09090b      │ Seiten-Hintergrund                         │
+│ Card         │ #18181b      │ Karten-Hintergrund                         │
+│ Muted        │ #71717a      │ Gedämpfte Texte, Borders                   │
+└──────────────┴──────────────┴────────────────────────────────────────────┘
+
+Weitere Themes:
+  • Ocean Blau: #3b82f6 / #06b6d4 / #f59e0b
+  • Sunset Orange: #f97316 / #ec4899 / #fbbf24
+  • Forest Grün: #22c55e / #84cc16 / #14b8a6
+  • Royal Rot: #ef4444 / #f97316 / #fbbf24
+  • Elegant Gold: #eab308 / #a855f7 / #f59e0b
+
+▸ TYPOGRAFIE
+─────────────────────────────────────────────────────────────────────────────
+
+Schriftfamilien:
+  • Display: "Unbounded" - Überschriften, Logo, Bonnummern
+  • Body: "Manrope" - Fließtext, Labels
+  • Mono: "JetBrains Mono" - Zahlen, Preise, Bonnummern
+
+Größenhierarchie:
+  • H1: text-4xl bis text-6xl (responsive)
+  • H2: text-lg bis text-xl
+  • Body: text-base (mobile: text-sm)
+  • Small: text-sm oder text-xs
+
+▸ NEON-EFFEKTE
+─────────────────────────────────────────────────────────────────────────────
+
+CSS-Klassen:
+  .neon-primary   → box-shadow: 0 0 20px rgba(168, 85, 247, 0.5)
+  .neon-secondary → box-shadow: 0 0 20px rgba(34, 197, 94, 0.5)
+  .neon-accent    → box-shadow: 0 0 20px rgba(234, 179, 8, 0.5)
+  .neon-success   → box-shadow: 0 0 20px rgba(34, 197, 94, 0.5)
+
+Anwendung: Aktive Buttons, ausgewählte Karten, Hervorhebungen
+
+▸ GLASSMORPHISM
+─────────────────────────────────────────────────────────────────────────────
+
+Header-Effekt:
+  .glass {
+    background: rgba(24, 24, 27, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+▸ RESPONSIVE BREAKPOINTS
+─────────────────────────────────────────────────────────────────────────────
+
+Tailwind Breakpoints:
+  • sm: 640px  - Kleine Tablets
+  • md: 768px  - Tablets
+  • lg: 1024px - Laptops
+  • xl: 1280px - Desktops
+
+Mobile-First Ansatz: Basis-Styles für Mobile, Erweiterungen für größer
+
+▸ KOMPONENTEN-DESIGN
+─────────────────────────────────────────────────────────────────────────────
+
+Buttons:
+  • Primär: Gefüllt mit Primary-Farbe, Neon-Glow bei Hover
+  • Sekundär: Outline-Stil
+  • Ghost: Transparent, nur Hover-Hintergrund
+  • Größen: sm (h-8), default (h-10), lg (h-12), icon (h-10 w-10)
+
+Karten:
+  • bg-card (dunkelgrau)
+  • Subtiler Border
+  • Hover-Effekt bei interaktiven Karten
+  • Neon-Glow bei ausgewählten Karten
+
+Badges:
+  • Farbcodiert nach Status
+  • variant="outline" für Status
+  • variant="default" für Kategorien
+
+Inputs:
+  • Dunkler Hintergrund
+  • Focus-Ring in Primary-Farbe
+  • Platzhalter in muted-foreground
+`
+  },
+
+  // -------------------------------------------------------------------------
+  // 8. N8N INTEGRATION
+  // -------------------------------------------------------------------------
+  n8n: {
+    title: "🔗 n8n Integration",
+    icon: Network,
+    content: `
+═══════════════════════════════════════════════════════════════════════════════
+                         N8N WORKFLOW-INTEGRATION
+═══════════════════════════════════════════════════════════════════════════════
+
+n8n ist eine Workflow-Automatisierungsplattform. Hier sind Möglichkeiten,
+Karnbachs Event OS mit n8n zu verbinden:
+
+▸ WEBHOOK-INTEGRATION
+─────────────────────────────────────────────────────────────────────────────
+
+Die App sendet bereits WebSocket-Events bei wichtigen Aktionen.
+Für n8n können Webhooks implementiert werden:
+
+EMPFOHLENE WEBHOOKS:
+
+1. Neue Bestellung
+   POST /api/webhooks/new-order
+   Payload: { order_id, stand_name, items, total, timestamp }
+   
+   n8n Use Cases:
+   • Slack-Benachrichtigung an Event-Manager
+   • Eintrag in Google Sheets zur Dokumentation
+   • SMS an Kunden wenn Bestellung fertig
+
+2. Bestellung fertig
+   POST /api/webhooks/order-ready
+   Payload: { order_id, order_number, stand_name }
+   
+   n8n Use Cases:
+   • Push-Notification an Kunden-App
+   • Display-Anzeige aktualisieren
+   • Sprachausgabe triggern
+
+3. Bestand niedrig
+   POST /api/webhooks/stock-low
+   Payload: { article_name, current_stock, threshold }
+   
+   n8n Use Cases:
+   • E-Mail an Lagerverwalter
+   • Automatische Nachbestellung
+   • Dashboard-Warnung
+
+4. Tages-Abschluss
+   POST /api/webhooks/daily-summary
+   Payload: { date, total_orders, total_revenue, top_items }
+   
+   n8n Use Cases:
+   • Automatischer Report per E-Mail
+   • Daten an Buchhaltungssystem
+   • Archivierung in Cloud
+
+▸ IMPLEMENTIERUNG (Backend-Erweiterung)
+─────────────────────────────────────────────────────────────────────────────
+
+In server.py hinzufügen:
+
+# Webhook-Konfiguration aus Umgebungsvariablen
+WEBHOOK_URLS = {
+    "new_order": os.environ.get("WEBHOOK_NEW_ORDER"),
+    "order_ready": os.environ.get("WEBHOOK_ORDER_READY"),
+    "stock_low": os.environ.get("WEBHOOK_STOCK_LOW"),
+}
+
+async def send_webhook(event_type: str, data: dict):
+    url = WEBHOOK_URLS.get(event_type)
+    if url:
+        async with aiohttp.ClientSession() as session:
+            await session.post(url, json={
+                "event": event_type,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "data": data
+            })
+
+# Bei neuer Bestellung aufrufen:
+await send_webhook("new_order", {
+    "order_id": order["id"],
+    "stand_name": order["stand_name"],
+    "items": order["items"],
+    "total": order["total"]
+})
+
+▸ N8N WORKFLOW-BEISPIELE
+─────────────────────────────────────────────────────────────────────────────
+
+BEISPIEL 1: Slack-Benachrichtigung bei neuer Bestellung
+
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Webhook   │ ──▶ │  Transform  │ ──▶ │    Slack    │
+│   Trigger   │     │    Data     │     │   Message   │
+└─────────────┘     └─────────────┘     └─────────────┘
+
+Webhook Trigger:
+  Path: /webhook/new-order
+  Method: POST
+
+Transform:
+  Message: "🎉 Neue Bestellung #{{order_number}} 
+            Stand: {{stand_name}}
+            Summe: {{total}}€"
+
+BEISPIEL 2: Google Sheets Logging
+
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Webhook   │ ──▶ │   Format    │ ──▶ │   Google    │
+│   Trigger   │     │    Date     │     │   Sheets    │
+└─────────────┘     └─────────────┘     └─────────────┘
+
+Fügt jede Bestellung als neue Zeile ein:
+  Datum | Uhrzeit | Stand | Bonnummer | Artikel | Summe
+
+BEISPIEL 3: Bestandswarnung per E-Mail
+
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Webhook   │ ──▶ │    Filter   │ ──▶ │    Email    │
+│   Trigger   │     │  < 10 Stk   │     │    Send     │
+└─────────────┘     └─────────────┘     └─────────────┘
+
+Filter: stock < threshold
+E-Mail: "⚠️ Artikel {{name}} hat nur noch {{stock}} Einheiten!"
+
+▸ REST-API FÜR N8N
+─────────────────────────────────────────────────────────────────────────────
+
+n8n kann auch direkt die REST-API nutzen:
+
+HTTP Request Node:
+  Method: GET
+  URL: https://your-domain.com/api/stats
+  Authentication: Basic Auth (admin/admin)
+
+Mögliche Abfragen:
+  • GET /api/orders - Alle Bestellungen
+  • GET /api/stats - Statistiken
+  • GET /api/events/{id}/stats - Event-Statistiken
+  • POST /api/orders - Bestellung erstellen (für Automationen)
+
+▸ SCHEDULE-BASIERTE WORKFLOWS
+─────────────────────────────────────────────────────────────────────────────
+
+Mit n8n Schedule Trigger:
+
+Täglich um 23:00: Tagesabschluss-Report
+  1. GET /api/stats (mit Datumsfilter)
+  2. Format als PDF
+  3. Per E-Mail versenden
+
+Stündlich: Bestandscheck
+  1. GET /api/admin/stock-overview
+  2. Filter: stock < threshold
+  3. Slack-Warnung wenn nötig
+`
+  },
+
+  // -------------------------------------------------------------------------
+  // 9. WEITERENTWICKLUNG
+  // -------------------------------------------------------------------------
+  future: {
+    title: "🚀 Weiterentwicklung",
+    icon: GitBranch,
+    content: `
+═══════════════════════════════════════════════════════════════════════════════
+                      WEITERENTWICKLUNGSMÖGLICHKEITEN
+═══════════════════════════════════════════════════════════════════════════════
+
+▸ KURZFRISTIG (Nächste Features)
+─────────────────────────────────────────────────────────────────────────────
+
+🗣️ SPRACHAUSGABE (Text-to-Speech)
+   Ansage wenn Bestellung fertig: "Bon 12 ist fertig!"
+   
+   Implementierung:
+   • Web Speech API (window.speechSynthesis)
+   • Konfigurierbare Stimme/Lautstärke
+   • Toggle in Einstellungen
+
+📊 LIVE-DASHBOARD
+   Echtzeit-Statistiken auf großem Monitor
+   
+   Features:
+   • Auto-Refresh alle 30 Sekunden
+   • Bestellungen pro Stunde (Chart)
+   • Aktuelle offene Bestellungen
+   • Top-Artikel des Tages
+   • Umsatz-Ticker
+
+▸ MITTELFRISTIG
+─────────────────────────────────────────────────────────────────────────────
+
+📶 OFFLINE-MODUS
+   App funktioniert ohne Internet
+   
+   Technologie:
+   • Service Worker für Caching
+   • IndexedDB für lokale Datenspeicherung
+   • Background Sync für spätere Übertragung
+   • Konfliktauflösung bei Reconnect
+
+🖨️ BON-DRUCK
+   Automatischer Druck auf Thermodrucker
+   
+   Optionen:
+   • Web Bluetooth API (direkte Verbindung)
+   • Print-Server (Raspberry Pi + CUPS)
+   • Cloud-Print-Service
+   
+   Bon-Format:
+   ┌─────────────────────────┐
+   │    KARNBACHS EVENT      │
+   │        Bon #12          │
+   │─────────────────────────│
+   │ 2x Schnitzel    16.00€  │
+   │ 1x Pommes        3.50€  │
+   │─────────────────────────│
+   │ Gesamt:         19.50€  │
+   │ + Pfand:         2.00€  │
+   │─────────────────────────│
+   │ ZU ZAHLEN:      21.50€  │
+   └─────────────────────────┘
+
+📱 KUNDEN-APP / SELF-ORDER
+   Gäste bestellen selbst per QR-Code
+   
+   Flow:
+   1. QR-Code am Stand scannen
+   2. Artikel auswählen
+   3. Bezahlen (Stripe/PayPal)
+   4. Bonnummer erhalten
+   5. Benachrichtigung wenn fertig
+
+▸ LANGFRISTIG
+─────────────────────────────────────────────────────────────────────────────
+
+💳 PAYMENT-INTEGRATION
+   Bargeldlose Zahlung
+   
+   Optionen:
+   • Stripe Terminal (Kartenleser)
+   • PayPal QR-Code
+   • Wero (Deutschland)
+   • Prepaid-Guthaben-System
+
+📈 ERWEITERTE ANALYTICS
+   Machine Learning für Vorhersagen
+   
+   Features:
+   • Verkaufsprognose pro Stunde
+   • Optimale Personalplanung
+   • Preisoptimierung
+   • Bestandsprognose
+
+🌐 MULTI-TENANT
+   Mehrere Veranstalter auf einer Instanz
+   
+   Features:
+   • Mandantentrennung
+   • Eigene Domains/Branding
+   • Abrechnung pro Veranstaltung
+
+📊 BI-INTEGRATION
+   Export zu Business Intelligence Tools
+   
+   Formate:
+   • CSV/Excel für manuelle Analyse
+   • API für Power BI / Tableau
+   • Webhook zu Data Warehouse
+
+▸ TECHNISCHE VERBESSERUNGEN
+─────────────────────────────────────────────────────────────────────────────
+
+PERFORMANCE
+  • Redis-Cache für häufige Queries
+  • CDN für statische Assets
+  • WebSocket-Clustering für > 100 Geräte
+  • Datenbanksharding bei großen Datenmengen
+
+SICHERHEIT
+  • JWT statt Basic Auth
+  • Rate Limiting
+  • HTTPS erzwingen
+  • Input-Sanitization
+  • OWASP Best Practices
+
+TESTING
+  • Unit Tests (Jest/Pytest)
+  • E2E Tests (Playwright)
+  • Load Testing (k6)
+  • CI/CD Pipeline
+
+MONITORING
+  • Sentry für Error Tracking
+  • Prometheus/Grafana für Metriken
+  • Health Checks für Kubernetes
+  • Log-Aggregation (ELK Stack)
+
+▸ MÖGLICHE ERWEITERUNGEN
+─────────────────────────────────────────────────────────────────────────────
+
+KASSENBUCH
+  • Automatische Buchungen
+  • TSE-Anbindung (Deutschland)
+  • DATEV-Export
+
+PERSONALVERWALTUNG
+  • Schichtplanung
+  • Zeiterfassung
+  • Provisionsabrechnung
+
+LIEFERANTEN-PORTAL
+  • Automatische Nachbestellung
+  • Bestellhistorie
+  • Preisvergleich
+
+KUNDEN-LOYALTY
+  • Stempelkarten digital
+  • Punktesystem
+  • Rabattaktionen
+`
+  },
+
+  // -------------------------------------------------------------------------
+  // 10. INSTALLATION & DEPLOYMENT
+  // -------------------------------------------------------------------------
+  deployment: {
+    title: "⚙️ Installation & Deployment",
+    icon: Settings,
+    content: `
+═══════════════════════════════════════════════════════════════════════════════
+                        INSTALLATION & DEPLOYMENT
+═══════════════════════════════════════════════════════════════════════════════
+
+▸ LOKALE ENTWICKLUNG
+─────────────────────────────────────────────────────────────────────────────
+
+Voraussetzungen:
+  • Node.js 18+
+  • Python 3.10+
+  • MongoDB 6+
+
+Backend starten:
+  cd /app/backend
+  pip install -r requirements.txt
+  uvicorn server:app --host 0.0.0.0 --port 8001 --reload
+
+Frontend starten:
+  cd /app/frontend
+  yarn install
+  yarn start
+
+▸ UMGEBUNGSVARIABLEN
+─────────────────────────────────────────────────────────────────────────────
+
+Backend (.env):
+  MONGO_URL=mongodb://localhost:27017
+  DB_NAME=event_os
+  ADMIN_USERNAME=admin
+  ADMIN_PASSWORD=admin
+  RESET_PIN=200183
+
+Frontend (.env):
+  REACT_APP_BACKEND_URL=http://localhost:8001
+
+▸ DOCKER DEPLOYMENT
+─────────────────────────────────────────────────────────────────────────────
+
+docker-compose.yml:
+
+version: '3.8'
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_BACKEND_URL=http://api:8001
+    depends_on:
+      - api
+
+  api:
+    build: ./backend
+    ports:
+      - "8001:8001"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017
+      - DB_NAME=event_os
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:6
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
+
+▸ KUBERNETES DEPLOYMENT
+─────────────────────────────────────────────────────────────────────────────
+
+Die App läuft bereits in einem Kubernetes-Cluster mit:
+  • Ingress für Routing (/api → Backend, / → Frontend)
+  • Service für interne Kommunikation
+  • ConfigMap für Umgebungsvariablen
+  • PersistentVolume für MongoDB
+
+▸ PRODUCTION CHECKLIST
+─────────────────────────────────────────────────────────────────────────────
+
+□ HTTPS aktivieren (SSL-Zertifikat)
+□ Admin-Passwort ändern
+□ Reset-PIN ändern
+□ MongoDB-Authentifizierung aktivieren
+□ Firewall konfigurieren
+□ Backup-Strategie implementieren
+□ Monitoring einrichten
+□ Log-Rotation konfigurieren
+
+▸ BACKUP & RESTORE
+─────────────────────────────────────────────────────────────────────────────
+
+Backup erstellen:
+  mongodump --uri="mongodb://localhost:27017" --db=event_os --out=/backup
+
+Backup wiederherstellen:
+  mongorestore --uri="mongodb://localhost:27017" /backup/event_os
+
+Automatisches Backup (Cron):
+  0 3 * * * /usr/bin/mongodump --uri="..." --out=/backup/$(date +%Y%m%d)
 `
   }
 };
 
-// Generate full text documentation
-const generateFullDocumentation = (settings) => {
-  const divider = "=".repeat(80);
-  const date = new Date().toLocaleDateString('de-DE', {
-    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-  });
-  
-  let doc = `
-${"=".repeat(80)}
-                    ${settings?.event_name || 'KARNBACHS EVENT OS'}
-                         VOLLSTÄNDIGE DOKUMENTATION
-${"=".repeat(80)}
-
-Erstellt am: ${date}
-Version: 1.0
-
-${divider}
-                              INHALTSVERZEICHNIS
-${divider}
-
-1. ÜBERSICHT
-2. WORKFLOW & ROLLEN
-3. ADMIN-BEREICH
-4. TECHNISCHE ARCHITEKTUR
-5. DESIGN & STYLING
-6. API-REFERENZ
-
-${divider}
-
-`;
-
-  // Add all sections
-  Object.values(DOCUMENTATION).forEach((section, index) => {
-    doc += `\n${"=".repeat(80)}\n`;
-    doc += `${index + 1}. ${section.title.toUpperCase()}\n`;
-    doc += `${"=".repeat(80)}\n`;
-    doc += section.content;
-    doc += `\n`;
-  });
-
-  // Add footer
-  doc += `
-${divider}
-                              AKTUELLE KONFIGURATION
-${divider}
-
-Event-Name: ${settings?.event_name || 'Karnbachs Event OS'}
-Zeitzone: ${settings?.timezone || 'Europe/Berlin'}
-Primärfarbe: ${settings?.primary_color || '#a855f7'}
-Sekundärfarbe: ${settings?.secondary_color || '#22c55e'}
-Akzentfarbe: ${settings?.accent_color || '#eab308'}
-Logo: ${settings?.logo_url ? 'Hochgeladen' : 'Nicht gesetzt'}
-
-${divider}
-                                    ENDE
-${divider}
-
-Diese Dokumentation wurde automatisch generiert.
-© ${new Date().getFullYear()} ${settings?.event_name || 'Karnbachs Event OS'}
-`;
-
-  return doc;
-};
+// ============================================================================
+// KOMPONENTE
+// ============================================================================
 
 export default function DocumentationPage() {
   const navigate = useNavigate();
   const [settings, setSettings] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("idea");
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
 
   const auth = sessionStorage.getItem("adminAuth");
 
@@ -1230,87 +1434,68 @@ export default function DocumentationPage() {
     }
   };
 
-  const handleDownload = () => {
-    const content = generateFullDocumentation(settings);
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${(settings?.event_name || 'EventOS').replace(/\s+/g, '_')}_Dokumentation.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    toast.success("Dokumentation heruntergeladen!");
-  };
-
-  const renderContent = (content) => {
-    return content.split('\n').map((line, i) => {
-      // Headers
-      if (line.match(/^={3,}$/)) return null;
-      if (line.match(/^-{3,}$/)) return <hr key={i} className="border-border my-2" />;
-      
-      // Section headers (all caps with multiple words)
-      if (line.match(/^[A-ZÄÖÜ\s&-]{5,}$/) && line.trim().length > 0) {
-        return <h3 key={i} className="font-display text-lg font-bold text-primary mt-6 mb-2 uppercase">{line}</h3>;
-      }
-      
-      // Sub-headers (Title Case with colon or specific patterns)
-      if (line.match(/^[A-ZÄÖÜ][a-zäöüß\s&-]+:$/) || line.match(/^[•●]\s[A-ZÄÖÜ]/)) {
-        return <h4 key={i} className="font-bold text-foreground mt-4 mb-1">{line}</h4>;
-      }
-      
-      // Bullet points
-      if (line.match(/^[•●]\s/)) {
-        return <p key={i} className="text-muted-foreground ml-4 text-sm">{line}</p>;
-      }
-      
-      // Code/paths
-      if (line.match(/^\/app\/|^\s+[a-z_]+:/)) {
-        return <code key={i} className="block text-xs font-mono text-secondary bg-muted/30 px-2 py-0.5 rounded">{line}</code>;
-      }
-      
-      // Empty lines
-      if (line.trim() === '') return <br key={i} />;
-      
-      // Regular text
-      return <p key={i} className="text-muted-foreground text-sm">{line}</p>;
+  // Generiere vollständigen Dokumentationstext
+  const generateFullText = () => {
+    const date = new Date().toLocaleDateString('de-DE', {
+      year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
+    
+    let doc = `
+${"═".repeat(80)}
+                    KARNBACHS EVENT OS
+                 VOLLSTÄNDIGE DOKUMENTATION
+${"═".repeat(80)}
+
+Erstellt am: ${date}
+Version: 1.0.0
+Event: ${settings?.event_name || 'Karnbachs Event OS'}
+
+${"═".repeat(80)}
+                         INHALTSVERZEICHNIS
+${"═".repeat(80)}
+
+1. App-Idee & Vision
+2. Architektur & Technologie
+3. Datenbank-Schema
+4. API-Referenz
+5. Frontend-Seiten
+6. Komponenten & Services
+7. Design-System
+8. n8n Integration
+9. Weiterentwicklung
+10. Installation & Deployment
+
+`;
+
+    // Alle Sektionen hinzufügen
+    Object.values(FULL_DOCUMENTATION).forEach((section, index) => {
+      doc += `\n${"═".repeat(80)}\n`;
+      doc += `KAPITEL ${index + 1}: ${section.title.replace(/[🎪🏗️🗄️🔌📱🧩🎨🔗🚀⚙️]/g, '').trim().toUpperCase()}\n`;
+      doc += `${"═".repeat(80)}\n`;
+      doc += section.content;
+      doc += `\n`;
+    });
+
+    doc += `
+${"═".repeat(80)}
+                              ENDE DER DOKUMENTATION
+${"═".repeat(80)}
+
+© ${new Date().getFullYear()} ${settings?.event_name || 'Karnbachs Event OS'}
+Diese Dokumentation wurde automatisch generiert.
+`;
+
+    return doc;
   };
 
-  const tabs = [
-    { id: "overview", label: "Übersicht", icon: Book },
-    { id: "workflow", label: "Workflow", icon: Users },
-    { id: "admin", label: "Admin", icon: Settings },
-    { id: "technical", label: "Technik", icon: Code },
-    { id: "design", label: "Design", icon: Palette },
-    { id: "api", label: "API", icon: Server },
-  ];
-
-  const { swipeHandlers } = useAdminSwipe();
-
-  const handleLogout = () => {
-    sessionStorage.removeItem("adminAuth");
-    navigate("/");
-  };
-
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  const [showExportDialog, setShowExportDialog] = useState(false);
-  const pdfContentRef = useRef(null);
-
-  // Export Funktion mit Format-Auswahl
+  // Export Funktion
   const handleExport = async (format) => {
     const timestamp = new Date().toISOString().split('T')[0];
-    const fileName = `event-os-dokumentation_${timestamp}`;
-    
-    // Sammle alle Dokumentation-Inhalte
-    let content = '';
-    Object.values(DOCUMENTATION).forEach(section => {
-      content += section.content + '\n\n';
-    });
+    const fileName = `karnbachs-event-os-dokumentation_${timestamp}`;
+    const fullText = generateFullText();
     
     if (format === 'txt') {
-      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -1320,47 +1505,54 @@ export default function DocumentationPage() {
       toast.success('Dokumentation als TXT heruntergeladen');
       setShowExportDialog(false);
       
-    } else if (format === 'html') {
-      const htmlContent = generateHtmlContent(content, timestamp, false);
-      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${fileName}.html`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success('Dokumentation als HTML heruntergeladen');
-      setShowExportDialog(false);
-      
-    } else if (format === 'pdf') {
-      setIsGeneratingPdf(true);
-      toast.info('PDF wird generiert... Bitte warten.');
+    } else if (format === 'html' || format === 'pdf') {
+      setIsGeneratingPdf(format === 'pdf');
+      if (format === 'pdf') {
+        toast.info('PDF wird generiert... Dies kann einige Sekunden dauern.');
+      }
       
       try {
-        // Erstelle HTML-Element für PDF
-        const htmlContent = generateHtmlContent(content, timestamp, true);
-        const container = document.createElement('div');
-        container.innerHTML = htmlContent;
-        container.style.position = 'absolute';
-        container.style.left = '-9999px';
-        document.body.appendChild(container);
+        const htmlContent = generateHtmlDocument(fullText, timestamp, format === 'pdf');
         
-        // PDF-Optionen
-        const opt = {
-          margin: [10, 10, 10, 10],
-          filename: `${fileName}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, logging: false },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-        };
-        
-        await html2pdf().set(opt).from(container).save();
-        document.body.removeChild(container);
-        toast.success('PDF erfolgreich heruntergeladen!');
+        if (format === 'html') {
+          const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${fileName}.html`;
+          a.click();
+          URL.revokeObjectURL(url);
+          toast.success('Dokumentation als HTML heruntergeladen');
+        } else {
+          // PDF generieren
+          const container = document.createElement('div');
+          container.innerHTML = htmlContent;
+          container.style.position = 'absolute';
+          container.style.left = '-9999px';
+          container.style.width = '800px';
+          document.body.appendChild(container);
+          
+          const opt = {
+            margin: [15, 15, 15, 15],
+            filename: `${fileName}.pdf`,
+            image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: { 
+              scale: 2, 
+              useCORS: true, 
+              logging: false,
+              letterRendering: true
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+          };
+          
+          await html2pdf().set(opt).from(container).save();
+          document.body.removeChild(container);
+          toast.success('PDF erfolgreich heruntergeladen!');
+        }
       } catch (error) {
-        console.error('PDF generation error:', error);
-        toast.error('PDF-Generierung fehlgeschlagen. Versuchen Sie HTML-Export.');
+        console.error('Export error:', error);
+        toast.error('Export fehlgeschlagen. Bitte versuchen Sie es erneut.');
       } finally {
         setIsGeneratingPdf(false);
         setShowExportDialog(false);
@@ -1368,130 +1560,333 @@ export default function DocumentationPage() {
     }
   };
 
-  // Generiere HTML-Content für Export
-  const generateHtmlContent = (content, timestamp, forPdf) => {
-    const bgColor = forPdf ? '#ffffff' : '#0a0a0b';
-    const textColor = forPdf ? '#1a1a1a' : '#e5e5e5';
-    const primaryColor = forPdf ? '#7c3aed' : '#a855f7';
-    const secondaryColor = forPdf ? '#16a34a' : '#22c55e';
-    const preBackground = forPdf ? '#f3f4f6' : '#1a1a1b';
+  // HTML-Dokument generieren
+  const generateHtmlDocument = (content, timestamp, forPdf) => {
+    const bg = forPdf ? '#ffffff' : '#0a0a0b';
+    const text = forPdf ? '#1a1a1a' : '#e5e5e5';
+    const primary = forPdf ? '#7c3aed' : '#a855f7';
+    const secondary = forPdf ? '#16a34a' : '#22c55e';
+    const accent = forPdf ? '#ca8a04' : '#eab308';
+    const codeBg = forPdf ? '#f3f4f6' : '#1f1f23';
+    const borderColor = forPdf ? '#e5e7eb' : '#333';
     
     return `<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Karnbachs Event OS - Dokumentation</title>
+  <title>Karnbachs Event OS - Vollständige Dokumentation</title>
   <style>
-    * { box-sizing: border-box; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap');
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       max-width: 800px; 
       margin: 0 auto; 
-      padding: 40px 20px; 
-      line-height: 1.6; 
-      background: ${bgColor}; 
-      color: ${textColor}; 
+      padding: 40px 30px; 
+      line-height: 1.7; 
+      background: ${bg}; 
+      color: ${text};
+      font-size: 14px;
     }
-    h1 { color: ${primaryColor}; border-bottom: 3px solid ${primaryColor}; padding-bottom: 15px; font-size: 28px; }
-    h2 { color: ${secondaryColor}; margin-top: 30px; font-size: 22px; border-left: 4px solid ${secondaryColor}; padding-left: 12px; }
-    h3 { color: ${forPdf ? '#ca8a04' : '#eab308'}; font-size: 18px; }
-    pre { 
-      background: ${preBackground}; 
-      padding: 15px; 
-      border-radius: 8px; 
-      overflow-x: auto; 
-      border: 1px solid ${forPdf ? '#d1d5db' : '#333'}; 
+    
+    .header {
+      text-align: center;
+      padding: 40px 20px;
+      margin-bottom: 40px;
+      background: linear-gradient(135deg, ${primary}22, ${secondary}22);
+      border-radius: 16px;
+      border: 2px solid ${borderColor};
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: ${primary};
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      font-size: 18px;
+      color: ${text};
+      opacity: 0.8;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
       font-size: 12px;
+      font-weight: 600;
+      margin: 5px;
+    }
+    
+    .badge-primary { background: ${primary}22; border: 2px solid ${primary}; color: ${primary}; }
+    .badge-secondary { background: ${secondary}22; border: 2px solid ${secondary}; color: ${secondary}; }
+    
+    .toc {
+      background: ${codeBg};
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 40px;
+      border: 1px solid ${borderColor};
+    }
+    
+    .toc h2 {
+      color: ${primary};
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    
+    .toc ol {
+      padding-left: 25px;
+    }
+    
+    .toc li {
+      padding: 5px 0;
+      color: ${text};
+    }
+    
+    pre {
+      background: ${codeBg};
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      border: 1px solid ${borderColor};
       white-space: pre-wrap;
       word-wrap: break-word;
+      margin: 20px 0;
     }
-    code { font-family: 'Courier New', monospace; font-size: 12px; }
-    .header { text-align: center; margin-bottom: 40px; }
-    .badge { 
-      display: inline-block; 
-      padding: 6px 14px; 
-      border-radius: 20px; 
-      font-size: 12px; 
-      margin-right: 10px; 
-      font-weight: 600;
+    
+    .section {
+      margin-bottom: 50px;
+      page-break-inside: avoid;
     }
-    .primary { 
-      background: ${forPdf ? 'rgba(124, 58, 237, 0.15)' : 'rgba(168, 85, 247, 0.2)'}; 
-      border: 2px solid ${primaryColor}; 
-      color: ${primaryColor}; 
+    
+    .section-header {
+      background: linear-gradient(90deg, ${primary}33, transparent);
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid ${primary};
     }
-    .secondary { 
-      background: ${forPdf ? 'rgba(22, 163, 74, 0.15)' : 'rgba(34, 197, 94, 0.2)'}; 
-      border: 2px solid ${secondaryColor}; 
-      color: ${secondaryColor}; 
+    
+    .section-header h2 {
+      color: ${primary};
+      font-size: 22px;
+      font-weight: 700;
     }
-    .screenshot { 
-      margin: 20px 0; 
-      padding: 15px; 
-      background: ${forPdf ? '#f9fafb' : '#1f1f1f'}; 
-      border-radius: 12px; 
-      border: 2px solid ${forPdf ? '#e5e7eb' : '#333'}; 
+    
+    .screenshot {
+      margin: 30px 0;
+      padding: 20px;
+      background: ${codeBg};
+      border-radius: 12px;
+      border: 2px solid ${borderColor};
+      text-align: center;
     }
-    .screenshot img { 
-      max-width: 100%; 
-      border-radius: 8px; 
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+    
+    .screenshot img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
-    .screenshot-caption { 
-      text-align: center; 
-      font-size: 13px; 
-      color: ${forPdf ? '#6b7280' : '#9ca3af'}; 
-      margin-top: 10px; 
+    
+    .screenshot-caption {
+      margin-top: 15px;
+      font-size: 13px;
+      color: ${text};
+      opacity: 0.7;
       font-style: italic;
     }
-    .section { page-break-inside: avoid; margin-bottom: 30px; }
-    .footer { 
-      margin-top: 50px; 
-      padding-top: 20px; 
-      border-top: 2px solid ${forPdf ? '#e5e7eb' : '#333'}; 
-      text-align: center; 
-      font-size: 12px; 
-      color: ${forPdf ? '#9ca3af' : '#6b7280'}; 
+    
+    .footer {
+      margin-top: 60px;
+      padding: 30px;
+      text-align: center;
+      border-top: 2px solid ${borderColor};
+      color: ${text};
+      opacity: 0.7;
+      font-size: 12px;
+    }
+    
+    .diagram {
+      margin: 20px 0;
+      padding: 15px;
+      background: ${forPdf ? '#f9fafb' : '#111'};
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .diagram svg {
+      max-width: 100%;
+      height: auto;
     }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>🎪 Karnbachs Event OS</h1>
-    <p style="font-size: 18px; margin-bottom: 20px;">Vollständige Dokumentation</p>
-    <p>
-      <span class="badge primary">Version 1.0</span>
-      <span class="badge secondary">Stand: ${timestamp}</span>
-    </p>
+    <p>Vollständige Dokumentation</p>
+    <div style="margin-top: 20px;">
+      <span class="badge badge-primary">Version 1.0.0</span>
+      <span class="badge badge-secondary">Stand: ${timestamp}</span>
+    </div>
+  </div>
+  
+  <div class="toc">
+    <h2>📚 Inhaltsverzeichnis</h2>
+    <ol>
+      <li>App-Idee & Vision</li>
+      <li>Architektur & Technologie</li>
+      <li>Datenbank-Schema</li>
+      <li>API-Referenz</li>
+      <li>Frontend-Seiten</li>
+      <li>Komponenten & Services</li>
+      <li>Design-System</li>
+      <li>n8n Integration</li>
+      <li>Weiterentwicklung</li>
+      <li>Installation & Deployment</li>
+    </ol>
   </div>
   
   <div class="screenshot">
-    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='300' viewBox='0 0 600 300'%3E%3Crect fill='%231a1a2e' width='600' height='300'/%3E%3Ctext x='300' y='140' text-anchor='middle' fill='%23a855f7' font-family='Arial' font-size='24' font-weight='bold'%3E🎪 Event OS Dashboard%3C/text%3E%3Ctext x='300' y='180' text-anchor='middle' fill='%2322c55e' font-family='Arial' font-size='14'%3EBestellsystem für Veranstaltungen%3C/text%3E%3Crect x='50' y='220' width='100' height='40' rx='8' fill='%23a855f7'/%3E%3Ctext x='100' y='245' text-anchor='middle' fill='white' font-family='Arial' font-size='12'%3EBestellung%3C/text%3E%3Crect x='170' y='220' width='100' height='40' rx='8' fill='%2322c55e'/%3E%3Ctext x='220' y='245' text-anchor='middle' fill='white' font-family='Arial' font-size='12'%3EMacher%3C/text%3E%3Crect x='290' y='220' width='100' height='40' rx='8' fill='%23eab308'/%3E%3Ctext x='340' y='245' text-anchor='middle' fill='black' font-family='Arial' font-size='12'%3EAusgabe%3C/text%3E%3Crect x='410' y='220' width='100' height='40' rx='8' fill='%23ef4444'/%3E%3Ctext x='460' y='245' text-anchor='middle' fill='white' font-family='Arial' font-size='12'%3EOneManShow%3C/text%3E%3C/svg%3E" alt="Event OS Dashboard" />
-    <p class="screenshot-caption">Abbildung 1: Event OS Hauptübersicht mit den vier Hauptrollen</p>
+    <svg xmlns="http://www.w3.org/2000/svg" width="700" height="200" viewBox="0 0 700 200">
+      <rect fill="${forPdf ? '#f0f0f5' : '#0a0a0b'}" width="700" height="200" rx="12"/>
+      <text x="350" y="40" text-anchor="middle" fill="${primary}" font-family="Arial" font-size="20" font-weight="bold">Karnbachs Event OS - Workflow</text>
+      
+      <!-- Workflow boxes -->
+      <rect x="20" y="70" width="140" height="70" rx="10" fill="${primary}22" stroke="${primary}" stroke-width="2"/>
+      <text x="90" y="100" text-anchor="middle" fill="${primary}" font-family="Arial" font-size="14" font-weight="bold">🛒 Besteller</text>
+      <text x="90" y="125" text-anchor="middle" fill="${text}" font-family="Arial" font-size="11">Bestellung aufnehmen</text>
+      
+      <path d="M160 105 L200 105" stroke="${secondary}" stroke-width="3" marker-end="url(#arrow)"/>
+      
+      <rect x="200" y="70" width="140" height="70" rx="10" fill="${secondary}22" stroke="${secondary}" stroke-width="2"/>
+      <text x="270" y="100" text-anchor="middle" fill="${secondary}" font-family="Arial" font-size="14" font-weight="bold">🔨 Macher</text>
+      <text x="270" y="125" text-anchor="middle" fill="${text}" font-family="Arial" font-size="11">Zubereiten</text>
+      
+      <path d="M340 105 L380 105" stroke="${accent}" stroke-width="3"/>
+      
+      <rect x="380" y="70" width="140" height="70" rx="10" fill="${accent}22" stroke="${accent}" stroke-width="2"/>
+      <text x="450" y="100" text-anchor="middle" fill="${accent}" font-family="Arial" font-size="14" font-weight="bold">📦 Ausgabe</text>
+      <text x="450" y="125" text-anchor="middle" fill="${text}" font-family="Arial" font-size="11">Übergeben</text>
+      
+      <path d="M520 105 L560 105" stroke="${forPdf ? '#16a34a' : '#22c55e'}" stroke-width="3"/>
+      
+      <rect x="560" y="70" width="120" height="70" rx="10" fill="${forPdf ? '#16a34a' : '#22c55e'}22" stroke="${forPdf ? '#16a34a' : '#22c55e'}" stroke-width="2"/>
+      <text x="620" y="100" text-anchor="middle" fill="${forPdf ? '#16a34a' : '#22c55e'}" font-family="Arial" font-size="14" font-weight="bold">✅ Fertig</text>
+      <text x="620" y="125" text-anchor="middle" fill="${text}" font-family="Arial" font-size="11">Abgeschlossen</text>
+      
+      <text x="350" y="175" text-anchor="middle" fill="${text}" font-family="Arial" font-size="12" opacity="0.7">Echtzeit-Synchronisation über WebSockets</text>
+    </svg>
+    <p class="screenshot-caption">Abbildung: Bestellungs-Workflow mit den vier Hauptrollen</p>
   </div>
-  
+
   <pre>${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
   
   <div class="screenshot">
-    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='250' viewBox='0 0 600 250'%3E%3Crect fill='%230f0f0f' width='600' height='250'/%3E%3Ctext x='300' y='30' text-anchor='middle' fill='%23a855f7' font-family='Arial' font-size='16' font-weight='bold'%3EWorkflow: Bestellung → Macher → Ausgabe%3C/text%3E%3Crect x='30' y='60' width='150' height='80' rx='12' fill='%231e1e2e' stroke='%23a855f7' stroke-width='2'/%3E%3Ctext x='105' y='95' text-anchor='middle' fill='%23a855f7' font-family='Arial' font-size='13' font-weight='bold'%3E1. Bestellung%3C/text%3E%3Ctext x='105' y='120' text-anchor='middle' fill='%239ca3af' font-family='Arial' font-size='10'%3EKunde bestellt%3C/text%3E%3Cpath d='M180 100 L220 100' stroke='%2322c55e' stroke-width='3' marker-end='url(%23arrow)'/%3E%3Crect x='220' y='60' width='150' height='80' rx='12' fill='%231e1e2e' stroke='%2322c55e' stroke-width='2'/%3E%3Ctext x='295' y='95' text-anchor='middle' fill='%2322c55e' font-family='Arial' font-size='13' font-weight='bold'%3E2. Macher%3C/text%3E%3Ctext x='295' y='120' text-anchor='middle' fill='%239ca3af' font-family='Arial' font-size='10'%3EZubereitung%3C/text%3E%3Cpath d='M370 100 L410 100' stroke='%23eab308' stroke-width='3'/%3E%3Crect x='410' y='60' width='150' height='80' rx='12' fill='%231e1e2e' stroke='%23eab308' stroke-width='2'/%3E%3Ctext x='485' y='95' text-anchor='middle' fill='%23eab308' font-family='Arial' font-size='13' font-weight='bold'%3E3. Ausgabe%3C/text%3E%3Ctext x='485' y='120' text-anchor='middle' fill='%239ca3af' font-family='Arial' font-size='10'%3EAbholung%3C/text%3E%3Crect x='150' y='170' width='300' height='60' rx='12' fill='%23dc2626' fill-opacity='0.2' stroke='%23dc2626' stroke-width='2'/%3E%3Ctext x='300' y='200' text-anchor='middle' fill='%23dc2626' font-family='Arial' font-size='13' font-weight='bold'%3EOneManShow: Direkt abgeschlossen%3C/text%3E%3Ctext x='300' y='218' text-anchor='middle' fill='%239ca3af' font-family='Arial' font-size='10'%3EÜberspringt Macher und Ausgabe%3C/text%3E%3C/svg%3E" alt="Workflow Diagramm" />
-    <p class="screenshot-caption">Abbildung 2: Bestellungs-Workflow mit den verschiedenen Prozesswegen</p>
+    <svg xmlns="http://www.w3.org/2000/svg" width="700" height="300" viewBox="0 0 700 300">
+      <rect fill="${forPdf ? '#f0f0f5' : '#0a0a0b'}" width="700" height="300" rx="12"/>
+      <text x="350" y="30" text-anchor="middle" fill="${primary}" font-family="Arial" font-size="18" font-weight="bold">System-Architektur</text>
+      
+      <!-- Frontend -->
+      <rect x="50" y="60" width="180" height="60" rx="8" fill="${primary}22" stroke="${primary}" stroke-width="2"/>
+      <text x="140" y="85" text-anchor="middle" fill="${primary}" font-family="Arial" font-size="12" font-weight="bold">Frontend</text>
+      <text x="140" y="105" text-anchor="middle" fill="${text}" font-family="Arial" font-size="10">React + Tailwind</text>
+      
+      <!-- Backend -->
+      <rect x="260" y="60" width="180" height="60" rx="8" fill="${secondary}22" stroke="${secondary}" stroke-width="2"/>
+      <text x="350" y="85" text-anchor="middle" fill="${secondary}" font-family="Arial" font-size="12" font-weight="bold">Backend</text>
+      <text x="350" y="105" text-anchor="middle" fill="${text}" font-family="Arial" font-size="10">FastAPI + WebSocket</text>
+      
+      <!-- Database -->
+      <rect x="470" y="60" width="180" height="60" rx="8" fill="${accent}22" stroke="${accent}" stroke-width="2"/>
+      <text x="560" y="85" text-anchor="middle" fill="${accent}" font-family="Arial" font-size="12" font-weight="bold">Datenbank</text>
+      <text x="560" y="105" text-anchor="middle" fill="${text}" font-family="Arial" font-size="10">MongoDB</text>
+      
+      <!-- Arrows -->
+      <path d="M230 90 L260 90" stroke="${text}" stroke-width="2" marker-end="url(#arrow2)"/>
+      <path d="M440 90 L470 90" stroke="${text}" stroke-width="2"/>
+      
+      <!-- Devices -->
+      <rect x="100" y="160" width="100" height="50" rx="6" fill="${forPdf ? '#e5e7eb' : '#222'}" stroke="${borderColor}" stroke-width="1"/>
+      <text x="150" y="190" text-anchor="middle" fill="${text}" font-family="Arial" font-size="10">📱 Besteller</text>
+      
+      <rect x="220" y="160" width="100" height="50" rx="6" fill="${forPdf ? '#e5e7eb' : '#222'}" stroke="${borderColor}" stroke-width="1"/>
+      <text x="270" y="190" text-anchor="middle" fill="${text}" font-family="Arial" font-size="10">📱 Macher</text>
+      
+      <rect x="340" y="160" width="100" height="50" rx="6" fill="${forPdf ? '#e5e7eb' : '#222'}" stroke="${borderColor}" stroke-width="1"/>
+      <text x="390" y="190" text-anchor="middle" fill="${text}" font-family="Arial" font-size="10">📱 Ausgabe</text>
+      
+      <rect x="460" y="160" width="100" height="50" rx="6" fill="${forPdf ? '#e5e7eb' : '#222'}" stroke="${borderColor}" stroke-width="1"/>
+      <text x="510" y="190" text-anchor="middle" fill="${text}" font-family="Arial" font-size="10">💻 Admin</text>
+      
+      <!-- Connection lines -->
+      <path d="M150 160 L150 130 L140 120" stroke="${text}" stroke-width="1" fill="none" stroke-dasharray="3,3"/>
+      <path d="M270 160 L270 130 L350 120" stroke="${text}" stroke-width="1" fill="none" stroke-dasharray="3,3"/>
+      <path d="M390 160 L390 130 L350 120" stroke="${text}" stroke-width="1" fill="none" stroke-dasharray="3,3"/>
+      <path d="M510 160 L510 130 L350 120" stroke="${text}" stroke-width="1" fill="none" stroke-dasharray="3,3"/>
+      
+      <text x="350" y="250" text-anchor="middle" fill="${text}" font-family="Arial" font-size="11">Alle Geräte synchronisieren in Echtzeit über WebSocket</text>
+      <text x="350" y="275" text-anchor="middle" fill="${secondary}" font-family="Arial" font-size="12" font-weight="bold">Latenz &lt; 30ms</text>
+    </svg>
+    <p class="screenshot-caption">Abbildung: System-Architektur mit Frontend, Backend und Datenbank</p>
   </div>
   
   <div class="footer">
-    <p>📄 Karnbachs Event OS - Dokumentation</p>
-    <p>Generiert am ${timestamp} | Version 1.0</p>
+    <p>📄 Karnbachs Event OS - Vollständige Dokumentation</p>
+    <p>Generiert am ${timestamp}</p>
+    <p>© ${new Date().getFullYear()} Karnbachs Event OS</p>
   </div>
 </body>
 </html>`;
   };
 
+  const handleLogout = () => {
+    sessionStorage.removeItem("adminAuth");
+    navigate("/");
+  };
+
+  const { swipeHandlers } = useAdminSwipe();
+
+  const tabs = [
+    { id: "idea", label: "Idee", icon: Lightbulb },
+    { id: "architecture", label: "Architektur", icon: Layers },
+    { id: "database", label: "Datenbank", icon: Database },
+    { id: "api", label: "API", icon: Server },
+    { id: "pages", label: "Seiten", icon: Monitor },
+    { id: "components", label: "Code", icon: Code },
+    { id: "design", label: "Design", icon: Palette },
+    { id: "n8n", label: "n8n", icon: Network },
+    { id: "future", label: "Zukunft", icon: GitBranch },
+    { id: "deployment", label: "Deploy", icon: Settings },
+  ];
+
+  const renderContent = (content) => {
+    return content.split('\n').map((line, i) => {
+      if (line.match(/^═+$/)) return <hr key={i} className="border-primary/30 my-4" />;
+      if (line.match(/^─+$/)) return <hr key={i} className="border-border my-2" />;
+      if (line.match(/^▸\s/)) return <h3 key={i} className="font-display text-lg font-bold text-primary mt-6 mb-2">{line.replace('▸ ', '')}</h3>;
+      if (line.match(/^\s{2,}[A-ZÄÖÜ][A-ZÄÖÜ\s&-]+:?\s*$/)) return <h4 key={i} className="font-bold text-secondary mt-4 mb-1 text-sm">{line.trim()}</h4>;
+      if (line.match(/^[•✓✗□]\s/)) return <p key={i} className="text-muted-foreground ml-4 text-sm">{line}</p>;
+      if (line.match(/^\d+\.\s/)) return <p key={i} className="text-muted-foreground ml-4 text-sm font-medium">{line}</p>;
+      if (line.trim() === '') return <br key={i} />;
+      if (line.match(/^┌|^│|^└|^├/)) return <code key={i} className="block text-xs font-mono text-green-400">{line}</code>;
+      return <p key={i} className="text-muted-foreground text-sm leading-relaxed">{line}</p>;
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
-      {/* Einheitlicher Header */}
       <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
         <AdminNavBar 
-          onHelp={() => toast.info("Dies ist die Dokumentations-Seite. Wählen Sie einen Tab für Details.")}
+          onHelp={() => toast.info("Vollständige App-Dokumentation mit Export-Funktion")}
           onLogout={handleLogout}
         />
       </header>
@@ -1499,12 +1894,9 @@ export default function DocumentationPage() {
       <main className="p-4 sm:p-6 flex-1">
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-3 mb-6">
-          <Button 
-            onClick={() => setShowExportDialog(true)}
-            className="neon-primary"
-          >
+          <Button onClick={() => setShowExportDialog(true)} className="neon-primary">
             <Download className="w-4 h-4 mr-2" />
-            Dokumentation herunterladen
+            Dokumentation exportieren
           </Button>
         </div>
 
@@ -1514,50 +1906,37 @@ export default function DocumentationPage() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Download className="w-5 h-5 text-primary" />
-                Dokumentation herunterladen
+                Dokumentation exportieren
               </DialogTitle>
               <DialogDescription>
-                Wählen Sie das gewünschte Format für den Download:
+                Wählen Sie das gewünschte Format. PDF enthält alle Diagramme und Bilder.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-3 py-4">
-              <Button
-                onClick={() => handleExport('txt')}
-                variant="outline"
-                className="justify-start h-auto py-4"
-              >
+              <Button onClick={() => handleExport('txt')} variant="outline" className="justify-start h-auto py-4">
                 <FileText className="w-8 h-8 mr-4 text-muted-foreground" />
                 <div className="text-left">
-                  <div className="font-bold">TXT (Text)</div>
-                  <div className="text-xs text-muted-foreground">Reiner Text ohne Formatierung</div>
+                  <div className="font-bold">TXT (Textdatei)</div>
+                  <div className="text-xs text-muted-foreground">Reiner Text, ~100 Seiten</div>
                 </div>
               </Button>
-              <Button
-                onClick={() => handleExport('html')}
-                variant="outline"
-                className="justify-start h-auto py-4"
-              >
+              <Button onClick={() => handleExport('html')} variant="outline" className="justify-start h-auto py-4">
                 <Code className="w-8 h-8 mr-4 text-green-500" />
                 <div className="text-left">
                   <div className="font-bold">HTML (Webseite)</div>
-                  <div className="text-xs text-muted-foreground">Mit Styling und Formatierung</div>
+                  <div className="text-xs text-muted-foreground">Mit Styling, Diagrammen und Inhaltsverzeichnis</div>
                 </div>
               </Button>
-              <Button
-                onClick={() => handleExport('pdf')}
-                variant="outline"
-                className="justify-start h-auto py-4"
-                disabled={isGeneratingPdf}
-              >
+              <Button onClick={() => handleExport('pdf')} variant="outline" className="justify-start h-auto py-4" disabled={isGeneratingPdf}>
                 {isGeneratingPdf ? (
                   <Loader2 className="w-8 h-8 mr-4 text-red-500 animate-spin" />
                 ) : (
                   <Image className="w-8 h-8 mr-4 text-red-500" />
                 )}
                 <div className="text-left">
-                  <div className="font-bold">PDF mit Bildern</div>
+                  <div className="font-bold">PDF (mit Bildern)</div>
                   <div className="text-xs text-muted-foreground">
-                    {isGeneratingPdf ? 'Generiere PDF...' : 'Vollständige Dokumentation mit Diagrammen'}
+                    {isGeneratingPdf ? 'Wird generiert...' : 'Vollständige Dokumentation mit Diagrammen'}
                   </div>
                 </div>
               </Button>
@@ -1577,14 +1956,11 @@ export default function DocumentationPage() {
                     {settings?.event_name || 'Karnbachs Event OS'}
                   </Badge>
                   <Badge variant="outline" className="border-secondary text-secondary">
-                    <Clock className="w-3 h-3 mr-1" />
-                    {settings?.timezone || 'Europe/Berlin'}
+                    Version 1.0.0
                   </Badge>
                   <Badge variant="outline">
-                    <Palette className="w-3 h-3 mr-1" />
-                    <span className="w-3 h-3 rounded-full mr-1" style={{ backgroundColor: settings?.primary_color || '#a855f7' }} />
-                    <span className="w-3 h-3 rounded-full mr-1" style={{ backgroundColor: settings?.secondary_color || '#22c55e' }} />
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: settings?.accent_color || '#eab308' }} />
+                    <CheckCircle className="w-3 h-3 mr-1 text-green-500" />
+                    100% Vollständig
                   </Badge>
                 </div>
               </CardContent>
@@ -1599,9 +1975,9 @@ export default function DocumentationPage() {
                       <TabsTrigger 
                         key={tab.id} 
                         value={tab.id}
-                        className="flex items-center gap-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                        className="flex items-center gap-1 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                       >
-                        <tab.icon className="w-4 h-4" />
+                        <tab.icon className="w-3 h-3" />
                         <span className="hidden sm:inline">{tab.label}</span>
                       </TabsTrigger>
                     ))}
@@ -1612,7 +1988,7 @@ export default function DocumentationPage() {
                     <TabsContent key={tab.id} value={tab.id} className="mt-0">
                       <ScrollArea className="h-[60vh] pr-4">
                         <div className="space-y-1">
-                          {renderContent(DOCUMENTATION[tab.id].content)}
+                          {renderContent(FULL_DOCUMENTATION[tab.id].content)}
                         </div>
                       </ScrollArea>
                     </TabsContent>
@@ -1622,33 +1998,40 @@ export default function DocumentationPage() {
             </Card>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
               <Card className="bg-card border-border">
-                <CardContent className="p-4 text-center">
-                  <Monitor className="w-8 h-8 mx-auto mb-2 text-primary" />
-                  <p className="text-2xl font-bold font-mono">4</p>
-                  <p className="text-xs text-muted-foreground">Benutzer-Rollen</p>
+                <CardContent className="p-3 text-center">
+                  <Monitor className="w-6 h-6 mx-auto mb-1 text-primary" />
+                  <p className="text-xl font-bold font-mono">12</p>
+                  <p className="text-xs text-muted-foreground">Seiten</p>
                 </CardContent>
               </Card>
               <Card className="bg-card border-border">
-                <CardContent className="p-4 text-center">
-                  <Server className="w-8 h-8 mx-auto mb-2 text-secondary" />
-                  <p className="text-2xl font-bold font-mono">30+</p>
+                <CardContent className="p-3 text-center">
+                  <Server className="w-6 h-6 mx-auto mb-1 text-secondary" />
+                  <p className="text-xl font-bold font-mono">40+</p>
                   <p className="text-xs text-muted-foreground">API Endpoints</p>
                 </CardContent>
               </Card>
               <Card className="bg-card border-border">
-                <CardContent className="p-4 text-center">
-                  <Database className="w-8 h-8 mx-auto mb-2 text-accent" />
-                  <p className="text-2xl font-bold font-mono">7</p>
-                  <p className="text-xs text-muted-foreground">DB Collections</p>
+                <CardContent className="p-3 text-center">
+                  <Database className="w-6 h-6 mx-auto mb-1 text-accent" />
+                  <p className="text-xl font-bold font-mono">8</p>
+                  <p className="text-xs text-muted-foreground">Collections</p>
                 </CardContent>
               </Card>
               <Card className="bg-card border-border">
-                <CardContent className="p-4 text-center">
-                  <Smartphone className="w-8 h-8 mx-auto mb-2 text-green-500" />
-                  <p className="text-2xl font-bold font-mono">PWA</p>
-                  <p className="text-xs text-muted-foreground">Installierbar</p>
+                <CardContent className="p-3 text-center">
+                  <Code className="w-6 h-6 mx-auto mb-1 text-blue-500" />
+                  <p className="text-xl font-bold font-mono">25+</p>
+                  <p className="text-xs text-muted-foreground">Komponenten</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-card border-border">
+                <CardContent className="p-3 text-center">
+                  <Network className="w-6 h-6 mx-auto mb-1 text-purple-500" />
+                  <p className="text-xl font-bold font-mono">n8n</p>
+                  <p className="text-xs text-muted-foreground">Ready</p>
                 </CardContent>
               </Card>
             </div>
