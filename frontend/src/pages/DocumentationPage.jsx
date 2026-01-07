@@ -1294,6 +1294,10 @@ export default function DocumentationPage() {
     navigate("/");
   };
 
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const pdfContentRef = useRef(null);
+
   // Export Funktion mit Format-Auswahl
   const handleExport = async (format) => {
     const timestamp = new Date().toISOString().split('T')[0];
@@ -1306,7 +1310,6 @@ export default function DocumentationPage() {
     });
     
     if (format === 'txt') {
-      // TXT Export
       const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1315,36 +1318,10 @@ export default function DocumentationPage() {
       a.click();
       URL.revokeObjectURL(url);
       toast.success('Dokumentation als TXT heruntergeladen');
+      setShowExportDialog(false);
       
     } else if (format === 'html') {
-      // HTML Export mit Styling
-      const htmlContent = `
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Karnbachs Event OS - Dokumentation</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; background: #0a0a0b; color: #e5e5e5; }
-    h1 { color: #a855f7; border-bottom: 2px solid #a855f7; padding-bottom: 10px; }
-    h2 { color: #22c55e; margin-top: 30px; }
-    h3 { color: #eab308; }
-    pre { background: #1a1a1b; padding: 15px; border-radius: 8px; overflow-x: auto; border: 1px solid #333; }
-    code { font-family: 'Fira Code', monospace; font-size: 14px; }
-    .section { margin-bottom: 40px; }
-    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-right: 8px; }
-    .primary { background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #a855f7; }
-    .secondary { background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #22c55e; }
-    img { max-width: 100%; border-radius: 8px; border: 1px solid #333; }
-  </style>
-</head>
-<body>
-  <h1>🎪 Karnbachs Event OS - Dokumentation</h1>
-  <p><span class="badge primary">Version 1.0</span><span class="badge secondary">Erstellt: ${timestamp}</span></p>
-  <pre>${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
-</body>
-</html>`;
+      const htmlContent = generateHtmlContent(content, timestamp, false);
       const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1353,18 +1330,161 @@ export default function DocumentationPage() {
       a.click();
       URL.revokeObjectURL(url);
       toast.success('Dokumentation als HTML heruntergeladen');
+      setShowExportDialog(false);
       
     } else if (format === 'pdf') {
-      // PDF Export - Info zeigen
-      toast.info('PDF Export: Bitte drucken Sie die HTML-Version als PDF (Strg+P → Als PDF speichern)');
-      // Öffne Print-Dialog
-      window.print();
+      setIsGeneratingPdf(true);
+      toast.info('PDF wird generiert... Bitte warten.');
+      
+      try {
+        // Erstelle HTML-Element für PDF
+        const htmlContent = generateHtmlContent(content, timestamp, true);
+        const container = document.createElement('div');
+        container.innerHTML = htmlContent;
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        document.body.appendChild(container);
+        
+        // PDF-Optionen
+        const opt = {
+          margin: [10, 10, 10, 10],
+          filename: `${fileName}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, logging: false },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+        
+        await html2pdf().set(opt).from(container).save();
+        document.body.removeChild(container);
+        toast.success('PDF erfolgreich heruntergeladen!');
+      } catch (error) {
+        console.error('PDF generation error:', error);
+        toast.error('PDF-Generierung fehlgeschlagen. Versuchen Sie HTML-Export.');
+      } finally {
+        setIsGeneratingPdf(false);
+        setShowExportDialog(false);
+      }
     }
-    
-    setShowExportDialog(false);
   };
 
-  const [showExportDialog, setShowExportDialog] = useState(false);
+  // Generiere HTML-Content für Export
+  const generateHtmlContent = (content, timestamp, forPdf) => {
+    const bgColor = forPdf ? '#ffffff' : '#0a0a0b';
+    const textColor = forPdf ? '#1a1a1a' : '#e5e5e5';
+    const primaryColor = forPdf ? '#7c3aed' : '#a855f7';
+    const secondaryColor = forPdf ? '#16a34a' : '#22c55e';
+    const preBackground = forPdf ? '#f3f4f6' : '#1a1a1b';
+    
+    return `<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Karnbachs Event OS - Dokumentation</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      max-width: 800px; 
+      margin: 0 auto; 
+      padding: 40px 20px; 
+      line-height: 1.6; 
+      background: ${bgColor}; 
+      color: ${textColor}; 
+    }
+    h1 { color: ${primaryColor}; border-bottom: 3px solid ${primaryColor}; padding-bottom: 15px; font-size: 28px; }
+    h2 { color: ${secondaryColor}; margin-top: 30px; font-size: 22px; border-left: 4px solid ${secondaryColor}; padding-left: 12px; }
+    h3 { color: ${forPdf ? '#ca8a04' : '#eab308'}; font-size: 18px; }
+    pre { 
+      background: ${preBackground}; 
+      padding: 15px; 
+      border-radius: 8px; 
+      overflow-x: auto; 
+      border: 1px solid ${forPdf ? '#d1d5db' : '#333'}; 
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    code { font-family: 'Courier New', monospace; font-size: 12px; }
+    .header { text-align: center; margin-bottom: 40px; }
+    .badge { 
+      display: inline-block; 
+      padding: 6px 14px; 
+      border-radius: 20px; 
+      font-size: 12px; 
+      margin-right: 10px; 
+      font-weight: 600;
+    }
+    .primary { 
+      background: ${forPdf ? 'rgba(124, 58, 237, 0.15)' : 'rgba(168, 85, 247, 0.2)'}; 
+      border: 2px solid ${primaryColor}; 
+      color: ${primaryColor}; 
+    }
+    .secondary { 
+      background: ${forPdf ? 'rgba(22, 163, 74, 0.15)' : 'rgba(34, 197, 94, 0.2)'}; 
+      border: 2px solid ${secondaryColor}; 
+      color: ${secondaryColor}; 
+    }
+    .screenshot { 
+      margin: 20px 0; 
+      padding: 15px; 
+      background: ${forPdf ? '#f9fafb' : '#1f1f1f'}; 
+      border-radius: 12px; 
+      border: 2px solid ${forPdf ? '#e5e7eb' : '#333'}; 
+    }
+    .screenshot img { 
+      max-width: 100%; 
+      border-radius: 8px; 
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+    }
+    .screenshot-caption { 
+      text-align: center; 
+      font-size: 13px; 
+      color: ${forPdf ? '#6b7280' : '#9ca3af'}; 
+      margin-top: 10px; 
+      font-style: italic;
+    }
+    .section { page-break-inside: avoid; margin-bottom: 30px; }
+    .footer { 
+      margin-top: 50px; 
+      padding-top: 20px; 
+      border-top: 2px solid ${forPdf ? '#e5e7eb' : '#333'}; 
+      text-align: center; 
+      font-size: 12px; 
+      color: ${forPdf ? '#9ca3af' : '#6b7280'}; 
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎪 Karnbachs Event OS</h1>
+    <p style="font-size: 18px; margin-bottom: 20px;">Vollständige Dokumentation</p>
+    <p>
+      <span class="badge primary">Version 1.0</span>
+      <span class="badge secondary">Stand: ${timestamp}</span>
+    </p>
+  </div>
+  
+  <div class="screenshot">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='300' viewBox='0 0 600 300'%3E%3Crect fill='%231a1a2e' width='600' height='300'/%3E%3Ctext x='300' y='140' text-anchor='middle' fill='%23a855f7' font-family='Arial' font-size='24' font-weight='bold'%3E🎪 Event OS Dashboard%3C/text%3E%3Ctext x='300' y='180' text-anchor='middle' fill='%2322c55e' font-family='Arial' font-size='14'%3EBestellsystem für Veranstaltungen%3C/text%3E%3Crect x='50' y='220' width='100' height='40' rx='8' fill='%23a855f7'/%3E%3Ctext x='100' y='245' text-anchor='middle' fill='white' font-family='Arial' font-size='12'%3EBestellung%3C/text%3E%3Crect x='170' y='220' width='100' height='40' rx='8' fill='%2322c55e'/%3E%3Ctext x='220' y='245' text-anchor='middle' fill='white' font-family='Arial' font-size='12'%3EMacher%3C/text%3E%3Crect x='290' y='220' width='100' height='40' rx='8' fill='%23eab308'/%3E%3Ctext x='340' y='245' text-anchor='middle' fill='black' font-family='Arial' font-size='12'%3EAusgabe%3C/text%3E%3Crect x='410' y='220' width='100' height='40' rx='8' fill='%23ef4444'/%3E%3Ctext x='460' y='245' text-anchor='middle' fill='white' font-family='Arial' font-size='12'%3EOneManShow%3C/text%3E%3C/svg%3E" alt="Event OS Dashboard" />
+    <p class="screenshot-caption">Abbildung 1: Event OS Hauptübersicht mit den vier Hauptrollen</p>
+  </div>
+  
+  <pre>${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+  
+  <div class="screenshot">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='250' viewBox='0 0 600 250'%3E%3Crect fill='%230f0f0f' width='600' height='250'/%3E%3Ctext x='300' y='30' text-anchor='middle' fill='%23a855f7' font-family='Arial' font-size='16' font-weight='bold'%3EWorkflow: Bestellung → Macher → Ausgabe%3C/text%3E%3Crect x='30' y='60' width='150' height='80' rx='12' fill='%231e1e2e' stroke='%23a855f7' stroke-width='2'/%3E%3Ctext x='105' y='95' text-anchor='middle' fill='%23a855f7' font-family='Arial' font-size='13' font-weight='bold'%3E1. Bestellung%3C/text%3E%3Ctext x='105' y='120' text-anchor='middle' fill='%239ca3af' font-family='Arial' font-size='10'%3EKunde bestellt%3C/text%3E%3Cpath d='M180 100 L220 100' stroke='%2322c55e' stroke-width='3' marker-end='url(%23arrow)'/%3E%3Crect x='220' y='60' width='150' height='80' rx='12' fill='%231e1e2e' stroke='%2322c55e' stroke-width='2'/%3E%3Ctext x='295' y='95' text-anchor='middle' fill='%2322c55e' font-family='Arial' font-size='13' font-weight='bold'%3E2. Macher%3C/text%3E%3Ctext x='295' y='120' text-anchor='middle' fill='%239ca3af' font-family='Arial' font-size='10'%3EZubereitung%3C/text%3E%3Cpath d='M370 100 L410 100' stroke='%23eab308' stroke-width='3'/%3E%3Crect x='410' y='60' width='150' height='80' rx='12' fill='%231e1e2e' stroke='%23eab308' stroke-width='2'/%3E%3Ctext x='485' y='95' text-anchor='middle' fill='%23eab308' font-family='Arial' font-size='13' font-weight='bold'%3E3. Ausgabe%3C/text%3E%3Ctext x='485' y='120' text-anchor='middle' fill='%239ca3af' font-family='Arial' font-size='10'%3EAbholung%3C/text%3E%3Crect x='150' y='170' width='300' height='60' rx='12' fill='%23dc2626' fill-opacity='0.2' stroke='%23dc2626' stroke-width='2'/%3E%3Ctext x='300' y='200' text-anchor='middle' fill='%23dc2626' font-family='Arial' font-size='13' font-weight='bold'%3EOneManShow: Direkt abgeschlossen%3C/text%3E%3Ctext x='300' y='218' text-anchor='middle' fill='%239ca3af' font-family='Arial' font-size='10'%3EÜberspringt Macher und Ausgabe%3C/text%3E%3C/svg%3E" alt="Workflow Diagramm" />
+    <p class="screenshot-caption">Abbildung 2: Bestellungs-Workflow mit den verschiedenen Prozesswegen</p>
+  </div>
+  
+  <div class="footer">
+    <p>📄 Karnbachs Event OS - Dokumentation</p>
+    <p>Generiert am ${timestamp} | Version 1.0</p>
+  </div>
+</body>
+</html>`;
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
