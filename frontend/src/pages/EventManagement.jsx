@@ -152,42 +152,38 @@ export default function EventManagement() {
     }
   };
 
-  const { swipeHandlers, currentIndex, totalPages, prevLabel, nextLabel } = useAdminSwipe();
+  const { swipeHandlers } = useAdminSwipe();
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
-      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate("/admin")}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex items-center gap-3">
-            <Calendar className="w-6 h-6 text-primary" />
-            <h1 className="font-display text-lg sm:text-xl font-bold uppercase tracking-tight">
-              Event-Verwaltung
+      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 shrink-0">
+            <Calendar className="w-5 h-5 text-primary" />
+            <h1 className="font-display text-base sm:text-lg font-bold uppercase tracking-tight">
+              Events
             </h1>
           </div>
-        </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
-          <LiveClock className="hidden md:flex" />
-          <Button 
-            onClick={() => {
-              setFormData({ name: "", description: "", start_date: "", end_date: "" });
-              setShowCreateDialog(true);
-            }}
-            className="neon-primary"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Neues Event
-          </Button>
+          
+          <div className="flex-1 overflow-x-auto scrollbar-hide">
+            <AdminNavBar />
+          </div>
+          
+          <div className="flex items-center gap-2 shrink-0">
+            <Button 
+              onClick={() => {
+                setFormData({ name: "", description: "", start_date: "", end_date: "" });
+                setShowCreateDialog(true);
+              }}
+              size="sm"
+              className="neon-primary"
+            >
+              <Plus className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Neues Event</span>
+            </Button>
+          </div>
         </div>
       </header>
-
-      <SwipeIndicator currentIndex={currentIndex} totalPages={totalPages} prevLabel={prevLabel} nextLabel={nextLabel} />
 
       <main className="p-4 sm:p-6 max-w-6xl mx-auto flex-1">
         {isLoading ? (
