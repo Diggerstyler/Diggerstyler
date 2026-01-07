@@ -339,15 +339,29 @@ export default function BestellungPage() {
       // Save cart items before clearing for display in overlay
       const savedCartItems = [...cart];
       
-      const response = await axios.post(`${API}/orders`, order);
-      showOrderCompletionOverlay(response.data.order_number, total, savedCartItems);
-      toast.success(`Bestellung #${response.data.order_number} erstellt!`);
+      // Use OrderService for reliable delivery with retry and offline support
+      const result = await submitOrderService(order, {
+        onQueueSuccess: () => {
+          toast.success("Bestellung wird gesendet...");
+        }
+      });
+      
+      if (result.queued) {
+        // Order was queued due to offline status
+        showOrderCompletionOverlay("WARTEND", total, savedCartItems);
+        toast.info(result.message);
+      } else {
+        showOrderCompletionOverlay(result.order_number, total, savedCartItems);
+        toast.success(`Bestellung #${result.order_number} erstellt!`);
+      }
+      
       setCart([]);
       
       // Refresh articles to update stock info
       refetchArticles();
     } catch (error) {
-      toast.error("Fehler beim Erstellen der Bestellung");
+      console.error("Order submission failed:", error);
+      toast.error("Fehler beim Erstellen der Bestellung. Bitte erneut versuchen.");
     } finally {
       setIsSubmitting(false);
     }
