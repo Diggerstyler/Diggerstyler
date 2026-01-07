@@ -192,6 +192,23 @@ export default function OrdersManagement() {
                 <Search className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">Filter:</span>
               </div>
+              <Select value={selectedEvent} onValueChange={handleEventChange}>
+                <SelectTrigger className="w-full sm:w-[200px] bg-background">
+                  <SelectValue placeholder="Alle Events" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle Events</SelectItem>
+                  <SelectItem value="none">Ohne Event</SelectItem>
+                  {events.map(event => (
+                    <SelectItem key={event.id} value={event.id}>
+                      <span className="flex items-center gap-2">
+                        <Calendar className="w-3 h-3" />
+                        {event.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select value={selectedStand} onValueChange={handleStandChange}>
                 <SelectTrigger className="w-full sm:w-[200px] bg-background">
                   <SelectValue placeholder="Alle Stände" />
