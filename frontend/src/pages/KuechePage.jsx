@@ -315,8 +315,6 @@ export default function KuechePage() {
       clearInterval(interval);
       unsubMessage();
       wsService.disconnect(standId);
-      if (reconnectTimeout) clearTimeout(reconnectTimeout);
-      ws?.close();
     };
   }, [fetchData, standId]);
 
