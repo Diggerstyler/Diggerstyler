@@ -579,6 +579,8 @@ export default function BestellungPage() {
           <p className="text-xs sm:text-sm text-muted-foreground truncate">{standInfo?.name}</p>
         </div>
         <div className="flex items-center gap-2">
+          {/* Connection Status Indicator */}
+          <ConnectionStatus standId={standId} />
           <LiveClock className="hidden sm:flex" />
           <Button
             variant="outline"
