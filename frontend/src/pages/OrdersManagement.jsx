@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, FileText, Trash2, Clock, Search, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
+import { ArrowLeft, FileText, Trash2, Clock, Search, ChevronLeft, ChevronRight, AlertTriangle, Calendar } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -17,8 +17,10 @@ export default function OrdersManagement() {
   const [orders, setOrders] = useState([]);
   const [totalOrders, setTotalOrders] = useState(0);
   const [stands, setStands] = useState([]);
+  const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedStand, setSelectedStand] = useState("all");
+  const [selectedEvent, setSelectedEvent] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderToDelete, setOrderToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -50,6 +52,15 @@ export default function OrdersManagement() {
     }
   };
 
+  const fetchEvents = async () => {
+    try {
+      const response = await axios.get(`${API}/events`);
+      setEvents(response.data);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+  };
+
   const fetchOrders = async () => {
     setIsLoading(true);
     try {
@@ -60,6 +71,9 @@ export default function OrdersManagement() {
       
       if (selectedStand !== "all") {
         params.append("stand_id", selectedStand);
+      }
+      if (selectedEvent !== "all") {
+        params.append("event_id", selectedEvent);
       }
       
       const response = await axios.get(`${API}/admin/orders?${params}`, { auth });
@@ -75,16 +89,22 @@ export default function OrdersManagement() {
 
   useEffect(() => {
     fetchStands();
+    fetchEvents();
   }, []);
 
   useEffect(() => {
     if (adminAuth) {
       fetchOrders();
     }
-  }, [currentPage, selectedStand, adminAuth]);
+  }, [currentPage, selectedStand, selectedEvent, adminAuth]);
 
   const handleStandChange = (value) => {
     setSelectedStand(value);
+    setCurrentPage(0); // Reset to first page
+  };
+
+  const handleEventChange = (value) => {
+    setSelectedEvent(value);
     setCurrentPage(0); // Reset to first page
   };
 
