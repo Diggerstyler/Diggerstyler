@@ -19,6 +19,7 @@ import {
   TrendingUp,
   Store,
   AlertTriangle,
+  HelpCircle,
   Layers,
   FileText,
   Box,
