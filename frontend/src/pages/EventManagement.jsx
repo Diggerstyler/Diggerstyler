@@ -161,26 +161,16 @@ export default function EventManagement() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
-      {/* Einheitlicher Header - nur Navigation + Hilfe + Logout */}
+      {/* Einheitlicher Header */}
       <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 shrink-0">
-            <Calendar className="w-5 h-5 text-primary" />
-            <h1 className="font-display text-sm sm:text-base font-bold uppercase tracking-tight hidden sm:block">
-              Events
-            </h1>
-          </div>
-          
-          {/* Admin Navigation + Hilfe + Logout */}
-          <AdminNavBar 
-            onHelp={() => navigate("/admin/docs")}
-            onLogout={handleLogout}
-          />
-        </div>
+        <AdminNavBar 
+          onHelp={() => navigate("/admin/docs")}
+          onLogout={handleLogout}
+        />
       </header>
 
-      <main className="p-4 sm:p-6 max-w-6xl mx-auto flex-1">
-        {/* Action Button - im Main Content */}
+      <main className="p-4 sm:p-6 flex-1">
+        {/* Action Button */}
         <div className="flex flex-wrap gap-3 mb-6">
           <Button 
             onClick={() => {
