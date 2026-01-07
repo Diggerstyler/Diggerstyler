@@ -546,6 +546,7 @@ export default function AusgabePage() {
           </>
         )}
       </main>
+      <AppFooter />
     </div>
   );
 }
