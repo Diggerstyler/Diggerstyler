@@ -492,6 +492,19 @@ Collection: orders
   items: [{ article_id, article_name, quantity, price }],
   total: number,
   status: "pending" | "in_progress" | "ready" | "delivered",
+  event_id: string | null,  // NEU: Zugehöriges Event
+  created_at: datetime,
+  updated_at: datetime
+}
+
+Collection: events (NEU)
+{
+  id: string,
+  name: string,
+  description: string,
+  start_date: string,      // ISO Datum
+  end_date: string,        // ISO Datum
+  status: "planned" | "active" | "completed",
   created_at: datetime,
   updated_at: datetime
 }
