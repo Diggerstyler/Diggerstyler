@@ -165,6 +165,11 @@ export default function OrdersManagement() {
 
   const totalPages = Math.ceil(totalOrders / pageSize);
 
+  const handleLogout = () => {
+    sessionStorage.removeItem("adminAuth");
+    navigate("/");
+  };
+
   const { swipeHandlers } = useAdminSwipe();
 
   return (
@@ -181,6 +186,13 @@ export default function OrdersManagement() {
           <div className="flex-1 ">
             <AdminNavBar />
           </div>
+          
+          <AdminActions
+            onHelp={() => toast.info("Bestellverwaltung: Alle Bestellungen anzeigen und filtern.")}
+            onLogout={handleLogout}
+            showExport={false}
+            showReset={false}
+          />
         </div>
       </header>
 
