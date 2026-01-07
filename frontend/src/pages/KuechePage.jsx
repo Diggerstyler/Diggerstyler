@@ -672,6 +672,7 @@ export default function KuechePage() {
           </div>
         </div>
       </main>
+      <AppFooter />
     </div>
   );
 }
