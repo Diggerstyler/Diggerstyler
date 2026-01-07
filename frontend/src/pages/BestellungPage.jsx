@@ -202,15 +202,23 @@ export default function BestellungPage() {
     };
     fetchData();
 
-    // WebSocket connection
-    if (WS_URL) {
-      wsRef.current = new WebSocket(`${WS_URL}/ws/${standId}`);
-      wsRef.current.onopen = () => console.log("WebSocket connected");
-      wsRef.current.onclose = () => console.log("WebSocket disconnected");
-    }
+    // WebSocket connection with auto-reconnect
+    wsService.connect(standId);
+    
+    // Listen for stock updates
+    const unsubStock = wsService.on(standId, 'stock_update', () => {
+      refetchArticles();
+    });
+    
+    // Listen for order updates
+    const unsubOrder = wsService.on(standId, 'order_update', (data) => {
+      console.log('Order update:', data);
+    });
 
     return () => {
-      if (wsRef.current) wsRef.current.close();
+      unsubStock();
+      unsubOrder();
+      wsService.disconnect(standId);
     };
   }, [standId, standType]);
 
