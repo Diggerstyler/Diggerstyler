@@ -17,6 +17,8 @@ import OrdersManagement from "@/pages/OrdersManagement";
 import StockOverview from "@/pages/StockOverview";
 import SettingsPage from "@/pages/SettingsPage";
 import DocumentationPage from "@/pages/DocumentationPage";
+import EventManagement from "@/pages/EventManagement";
+import EventStatsPage from "@/pages/EventStatsPage";
 
 function App() {
   return (
@@ -41,6 +43,8 @@ function App() {
               <Route path="/admin/stock" element={<StockOverview />} />
               <Route path="/admin/settings" element={<SettingsPage />} />
               <Route path="/admin/docs" element={<DocumentationPage />} />
+              <Route path="/admin/events" element={<EventManagement />} />
+              <Route path="/admin/events/:eventId/stats" element={<EventStatsPage />} />
             </Routes>
           </BrowserRouter>
           <Toaster position="top-right" richColors />
