@@ -424,6 +424,8 @@ export default function KuechePage() {
           </div>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
+          {/* Connection Status */}
+          <ConnectionStatusDot standId={standId} />
           <LiveClock className="hidden sm:flex" />
           
           {/* Sound Toggle with Test */}
