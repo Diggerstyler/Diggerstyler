@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, Package, CheckCircle, RefreshCw, ChevronLeft, ChevronRight, Undo2, Archive, Clock, Maximize, Minimize, Home } from "lucide-react";
 import LiveClock from "@/components/LiveClock";
 import AppFooter from "@/components/AppFooter";
+import { ConnectionStatusDot } from "@/components/ConnectionStatus";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
