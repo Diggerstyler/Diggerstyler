@@ -332,6 +332,14 @@ export default function AdminDashboard() {
         </div>
       </header>
 
+      {/* Swipe Indicator für Mobile */}
+      <SwipeIndicator 
+        currentIndex={currentIndex} 
+        totalPages={totalPages} 
+        prevLabel={prevLabel} 
+        nextLabel={nextLabel} 
+      />
+
       {/* Admin Help Dialog */}
       <Dialog open={showHelp} onOpenChange={setShowHelp}>
         <DialogContent className="bg-card border-border max-w-2xl max-h-[85vh]">
