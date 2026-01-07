@@ -511,7 +511,7 @@ export default function EventManagement() {
               Event löschen?
             </DialogTitle>
             <DialogDescription>
-              Möchten Sie das Event "{selectedEvent?.name}" wirklich löschen? 
+              Möchten Sie das Event &quot;{selectedEvent?.name}&quot; wirklich löschen? 
               Die zugehörigen Bestellungen bleiben erhalten, verlieren aber ihre Event-Zuordnung.
             </DialogDescription>
           </DialogHeader>
