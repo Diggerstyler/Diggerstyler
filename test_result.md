@@ -1,4 +1,16 @@
 frontend:
+  - task: "Complete Documentation with PDF Export"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/DocumentationPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Complete documentation rewrite with 10 sections: App-Idee, Architektur, Datenbank, API, Seiten, Code, Design, n8n Integration, Weiterentwicklung, Deployment. PDF export with html2pdf.js generates proper PDF with embedded SVG diagrams."
+
   - task: "Global Connection Status Indicator"
     implemented: true
     working: true
