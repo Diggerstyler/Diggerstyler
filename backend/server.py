@@ -1344,8 +1344,13 @@ async def create_order(order: OrderCreate):
     else:
         initial_status = "created"  # Normal: geht zum Macher
     
+    # Automatisch aktives Event zuweisen
+    active_event = await get_active_event_for_date()
+    event_id = active_event["id"] if active_event else None
+    
     order_dict = order.model_dump()
     del order_dict["direct_complete"]
+    order_dict["event_id"] = event_id  # Event-ID hinzufügen
     
     # Process items for linked articles
     items = order_dict["items"]
