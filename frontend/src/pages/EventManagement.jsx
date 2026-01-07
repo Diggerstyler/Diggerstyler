@@ -531,6 +531,8 @@ export default function EventManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AppFooter />
     </div>
   );
 }
