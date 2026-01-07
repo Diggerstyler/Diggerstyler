@@ -120,3 +120,5 @@ agent_communication:
     message: "Starting comprehensive testing of Admin UI unified header structure across all admin pages"
   - agent: "testing"
     message: "✅ ALL TESTS PASSED - Admin UI unified header structure working perfectly across all pages. Verified: 1) Dashboard header with navigation in 2 rows, action buttons in main content 2) Events page header structure 3) Statistics page header structure 4) Documentation export dialog with 3 options 5) Mobile responsiveness (375x800). All navigation highlighting working correctly."
+  - agent: "testing"
+    message: "✅ COMPREHENSIVE TESTING COMPLETED - Karnbachs Event OS features tested successfully: 1) Global Connection Status: Verified on Landing Page, Admin Dashboard, Bestellung Page, and Documentation Page - green dot and WiFi icon visible on all pages indicating online status 2) PDF Export: Verified export dialog with all 3 required options (TXT, HTML, PDF mit Bildern) working correctly. Both high-priority features are fully functional as requested."
