@@ -442,6 +442,8 @@ export default function StationManagement() {
           </>
         )}
       </main>
+
+      <AppFooter />
     </div>
   );
 }
