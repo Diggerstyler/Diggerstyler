@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ArrowLeft, BarChart3, CalendarIcon, Filter, Download, Clock } from "lucide-react";
+import { ArrowLeft, BarChart3, CalendarIcon, Filter, Download, Clock, Calendar as CalendarEvent } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -21,10 +21,12 @@ export default function StatsPage() {
   const [stats, setStats] = useState(null);
   const [orders, setOrders] = useState([]);
   const [stands, setStands] = useState([]);
+  const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState({
     stand_id: "all",
     status: "all",
+    event_id: "all",
     start_date: null,
     end_date: null
   });
@@ -37,6 +39,7 @@ export default function StatsPage() {
       return;
     }
     fetchStands();
+    fetchEvents();
   }, [auth, navigate]);
 
   useEffect(() => {
@@ -54,13 +57,23 @@ export default function StatsPage() {
     }
   };
 
+  const fetchEvents = async () => {
+    try {
+      const response = await axios.get(`${API}/events`);
+      setEvents(response.data);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+  };
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
       const filterPayload = {
         start_date: filters.start_date ? format(filters.start_date, "yyyy-MM-dd") : null,
         end_date: filters.end_date ? format(filters.end_date, "yyyy-MM-dd") : null,
-        stand_id: filters.stand_id !== "all" ? filters.stand_id : null
+        stand_id: filters.stand_id !== "all" ? filters.stand_id : null,
+        event_id: filters.event_id !== "all" ? filters.event_id : null
       };
 
       const [statsRes, ordersRes] = await Promise.all([
@@ -72,6 +85,7 @@ export default function StatsPage() {
             start_date: filterPayload.start_date,
             end_date: filterPayload.end_date,
             stand_id: filterPayload.stand_id,
+            event_id: filterPayload.event_id,
             status: filters.status !== "all" ? filters.status : null
           },
           headers: { Authorization: `Basic ${auth}` }
