@@ -500,10 +500,23 @@ async def health_check():
     except Exception as e:
         db_status = f"error: {str(e)}"
     
+    # Get MongoDB pool info
+    pool_info = {}
+    try:
+        server_info = await client.server_info()
+        pool_info = {
+            "max_pool_size": client.options.pool_options.max_pool_size,
+            "min_pool_size": client.options.pool_options.min_pool_size,
+        }
+    except:
+        pass
+    
     return {
         "status": "healthy",
         "database": db_status,
+        "db_pool_info": pool_info,
         "websocket_connections": manager.get_connection_count(),
+        "request_cache_size": len(request_cache.cache),
         "version": "1.0.0"
     }
 
