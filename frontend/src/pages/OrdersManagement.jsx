@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, FileText, Trash2, Clock, Search, ChevronLeft, ChevronRight, AlertTriangle, Calendar } from "lucide-react";
+import AppFooter from "@/components/AppFooter";
+import { useAdminSwipe, SwipeIndicator } from "@/components/AdminSwipe";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
