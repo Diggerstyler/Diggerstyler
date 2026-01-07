@@ -74,39 +74,48 @@ backend:
 frontend:
   - task: "Event Management Page"
     implemented: true
-    working: "NA"
-    file: "frontend/src/components/admin/EventManagement.js"
+    working: true
+    file: "frontend/src/pages/EventManagement.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "testing"
         comment: "Frontend testing not performed as per system limitations. Backend APIs are fully functional and ready for frontend integration."
+      - working: true
+        agent: "testing"
+        comment: "✅ Event Management Page fully functional. German UI working correctly with 'Event-Verwaltung' header. Status badges display properly (Aktiv=green, Geplant=blue, Abgeschlossen=gray). 'Neues Event' button opens creation dialog. Successfully created 'Test Festival' event (2026-02-01 to 2026-02-03). Event appears in list with correct status. All CRUD operations working."
 
   - task: "Event Statistics Page"
     implemented: true
-    working: "NA"
-    file: "frontend/src/components/admin/EventStatistics.js"
+    working: true
+    file: "frontend/src/pages/EventStatsPage.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "testing"
         comment: "Frontend testing not performed as per system limitations. Backend statistics API is fully functional and returns all required data for frontend display."
+      - working: true
+        agent: "testing"
+        comment: "✅ Event Statistics Page fully functional. Successfully navigated from event 'Statistiken' button. Summary cards display correctly: Bestellungen, Gesamtumsatz, Ø Bestellwert, Pfand. All tabs working: Übersicht, Artikel, Pro Stunde, Pro Tag, Pro Stand. Export button present and functional. German language interface working properly."
 
   - task: "Event Filters in Admin Pages"
     implemented: true
-    working: "NA"
-    file: "frontend/src/components/admin/"
+    working: true
+    file: "frontend/src/pages/StatsPage.jsx, frontend/src/pages/OrdersManagement.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "testing"
         comment: "Frontend testing not performed as per system limitations. Backend filter APIs are fully functional and ready for frontend integration."
+      - working: true
+        agent: "testing"
+        comment: "✅ Event Filters fully functional in both admin pages. Stats page (/admin/stats) has Event dropdown with options: 'Alle Events', 'Ohne Event', 'Test Festival', 'Aktuelles Fest', 'Sommerfest 2025'. Orders page (/admin/orders) has Event filter dropdown with same options. Both filters working correctly and filtering data appropriately."
 
 metadata:
   created_by: "testing_agent"
