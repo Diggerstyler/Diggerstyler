@@ -506,6 +506,8 @@ export default function SettingsPage() {
           </>
         )}
       </main>
+
+      <AppFooter />
     </div>
   );
 }
