@@ -602,6 +602,8 @@ export default function StockOverview() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AppFooter />
     </div>
   );
 }
