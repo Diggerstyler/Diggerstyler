@@ -53,7 +53,7 @@ export default function AdminNavBar({ onHelp, onLogout }) {
     );
   };
 
-  const renderActionButton = (icon: any, label: string, onClick: () => void, testId?: string) => {
+  const renderActionButton = (icon, label, onClick, testId) => {
     const Icon = icon;
     return (
       <button
