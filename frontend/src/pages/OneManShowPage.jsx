@@ -812,7 +812,7 @@ export default function OneManShowPage() {
       </div>
 
       {/* Mobile Cart */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 glass border-t border-green-500/30 z-50">
+      <div className="md:hidden fixed bottom-14 sm:bottom-12 left-0 right-0 glass border-t border-green-500/30 z-50">
         {cart.length > 0 && (
           <div className="max-h-32 overflow-auto p-2 space-y-1">
             {cart.map(item => (
