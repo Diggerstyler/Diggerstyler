@@ -1048,6 +1048,308 @@ class FestivalAPITester:
         
         print("   🎯 Stock Management Features testing completed")
 
+    def test_event_management_features(self):
+        """Test Event Management features from review request"""
+        print("\n=== TESTING EVENT MANAGEMENT FEATURES ===")
+        
+        # First, ensure we have test data
+        self.run_test("Seed Data for Event Management", "POST", "seed", 200)
+        
+        # TEST 1: Event CRUD Operations
+        print("\n--- Testing Event CRUD Operations ---")
+        
+        # Get existing events
+        success, events = self.run_test("Get All Events", "GET", "events", 200)
+        if success:
+            print(f"   Found {len(events)} existing events")
+        
+        # Create a new event
+        from datetime import datetime, timedelta
+        today = datetime.now()
+        tomorrow = today + timedelta(days=1)
+        next_week = today + timedelta(days=7)
+        
+        test_event = {
+            "name": "Oktoberfest München 2024",
+            "description": "Das größte Volksfest der Welt",
+            "start_date": tomorrow.isoformat(),
+            "end_date": next_week.isoformat()
+        }
+        
+        success, created_event = self.run_test("Create Event", "POST", "events", 200, test_event, auth=True)
+        event_id = None
+        if success and created_event:
+            event_id = created_event.get('id')
+            event_status = created_event.get('status')
+            print(f"   Created event with ID: {event_id}, Status: {event_status}")
+            
+            # Verify status is calculated correctly (should be 'planned' since start is tomorrow)
+            if event_status == 'planned':
+                print("   ✅ Event status correctly calculated as 'planned'")
+            else:
+                print(f"   ❌ Event status incorrect: expected 'planned', got '{event_status}'")
+                self.failed_tests.append({
+                    "test": "Event Status Calculation",
+                    "expected": "planned",
+                    "actual": event_status
+                })
+        
+        # Get single event
+        if event_id:
+            success, single_event = self.run_test("Get Single Event", "GET", f"events/{event_id}", 200)
+            if success and single_event:
+                if single_event.get('id') == event_id:
+                    print("   ✅ Single event retrieved successfully")
+                else:
+                    print("   ❌ Single event retrieval failed")
+                    self.failed_tests.append({
+                        "test": "Get Single Event",
+                        "error": "Event ID mismatch"
+                    })
+        
+        # Update event
+        if event_id:
+            update_data = {
+                "description": "Das größte Volksfest der Welt - Updated",
+                "status": "active"
+            }
+            success, updated_event = self.run_test("Update Event", "PUT", f"events/{event_id}", 200, update_data, auth=True)
+            if success and updated_event:
+                if updated_event.get('description') == update_data['description']:
+                    print("   ✅ Event updated successfully")
+                else:
+                    print("   ❌ Event update failed")
+                    self.failed_tests.append({
+                        "test": "Update Event",
+                        "error": "Description not updated"
+                    })
+        
+        # TEST 2: Active Event Detection
+        print("\n--- Testing Active Event Detection ---")
+        
+        # Create an active event (today to next week)
+        active_event = {
+            "name": "Karnbachs Fest 2024",
+            "description": "Aktuelles Event",
+            "start_date": today.isoformat(),
+            "end_date": next_week.isoformat()
+        }
+        
+        success, created_active = self.run_test("Create Active Event", "POST", "events", 200, active_event, auth=True)
+        active_event_id = None
+        if success and created_active:
+            active_event_id = created_active.get('id')
+            print(f"   Created active event with ID: {active_event_id}")
+        
+        # Get active event
+        success, active_response = self.run_test("Get Active Event", "GET", "events/active", 200)
+        if success and active_response:
+            if active_response.get('event'):
+                active_event_data = active_response['event']
+                print(f"   ✅ Active event found: {active_event_data.get('name')}")
+                if active_event_data.get('id') == active_event_id:
+                    print("   ✅ Correct active event returned")
+                else:
+                    print("   ❌ Wrong active event returned")
+                    self.failed_tests.append({
+                        "test": "Get Active Event",
+                        "error": "Wrong event returned as active"
+                    })
+            else:
+                print("   ❌ No active event found")
+                self.failed_tests.append({
+                    "test": "Get Active Event",
+                    "error": "No active event in response"
+                })
+        
+        # TEST 3: Event Statistics
+        print("\n--- Testing Event Statistics ---")
+        
+        if active_event_id:
+            # Create some orders for the active event to generate statistics
+            success, stands = self.run_test("Get Stands for Event Orders", "GET", "stands", 200)
+            success, articles = self.run_test("Get Articles for Event Orders", "GET", "articles?active_only=true", 200)
+            
+            if success and stands and articles:
+                test_stand = stands[0]
+                test_article = articles[0]
+                
+                # Create test orders that should be assigned to the active event
+                for i in range(3):
+                    test_order = {
+                        "stand_id": test_stand["id"],
+                        "stand_name": test_stand["name"],
+                        "items": [
+                            {
+                                "article_id": test_article["id"],
+                                "article_name": test_article["name"],
+                                "quantity": 2,
+                                "price": test_article["price"],
+                                "deposit_amount": 0,
+                                "is_deposit_return": False
+                            }
+                        ],
+                        "subtotal": test_article["price"] * 2,
+                        "deposit_total": 0,
+                        "deposit_return_total": 0,
+                        "total": test_article["price"] * 2,
+                        "created_by": f"EventTestUser{i+1}"
+                    }
+                    
+                    success, created_order = self.run_test(f"Create Event Order {i+1}", "POST", "orders", 200, test_order)
+                    if success and created_order:
+                        # Verify order has event_id assigned
+                        order_event_id = created_order.get('event_id')
+                        if order_event_id == active_event_id:
+                            print(f"   ✅ Order {i+1} correctly assigned to active event")
+                        else:
+                            print(f"   ❌ Order {i+1} not assigned to active event: {order_event_id}")
+                            self.failed_tests.append({
+                                "test": f"Order {i+1} Event Assignment",
+                                "expected": active_event_id,
+                                "actual": order_event_id
+                            })
+            
+            # Get event statistics
+            success, event_stats = self.run_test("Get Event Statistics", "GET", f"events/{active_event_id}/stats", 200, auth=True)
+            if success and event_stats:
+                summary = event_stats.get('summary', {})
+                total_orders = summary.get('total_orders', 0)
+                total_revenue = summary.get('total_revenue', 0)
+                top_articles = event_stats.get('top_articles', [])
+                orders_by_hour = event_stats.get('orders_by_hour', {})
+                orders_by_day = event_stats.get('orders_by_day', {})
+                orders_by_stand = event_stats.get('orders_by_stand', {})
+                
+                print(f"   ✅ Event statistics retrieved:")
+                print(f"      Total orders: {total_orders}")
+                print(f"      Total revenue: {total_revenue}")
+                print(f"      Top articles: {len(top_articles)}")
+                print(f"      Hourly data points: {len(orders_by_hour)}")
+                print(f"      Daily data points: {len(orders_by_day)}")
+                print(f"      Stand data points: {len(orders_by_stand)}")
+                
+                if total_orders >= 3:  # We created 3 orders
+                    print("   ✅ Event statistics show expected order count")
+                else:
+                    print(f"   ❌ Event statistics show unexpected order count: {total_orders}")
+                    self.failed_tests.append({
+                        "test": "Event Statistics Order Count",
+                        "expected": ">=3",
+                        "actual": total_orders
+                    })
+        
+        # TEST 4: Event Filters in Stats and Orders
+        print("\n--- Testing Event Filters ---")
+        
+        if active_event_id:
+            # Test stats overview with event filter
+            stats_filter = {
+                "start_date": None,
+                "end_date": None,
+                "stand_id": None,
+                "role": None,
+                "event_id": active_event_id
+            }
+            
+            success, filtered_stats = self.run_test("Get Stats Overview with Event Filter", "POST", "stats/overview", 200, stats_filter, auth=True)
+            if success and filtered_stats:
+                filtered_orders = filtered_stats.get('total_orders', 0)
+                print(f"   ✅ Stats overview with event filter: {filtered_orders} orders")
+                
+                if filtered_orders >= 3:  # Should show our test orders
+                    print("   ✅ Event filter working in stats overview")
+                else:
+                    print(f"   ❌ Event filter not working in stats overview: {filtered_orders}")
+                    self.failed_tests.append({
+                        "test": "Stats Overview Event Filter",
+                        "expected": ">=3",
+                        "actual": filtered_orders
+                    })
+            
+            # Test stats orders with event filter
+            success, filtered_orders_list = self.run_test("Get Stats Orders with Event Filter", "GET", f"stats/orders?event_id={active_event_id}", 200, auth=True)
+            if success and filtered_orders_list:
+                print(f"   ✅ Stats orders with event filter: {len(filtered_orders_list)} orders")
+                
+                # Verify all orders have the correct event_id
+                correct_event_orders = [o for o in filtered_orders_list if o.get('event_id') == active_event_id]
+                if len(correct_event_orders) == len(filtered_orders_list):
+                    print("   ✅ All filtered orders have correct event_id")
+                else:
+                    print(f"   ❌ Some filtered orders have wrong event_id")
+                    self.failed_tests.append({
+                        "test": "Stats Orders Event Filter",
+                        "error": "Some orders have wrong event_id"
+                    })
+            
+            # Test admin orders with event filter
+            success, admin_filtered_orders = self.run_test("Get Admin Orders with Event Filter", "GET", f"admin/orders?event_id={active_event_id}", 200, auth=True)
+            if success and admin_filtered_orders:
+                admin_orders_list = admin_filtered_orders.get('orders', [])
+                print(f"   ✅ Admin orders with event filter: {len(admin_orders_list)} orders")
+                
+                # Verify all orders have the correct event_id
+                correct_admin_orders = [o for o in admin_orders_list if o.get('event_id') == active_event_id]
+                if len(correct_admin_orders) == len(admin_orders_list):
+                    print("   ✅ All admin filtered orders have correct event_id")
+                else:
+                    print(f"   ❌ Some admin filtered orders have wrong event_id")
+                    self.failed_tests.append({
+                        "test": "Admin Orders Event Filter",
+                        "error": "Some orders have wrong event_id"
+                    })
+        
+        # TEST 5: Event Deletion
+        print("\n--- Testing Event Deletion ---")
+        
+        if event_id:
+            success, delete_response = self.run_test("Delete Event", "DELETE", f"events/{event_id}", 200, auth=True)
+            if success and delete_response:
+                if 'gelöscht' in delete_response.get('message', ''):
+                    print("   ✅ Event deleted successfully")
+                    
+                    # Verify event is actually deleted
+                    success, get_deleted = self.run_test("Verify Event Deleted", "GET", f"events/{event_id}", 404)
+                    if success:
+                        print("   ✅ Deleted event correctly returns 404")
+                    else:
+                        print("   ❌ Deleted event still accessible")
+                        self.failed_tests.append({
+                            "test": "Verify Event Deletion",
+                            "error": "Deleted event still accessible"
+                        })
+                else:
+                    print("   ❌ Event deletion response unexpected")
+                    self.failed_tests.append({
+                        "test": "Event Deletion Response",
+                        "error": "Unexpected deletion response"
+                    })
+        
+        # Clean up active event
+        if active_event_id:
+            self.run_test("Clean Up Active Event", "DELETE", f"events/{active_event_id}", 200, auth=True)
+        
+        # TEST 6: Unauthorized Access
+        print("\n--- Testing Unauthorized Access ---")
+        
+        # Test creating event without auth
+        self.run_test("Create Event (No Auth)", "POST", "events", 401, test_event)
+        
+        # Test updating event without auth
+        if event_id:
+            self.run_test("Update Event (No Auth)", "PUT", f"events/{event_id}", 401, {"name": "Unauthorized"})
+        
+        # Test deleting event without auth
+        if event_id:
+            self.run_test("Delete Event (No Auth)", "DELETE", f"events/{event_id}", 401)
+        
+        # Test event stats without auth
+        if active_event_id:
+            self.run_test("Get Event Stats (No Auth)", "GET", f"events/{active_event_id}/stats", 401)
+        
+        print("   🎯 Event Management Features testing completed")
+
     def run_all_tests(self):
         """Run all test suites"""
         print("🚀 Starting Festival Order Management API Tests")
