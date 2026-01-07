@@ -1518,61 +1518,34 @@ Diese Dokumentation wurde automatisch generiert.
       setShowExportDialog(false);
       
     } else if (format === 'pdf') {
-      setIsGeneratingPdf(true);
-      toast.info('PDF wird generiert... Bitte warten.');
       setShowExportDialog(false);
+      toast.info('PDF-Druckansicht wird geöffnet...');
       
-      try {
-        // Erstelle sichtbaren Container für PDF-Rendering
-        const htmlContent = generateHtmlDocument(fullText, timestamp, true);
+      // Öffne neues Fenster mit druckbarem HTML
+      const htmlContent = generateHtmlDocument(fullText, timestamp, true);
+      const printWindow = window.open('', '_blank', 'width=900,height=700');
+      
+      if (printWindow) {
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
         
-        // Erstelle iframe für sauberes Rendering
-        const iframe = document.createElement('iframe');
-        iframe.style.position = 'fixed';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.style.width = '210mm';
-        iframe.style.height = '297mm';
-        iframe.style.border = 'none';
-        iframe.style.zIndex = '-9999';
-        iframe.style.opacity = '0';
-        document.body.appendChild(iframe);
-        
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-        iframeDoc.open();
-        iframeDoc.write(htmlContent);
-        iframeDoc.close();
-        
-        // Warten bis alles geladen ist
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        const opt = {
-          margin: [10, 10, 10, 10],
-          filename: `${fileName}.pdf`,
-          image: { type: 'jpeg', quality: 0.92 },
-          html2canvas: { 
-            scale: 1.5,
-            useCORS: true,
-            logging: true,
-            letterRendering: true,
-            allowTaint: true,
-            foreignObjectRendering: false,
-            windowWidth: 794, // A4 width in pixels at 96dpi
-            windowHeight: 1123 // A4 height
-          },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: 'avoid-all' }
+        // Warten bis Inhalt geladen ist, dann Druckdialog öffnen
+        printWindow.onload = function() {
+          setTimeout(() => {
+            printWindow.print();
+          }, 500);
         };
         
-        await html2pdf().set(opt).from(iframeDoc.body).save();
+        // Fallback falls onload nicht feuert
+        setTimeout(() => {
+          if (printWindow && !printWindow.closed) {
+            printWindow.print();
+          }
+        }, 2000);
         
-        document.body.removeChild(iframe);
-        toast.success('PDF erfolgreich heruntergeladen!');
-      } catch (error) {
-        console.error('PDF Export error:', error);
-        toast.error('PDF-Export fehlgeschlagen: ' + error.message);
-      } finally {
-        setIsGeneratingPdf(false);
+        toast.success('Wählen Sie "Als PDF speichern" im Druckdialog');
+      } else {
+        toast.error('Popup wurde blockiert. Bitte erlauben Sie Popups für diese Seite.');
       }
     }
   };
