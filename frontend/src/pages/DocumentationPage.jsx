@@ -1917,16 +1917,12 @@ Diese Dokumentation wurde automatisch generiert.
                   <div className="text-xs text-muted-foreground">Mit Styling, Diagrammen und Inhaltsverzeichnis</div>
                 </div>
               </Button>
-              <Button onClick={() => handleExport('pdf')} variant="outline" className="justify-start h-auto py-4" disabled={isGeneratingPdf}>
-                {isGeneratingPdf ? (
-                  <Loader2 className="w-8 h-8 mr-4 text-red-500 animate-spin" />
-                ) : (
-                  <Image className="w-8 h-8 mr-4 text-red-500" />
-                )}
+              <Button onClick={() => handleExport('pdf')} variant="outline" className="justify-start h-auto py-4">
+                <Image className="w-8 h-8 mr-4 text-red-500" />
                 <div className="text-left">
                   <div className="font-bold">PDF (mit Bildern)</div>
                   <div className="text-xs text-muted-foreground">
-                    {isGeneratingPdf ? 'Wird generiert...' : 'Vollständige Dokumentation mit Diagrammen'}
+                    Öffnet Druckansicht → "Als PDF speichern" wählen
                   </div>
                 </div>
               </Button>
