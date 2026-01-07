@@ -194,6 +194,7 @@ Das Admin-Dashboard zeigt:
 • Anzahl der Bestellungen
 
 Navigation (alle Bereiche):
+• Events - Event-Verwaltung (NEU)
 • Stände - Standverwaltung
 • Artikel - Artikelverwaltung
 • Bestand - Bestandsübersicht
@@ -205,6 +206,131 @@ Navigation (alle Bereiche):
 • Reset - Daten zurücksetzen
 • Hilfe - Diese Anleitung
 • Dokumentation - Vollständige App-Doku
+
+
+EVENT-VERWALTUNG (/admin/events) - NEU
+======================================
+
+ÜBERBLICK
+---------
+Die Event-Verwaltung ermöglicht die Definition und Auswertung 
+einzelner Veranstaltungen. Jede Bestellung wird automatisch 
+dem aktuell aktiven Event zugeordnet.
+
+VORTEILE
+--------
+• Saubere Trennung der Daten zwischen Events
+• Detaillierte Statistiken pro Veranstaltung
+• Vergleichbarkeit zwischen Events
+• Automatische Event-Zuordnung
+
+EVENTS ERSTELLEN
+----------------
+1. Im Admin-Dashboard auf "Events" klicken
+2. Button "Neues Event" klicken
+3. Pflichtfelder ausfüllen:
+   - Name (z.B. "Sommerfest 2025")
+   - Startdatum
+   - Enddatum
+4. Optional: Beschreibung hinzufügen
+5. "Erstellen" klicken
+
+EVENT-STATUS
+------------
+Der Status wird automatisch basierend auf dem Datum gesetzt:
+
+• Geplant (blau):
+  - Startdatum liegt in der Zukunft
+  - Bestellungen können noch nicht zugeordnet werden
+  
+• Aktiv (grün):
+  - Heutiges Datum liegt zwischen Start und Ende
+  - Alle neuen Bestellungen werden diesem Event zugeordnet
+  - WICHTIG: Nur EIN Event kann gleichzeitig aktiv sein!
+  
+• Abgeschlossen (grau):
+  - Enddatum liegt in der Vergangenheit
+  - Keine neuen Bestellungen werden zugeordnet
+  - Statistiken sind weiterhin abrufbar
+
+AUTOMATISCHE ZUORDNUNG
+----------------------
+Wenn eine Bestellung erstellt wird:
+1. System prüft: Gibt es ein aktives Event?
+2. Falls JA: event_id wird automatisch gesetzt
+3. Falls NEIN: event_id bleibt leer ("ohne Event")
+
+Alte Bestellungen (vor Event-System):
+• Werden als "ohne Event" geführt
+• Sind über Filter "Ohne Event" abrufbar
+
+EVENT-STATISTIKEN (/admin/events/{id}/stats)
+============================================
+Detaillierte Auswertung für ein spezifisches Event.
+
+ZUSAMMENFASSUNG
+---------------
+• Gesamtzahl Bestellungen
+• Abgeschlossene Bestellungen + Quote
+• Gesamtumsatz in Euro
+• Pfand erhalten / zurückgegeben
+• Netto-Umsatz
+• Durchschnittlicher Bestellwert
+
+TABS IN DER STATISTIK
+---------------------
+
+Tab "Übersicht":
+• Top 5 meistverkaufte Artikel
+• Top 5 umsatzstärkste Stände
+• Grafische Übersicht
+
+Tab "Artikel":
+• Alle verkauften Artikel
+• Sortiert nach Menge
+• Umsatz pro Artikel
+• Durchschnittspreis
+
+Tab "Pro Stunde":
+• Bestellungen pro Stunde
+• Umsatz pro Stunde
+• Durchschnittlicher Bestellwert
+• Ideal zur Identifikation der Stoßzeiten
+
+Tab "Pro Tag":
+• Bestellungen pro Tag
+• Umsatz pro Tag
+• Bei mehrtägigen Events sehr hilfreich
+
+Tab "Pro Stand":
+• Vergleich aller Stände
+• Bestellungen und Umsatz
+• Prozentualer Anteil am Gesamtumsatz
+
+EXPORT
+------
+• Button "Export" erstellt CSV-Datei
+• Enthält alle Statistikdaten
+• Kann in Excel geöffnet werden
+
+EVENT-FILTER IN ANDEREN BEREICHEN
+=================================
+
+STATISTIK-SEITE (/admin/stats)
+------------------------------
+Neuer Filter: "Event"
+• "Alle Events" - Alle Daten (Standard)
+• "Ohne Event" - Nur nicht zugeordnete
+• [Event-Name] - Nur dieses Event
+
+BESTELLUNGEN (/admin/orders)
+-----------------------------
+Neuer Filter: "Event"
+• Funktioniert wie oben
+• Kombinierbar mit Stand-Filter
+
+WICHTIG: Wenn kein Filter gesetzt ist, 
+werden IMMER alle Daten angezeigt!
 
 
 STÄNDE VERWALTEN (/admin/stands)
