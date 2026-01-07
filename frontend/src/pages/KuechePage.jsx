@@ -139,10 +139,8 @@ export default function KuechePage() {
   const [isLoading, setIsLoading] = useState(false);
   
   // Sound & Fullscreen state
-  const [soundEnabled, setSoundEnabled] = useState(() => {
-    const saved = localStorage.getItem('macher_sound_enabled');
-    return saved !== null ? saved === 'true' : true; // Default: on
-  });
+  // Sound ist IMMER standardmäßig AN - wird nicht mehr im localStorage gespeichert
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const previousOrderCount = useRef(0);
@@ -167,11 +165,6 @@ export default function KuechePage() {
       notificationSound.play();
     }
   }, [audioUnlocked, unlockAudio]);
-
-  // Save sound preference
-  useEffect(() => {
-    localStorage.setItem('macher_sound_enabled', soundEnabled.toString());
-  }, [soundEnabled]);
 
   // Play notification sound when orders go from 0 to 1+
   const playNotificationSound = useCallback(() => {
