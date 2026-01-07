@@ -169,37 +169,28 @@ export default function StockOverview() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
+      {/* Einheitlicher Header */}
       <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3 shrink-0">
-            <Box className="w-5 h-5 text-secondary" />
-            <h1 className="font-display text-sm sm:text-base font-bold uppercase tracking-tight hidden sm:block">
-              Bestand
-            </h1>
-          </div>
-          
-          <div className="flex-1 ">
-            <AdminNavBar />
-          </div>
-          
-          <div className="flex items-center gap-1 shrink-0">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={fetchStock} title="Aktualisieren">
-              <RefreshCw className="w-4 h-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8 w-8 p-0 text-destructive"
-              onClick={() => setShowResetDialog(true)}
-              title="Reset"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
+        <AdminNavBar />
       </header>
 
-      <main className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 flex-1">
+      <main className="p-4 sm:p-6 space-y-6 flex-1">
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-3 mb-6">
+          <Button variant="outline" onClick={fetchStock}>
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Aktualisieren
+          </Button>
+          <Button 
+            variant="outline"
+            className="border-destructive/50 text-destructive hover:bg-destructive/10"
+            onClick={() => setShowResetDialog(true)}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Bestand zurücksetzen
+          </Button>
+        </div>
+
         {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
           <Card className="bg-card border-border">
