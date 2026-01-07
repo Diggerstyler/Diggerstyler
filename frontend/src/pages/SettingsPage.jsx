@@ -191,22 +191,12 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
+      {/* Einheitlicher Header */}
       <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3 shrink-0">
-            <Settings className="w-5 h-5 text-primary" />
-            <h1 className="font-display text-sm sm:text-base font-bold uppercase tracking-tight hidden sm:block">
-              Einstellungen
-            </h1>
-          </div>
-          
-          <div className="flex-1 ">
-            <AdminNavBar />
-          </div>
-        </div>
+        <AdminNavBar />
       </header>
 
-      <main className="p-4 sm:p-6 max-w-3xl mx-auto space-y-6 flex-1">
+      <main className="p-4 sm:p-6 space-y-6 flex-1">
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Laden...</div>
         ) : (
