@@ -191,27 +191,20 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
-      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate("/admin")}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex items-center gap-3">
-            <Settings className="w-6 h-6 text-primary" />
-            <h1 className="font-display text-lg sm:text-xl font-bold uppercase tracking-tight">
+      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 shrink-0">
+            <Settings className="w-5 h-5 text-primary" />
+            <h1 className="font-display text-base sm:text-lg font-bold uppercase tracking-tight">
               Einstellungen
             </h1>
           </div>
-        </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
-          <LiveClock />
+          
+          <div className="flex-1 overflow-x-auto scrollbar-hide">
+            <AdminNavBar />
+          </div>
         </div>
       </header>
-
 
       <main className="p-4 sm:p-6 max-w-3xl mx-auto space-y-6 flex-1">
         {isLoading ? (
