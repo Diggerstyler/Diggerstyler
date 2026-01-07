@@ -202,7 +202,9 @@ export default function StockOverview() {
         </div>
       </header>
 
-      <main className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
+      <SwipeIndicator currentIndex={currentIndex} totalPages={totalPages} prevLabel={prevLabel} nextLabel={nextLabel} />
+
+      <main className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 flex-1">
         {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           <Card className="bg-card border-border">
