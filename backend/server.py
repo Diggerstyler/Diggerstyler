@@ -1564,6 +1564,10 @@ async def create_order(
     await db.orders.insert_one(doc)
     asyncio.create_task(broadcast_new_order())
     
+    # Cache the order for deduplication (5 minutes TTL)
+    if x_request_id:
+        await request_cache.set(x_request_id, order_obj)
+    
     return order_obj
 
 @api_router.put("/orders/{order_id}/status", response_model=Order)
