@@ -332,7 +332,7 @@ export default function OneManShowPage() {
       {/* Order Completion Bottom Sheet */}
       {completedOrderNumber !== null && (
         <div 
-          className="fixed inset-0 z-[100] bg-black/80"
+          className="fixed inset-0 z-[10000] bg-black/80"
           onClick={!showChangeCalc ? dismissOverlay : undefined}
         >
           {/* Bottom Sheet Container */}
@@ -345,8 +345,8 @@ export default function OneManShowPage() {
               <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
             </div>
             
-            {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-4">
+            {/* Scrollable content - extra padding at bottom for footer */}
+            <div className="flex-1 overflow-y-auto px-4 pb-20 space-y-4">
               {/* Header with Bonnummer */}
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
