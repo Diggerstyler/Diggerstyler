@@ -1,9 +1,8 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { 
   LayoutDashboard, Calendar, Store, Package, Box, Layers, 
   BarChart3, FileText, Settings, BookOpen,
-  Download, Trash2, HelpCircle, LogOut
+  HelpCircle, LogOut
 } from "lucide-react";
 
 // Admin Navigation Items
@@ -20,7 +19,12 @@ const ADMIN_NAV_ITEMS = [
   { path: "/admin/docs", icon: BookOpen, label: "Doku" },
 ];
 
-export default function AdminNavBar() {
+/**
+ * AdminNavBar - Einheitliche Navigation für alle Admin-Seiten
+ * Enthält nur: Navigation + Hilfe + Logout
+ * KEINE Action-Buttons (die kommen in den Main Content)
+ */
+export default function AdminNavBar({ onHelp, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -28,7 +32,7 @@ export default function AdminNavBar() {
   const row1 = ADMIN_NAV_ITEMS.slice(0, 5);
   const row2 = ADMIN_NAV_ITEMS.slice(5, 10);
 
-  const renderButton = (item) => {
+  const renderNavButton = (item) => {
     const Icon = item.icon;
     const isActive = location.pathname === item.path;
     
@@ -49,94 +53,44 @@ export default function AdminNavBar() {
     );
   };
 
-  return (
-    <div className="flex flex-col gap-0.5">
-      <div className="flex items-center justify-center gap-0.5">
-        {row1.map(renderButton)}
-      </div>
-      <div className="flex items-center justify-center gap-0.5">
-        {row2.map(renderButton)}
-      </div>
-    </div>
-  );
-}
-
-// Reusable Action Button Component - consistent style with nav icons
-export function AdminActionButton({ icon: Icon, label, onClick, color = "default", disabled = false, testId }) {
-  const colorClasses = {
-    default: "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-    green: "text-green-500 hover:bg-green-500/10",
-    red: "text-destructive hover:bg-destructive/10",
-    primary: "text-primary hover:bg-primary/10",
-    yellow: "text-yellow-500 hover:bg-yellow-500/10"
+  const renderActionButton = (icon: any, label: string, onClick: () => void, testId?: string) => {
+    const Icon = icon;
+    return (
+      <button
+        onClick={onClick}
+        data-testid={testId}
+        className="flex flex-col items-center justify-center px-1 sm:px-2 py-1 rounded-lg transition-all min-w-[40px] sm:min-w-[52px] text-muted-foreground hover:text-foreground hover:bg-muted/50"
+        title={label}
+      >
+        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        <span className="text-[8px] sm:text-[9px] mt-0.5 leading-tight">{label}</span>
+      </button>
+    );
   };
 
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      data-testid={testId}
-      className={`flex flex-col items-center justify-center px-1 sm:px-2 py-1 rounded-lg transition-all min-w-[40px] sm:min-w-[52px] ${colorClasses[color]} disabled:opacity-50`}
-      title={label}
-    >
-      <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-      <span className="text-[8px] sm:text-[9px] mt-0.5 leading-tight">{label}</span>
-    </button>
-  );
-}
-
-// Standard Admin Actions Component - for pages that need export/reset/help/logout
-export function AdminActions({ 
-  onExport, 
-  onReset, 
-  onHelp, 
-  onLogout,
-  isExporting = false,
-  showExport = true,
-  showReset = true,
-  showHelp = true,
-  showLogout = true
-}) {
-  return (
-    <div className="flex flex-col gap-0.5 shrink-0">
-      <div className="flex items-center gap-0.5">
-        {showExport && (
-          <AdminActionButton 
-            icon={Download} 
-            label="Export" 
-            onClick={onExport} 
-            color="green"
-            disabled={isExporting}
-            testId="export-btn"
-          />
-        )}
-        {showReset && (
-          <AdminActionButton 
-            icon={Trash2} 
-            label="Reset" 
-            onClick={onReset} 
-            color="red"
-            testId="reset-btn"
-          />
-        )}
+    <div className="flex items-center gap-2">
+      {/* Navigation - 2 Reihen */}
+      <div className="flex flex-col gap-0.5 flex-1">
+        <div className="flex items-center justify-center gap-0.5">
+          {row1.map(renderNavButton)}
+        </div>
+        <div className="flex items-center justify-center gap-0.5">
+          {row2.map(renderNavButton)}
+        </div>
       </div>
-      <div className="flex items-center gap-0.5">
-        {showHelp && (
-          <AdminActionButton 
-            icon={HelpCircle} 
-            label="Hilfe" 
-            onClick={onHelp}
-            testId="help-btn"
-          />
-        )}
-        {showLogout && (
-          <AdminActionButton 
-            icon={LogOut} 
-            label="Logout" 
-            onClick={onLogout}
-            testId="logout-btn"
-          />
-        )}
+      
+      {/* Feste Actions: Hilfe + Logout */}
+      <div className="flex flex-col gap-0.5 shrink-0">
+        <div className="flex items-center gap-0.5">
+          {renderActionButton(HelpCircle, "Hilfe", onHelp || (() => navigate("/admin/docs")), "help-btn")}
+        </div>
+        <div className="flex items-center gap-0.5">
+          {renderActionButton(LogOut, "Logout", onLogout || (() => {
+            sessionStorage.removeItem("adminAuth");
+            navigate("/");
+          }), "logout-btn")}
+        </div>
       </div>
     </div>
   );
