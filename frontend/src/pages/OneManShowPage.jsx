@@ -179,17 +179,6 @@ export default function OneManShowPage() {
       }
     };
     fetchData();
-
-    // WebSocket connection
-    if (WS_URL) {
-      wsRef.current = new WebSocket(`${WS_URL}/ws/${standId}`);
-      wsRef.current.onopen = () => console.log("WebSocket connected");
-      wsRef.current.onclose = () => console.log("WebSocket disconnected");
-    }
-
-    return () => {
-      if (wsRef.current) wsRef.current.close();
-    };
   }, [standId, standType]);
 
   const filteredArticles = articles.filter(
