@@ -182,8 +182,10 @@ export default function StationManagement() {
     return article?.name || "Unbekannt";
   };
 
+  const { swipeHandlers, currentIndex, totalPages, prevLabel, nextLabel } = useAdminSwipe();
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col" {...swipeHandlers}>
       <header className="sticky top-0 z-50 bg-card/95 backdrop-blur border-b border-border px-4 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -195,7 +197,9 @@ export default function StationManagement() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto p-4 space-y-6">
+      <SwipeIndicator currentIndex={currentIndex} totalPages={totalPages} prevLabel={prevLabel} nextLabel={nextLabel} />
+
+      <main className="max-w-6xl mx-auto p-4 space-y-6 flex-1">
         {/* Stand Selection */}
         <Card className="bg-card/80 border-border">
           <CardHeader className="pb-2">
