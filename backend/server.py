@@ -1651,6 +1651,7 @@ async def get_stats_overview(filters: dict, username: str = Depends(verify_admin
     start_date = filters.get("start_date")
     end_date = filters.get("end_date")
     stand_id = filters.get("stand_id")
+    event_id = filters.get("event_id")  # Event-Filter hinzufügen
     
     if start_date:
         query["created_at"] = {"$gte": start_date}
@@ -1661,6 +1662,11 @@ async def get_stats_overview(filters: dict, username: str = Depends(verify_admin
             query["created_at"] = {"$lte": end_date}
     if stand_id:
         query["stand_id"] = stand_id
+    if event_id:
+        if event_id == "none":
+            query["event_id"] = None  # Bestellungen ohne Event
+        else:
+            query["event_id"] = event_id
     
     orders = await db.orders.find(query, {"_id": 0}).to_list(10000)
     
