@@ -142,35 +142,32 @@ export default function StatsPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
-      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate("/admin")}
-            data-testid="back-btn"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex items-center gap-3">
-            <BarChart3 className="w-6 h-6 text-primary" />
-            <h1 className="font-display text-lg sm:text-xl font-bold uppercase tracking-tight">
-              Statistiken
+      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 shrink-0">
+            <BarChart3 className="w-5 h-5 text-primary" />
+            <h1 className="font-display text-base sm:text-lg font-bold uppercase tracking-tight">
+              Statistik
             </h1>
           </div>
+          
+          <div className="flex-1 overflow-x-auto scrollbar-hide">
+            <AdminNavBar />
+          </div>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 shrink-0"
+            onClick={exportCSV}
+            disabled={orders.length === 0}
+            data-testid="export-btn"
+            title="CSV Export"
+          >
+            <Download className="w-4 h-4" />
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          className="sm:ml-auto"
-          onClick={exportCSV}
-          disabled={orders.length === 0}
-          data-testid="export-btn"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          CSV Export
-        </Button>
       </header>
-
 
       <main className="p-4 sm:p-6 max-w-7xl mx-auto flex-1">
         {/* Filters */}
