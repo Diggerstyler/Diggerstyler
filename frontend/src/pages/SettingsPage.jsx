@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Settings, Clock, Save, Palette, Upload, Trash2, Image, RefreshCw } from "lucide-react";
 import LiveClock from "@/components/LiveClock";
+import AppFooter from "@/components/AppFooter";
+import { useAdminSwipe, SwipeIndicator } from "@/components/AdminSwipe";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 

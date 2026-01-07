@@ -13,6 +13,8 @@ import {
   BarChart3, Clock, Globe, Smartphone, Monitor, Server
 } from "lucide-react";
 import LiveClock from "@/components/LiveClock";
+import AppFooter from "@/components/AppFooter";
+import { useAdminSwipe, SwipeIndicator } from "@/components/AdminSwipe";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
