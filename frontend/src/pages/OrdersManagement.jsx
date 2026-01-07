@@ -188,7 +188,6 @@ export default function OrdersManagement() {
         </div>
       </header>
 
-      <SwipeIndicator currentIndex={currentIndex} totalPages={swipeTotalPages} prevLabel={prevLabel} nextLabel={nextLabel} />
 
       <main className="p-4 sm:p-6 flex-1">
         {/* Filters */}

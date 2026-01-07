@@ -212,7 +212,6 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <SwipeIndicator currentIndex={currentIndex} totalPages={totalPages} prevLabel={prevLabel} nextLabel={nextLabel} />
 
       <main className="p-4 sm:p-6 max-w-3xl mx-auto space-y-6 flex-1">
         {isLoading ? (

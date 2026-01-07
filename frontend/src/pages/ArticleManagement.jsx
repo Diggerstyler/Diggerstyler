@@ -689,7 +689,6 @@ export default function ArticleManagement() {
         </div>
       </header>
 
-      <SwipeIndicator currentIndex={currentIndex} totalPages={totalPages} prevLabel={prevLabel} nextLabel={nextLabel} />
 
       <main className="p-4 sm:p-6 max-w-7xl mx-auto flex-1">
         <Tabs defaultValue="articles" className="space-y-6">

@@ -198,7 +198,6 @@ export default function StationManagement() {
         </div>
       </header>
 
-      <SwipeIndicator currentIndex={currentIndex} totalPages={totalPages} prevLabel={prevLabel} nextLabel={nextLabel} />
 
       <main className="max-w-6xl mx-auto p-4 space-y-6 flex-1">
         {/* Stand Selection */}
