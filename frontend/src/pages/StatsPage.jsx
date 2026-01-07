@@ -461,6 +461,8 @@ export default function StatsPage() {
           </CardContent>
         </Card>
       </main>
+
+      <AppFooter />
     </div>
   );
 }
