@@ -183,6 +183,17 @@ export default function AdminDashboard() {
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => navigate("/admin/events")}
+              data-testid="events-nav-btn"
+              className="h-8 px-2"
+              title="Events"
+            >
+              <Calendar className="w-4 h-4" />
+              <span className="hidden sm:inline ml-1">Events</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate("/admin/stands")}
               data-testid="stands-nav-btn"
               className="h-8 px-2"
