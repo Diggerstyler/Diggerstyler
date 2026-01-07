@@ -473,6 +473,8 @@ export default function OneManShowPage() {
           </div>
         </div>
         <div className="flex items-center gap-2 ml-auto shrink-0">
+          {/* Connection Status */}
+          <ConnectionStatus standId={standId} />
           <LiveClock className="hidden sm:flex" />
           <Button
             variant="outline"
