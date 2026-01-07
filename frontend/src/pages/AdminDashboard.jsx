@@ -325,6 +325,46 @@ export default function AdminDashboard() {
         )}
       </main>
 
+      {/* Admin Help Dialog */}
+      <Dialog open={showHelp} onOpenChange={setShowHelp}>
+        <DialogContent className="bg-card border-border max-w-2xl max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-primary" />
+              Admin-Anleitung
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[55vh] pr-4">
+            <div className="space-y-3 py-2">
+              <section>
+                <h3 className="font-bold text-primary text-sm mb-1">🏪 Stände</h3>
+                <p className="text-xs text-muted-foreground">Stand erstellen mit Typ (Speise/Getränk/Gemischt). "Kurzer Prozess" = Bestellung direkt zur Ausgabe.</p>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-primary text-sm mb-1">📦 Artikel</h3>
+                <p className="text-xs text-muted-foreground">Artikel mit Preis und Kategorie anlegen. Optional Pfandgruppe zuweisen.</p>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-primary text-sm mb-1">💰 Pfand</h3>
+                <p className="text-xs text-muted-foreground">Pfandgruppen erstellen (z.B. "Becher 2€") und Artikeln zuweisen.</p>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-primary text-sm mb-1">🏭 Stationen</h3>
+                <p className="text-xs text-muted-foreground">Unterstationen (Küche, Bar) für Linked-Articles. Hauptstation aktivieren für Hauptkarte.</p>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-primary text-sm mb-1">📊 Workflow</h3>
+                <p className="text-xs text-muted-foreground">Bestellung → Macher (bereitet zu) → Ausgabe (gibt aus). Kurzer Prozess überspringt Macher.</p>
+              </section>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
       {/* PIN Dialog */}
       <Dialog open={showResetDialog} onOpenChange={(open) => {
         setShowResetDialog(open);
