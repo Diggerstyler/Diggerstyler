@@ -25,11 +25,13 @@ import {
   Box,
   Settings,
   Clock,
-  Calendar
+  Calendar,
+  Download,
+  Trash2
 } from "lucide-react";
 import LiveClock from "@/components/LiveClock";
 import AppFooter from "@/components/AppFooter";
-import AdminNavBar, { AdminActions } from "@/components/AdminNavBar";
+import AdminNavBar from "@/components/AdminNavBar";
 import { useAdminSwipe } from "@/components/AdminSwipe";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
