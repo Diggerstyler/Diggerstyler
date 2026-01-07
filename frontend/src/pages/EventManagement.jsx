@@ -152,12 +152,18 @@ export default function EventManagement() {
     }
   };
 
+  const handleLogout = () => {
+    sessionStorage.removeItem("adminAuth");
+    navigate("/");
+  };
+
   const { swipeHandlers } = useAdminSwipe();
 
   return (
     <div className="min-h-screen bg-background flex flex-col" {...swipeHandlers}>
+      {/* Einheitlicher Header - nur Navigation + Hilfe + Logout */}
       <header className="glass sticky top-0 z-50 px-3 sm:px-6 py-2">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 shrink-0">
             <Calendar className="w-5 h-5 text-primary" />
             <h1 className="font-display text-sm sm:text-base font-bold uppercase tracking-tight hidden sm:block">
@@ -165,26 +171,29 @@ export default function EventManagement() {
             </h1>
           </div>
           
-          <div className="flex-1">
-            <AdminNavBar />
-          </div>
-          
-          <div className="shrink-0">
-            <Button 
-              onClick={() => {
-                setFormData({ name: "", description: "", start_date: "", end_date: "" });
-                setShowCreateDialog(true);
-              }}
-              size="sm"
-              className="neon-primary h-8"
-            >
-              <Plus className="w-4 h-4" />
-            </Button>
-          </div>
+          {/* Admin Navigation + Hilfe + Logout */}
+          <AdminNavBar 
+            onHelp={() => navigate("/admin/docs")}
+            onLogout={handleLogout}
+          />
         </div>
       </header>
 
       <main className="p-4 sm:p-6 max-w-6xl mx-auto flex-1">
+        {/* Action Button - im Main Content */}
+        <div className="flex flex-wrap gap-3 mb-6">
+          <Button 
+            onClick={() => {
+              setFormData({ name: "", description: "", start_date: "", end_date: "" });
+              setShowCreateDialog(true);
+            }}
+            className="neon-primary"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Neues Event erstellen
+          </Button>
+        </div>
+
         {isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Laden...</div>
         ) : events.length === 0 ? (
