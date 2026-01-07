@@ -257,6 +257,8 @@ export default function LandingPage() {
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <LiveClock className="hidden sm:flex" />
+          {/* Verbindungsstatus - überall sichtbar */}
+          <ConnectionStatusDot />
           <Button 
             variant="ghost" 
             size="icon"
