@@ -867,6 +867,7 @@ export default function OneManShowPage() {
           </Button>
         </div>
       </div>
+      <AppFooter />
     </div>
   );
 }
