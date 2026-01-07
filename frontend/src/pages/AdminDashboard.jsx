@@ -171,175 +171,74 @@ export default function AdminDashboard() {
     }
   ] : [];
 
-  const { swipeHandlers, currentIndex, totalPages, prevLabel, nextLabel } = useAdminSwipe();
+  const { swipeHandlers } = useAdminSwipe();
 
   return (
     <div 
       className="min-h-screen bg-background flex flex-col"
       {...swipeHandlers}
     >
-      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <LayoutDashboard className="w-5 sm:w-6 h-5 sm:h-6 text-primary" />
-            <h1 className="font-display text-base sm:text-xl font-bold uppercase tracking-tight">
-              Karnbachs Admin
+      <header className="glass sticky top-0 z-50 px-4 sm:px-6 py-3">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 shrink-0">
+            <LayoutDashboard className="w-5 h-5 text-primary" />
+            <h1 className="font-display text-base sm:text-lg font-bold uppercase tracking-tight">
+              Admin
             </h1>
           </div>
-          <div className="flex flex-wrap items-center gap-1 sm:gap-2 sm:ml-auto">
-            <LiveClock className="hidden md:flex mr-2" />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/admin/events")}
-              data-testid="events-nav-btn"
-              className="h-8 px-2"
-              title="Events"
-            >
-              <Calendar className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1">Events</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/admin/stands")}
-              data-testid="stands-nav-btn"
-              className="h-8 px-2"
-              title="Stände"
-            >
-              <Store className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1">Stände</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/admin/articles")}
-              data-testid="articles-nav-btn"
-              className="h-8 px-2"
-              title="Artikel"
-            >
-              <Package className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1">Artikel</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/admin/stock")}
-              data-testid="stock-nav-btn"
-              className="h-8 px-2"
-              title="Bestand"
-            >
-              <Box className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1">Bestand</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/admin/stations")}
-              data-testid="stations-nav-btn"
-              className="h-8 px-2"
-              title="Stationen"
-            >
-              <Layers className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1">Stationen</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/admin/stats")}
-              data-testid="stats-nav-btn"
-              className="h-8 px-2"
-              title="Statistik"
-            >
-              <BarChart3 className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1">Statistik</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/admin/settings")}
-              data-testid="settings-nav-btn"
-              className="h-8 px-2"
-              title="Einstellungen"
-            >
-              <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1">Einstellungen</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/admin/orders")}
-              data-testid="orders-nav-btn"
-              className="h-8 px-2"
-              title="Bestellungen"
-            >
-              <FileText className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1">Bestellungen</span>
-            </Button>
+          
+          {/* Admin Navigation - scrollbar horizontal auf Mobile */}
+          <div className="flex-1 overflow-x-auto scrollbar-hide">
+            <AdminNavBar />
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex items-center gap-1 shrink-0">
+            <LiveClock className="hidden lg:flex mr-2" />
             <Button
               variant="ghost"
               size="sm"
               onClick={handleExport}
               disabled={isExporting}
               data-testid="export-btn"
-              className="h-8 px-2 text-green-500"
+              className="h-8 w-8 p-0 text-green-500"
               title="Export"
             >
               <Download className="w-4 h-4" />
-              <span className="hidden lg:inline ml-1">Export</span>
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowResetDialog(true)}
               data-testid="reset-btn"
-              className="h-8 px-2 text-destructive"
+              className="h-8 w-8 p-0 text-destructive"
               title="Reset"
             >
               <Trash2 className="w-4 h-4" />
-              <span className="hidden lg:inline ml-1">Reset</span>
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowHelp(true)}
               data-testid="help-btn"
-              className="h-8 px-2"
+              className="h-8 w-8 p-0"
               title="Hilfe"
             >
               <HelpCircle className="w-4 h-4" />
-              <span className="hidden lg:inline ml-1">Hilfe</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/admin/docs")}
-              className="h-8 px-2"
-              title="Dokumentation"
-            >
-              <FileText className="w-4 h-4" />
-              <span className="hidden lg:inline ml-1">Doku</span>
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleLogout}
               data-testid="logout-btn"
+              className="h-8 w-8 p-0"
+              title="Abmelden"
             >
-              <LogOut className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Abmelden</span>
+              <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
       </header>
-
-      {/* Swipe Indicator für Mobile */}
-      <SwipeIndicator 
-        currentIndex={currentIndex} 
-        totalPages={totalPages} 
-        prevLabel={prevLabel} 
-        nextLabel={nextLabel} 
-      />
 
       {/* Admin Help Dialog */}
       <Dialog open={showHelp} onOpenChange={setShowHelp}>
