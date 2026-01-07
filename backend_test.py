@@ -11,7 +11,7 @@ from datetime import datetime
 from base64 import b64encode
 
 class FestivalAPITester:
-    def __init__(self, base_url="https://statflow-9.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://eventmgmt-ui.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.admin_auth = b64encode(b"admin:admin").decode('ascii')
         self.tests_run = 0
