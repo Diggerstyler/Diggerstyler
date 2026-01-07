@@ -19,7 +19,7 @@ import LiveClock from "@/components/LiveClock";
 import AppFooter from "@/components/AppFooter";
 import AdminNavBar from "@/components/AdminNavBar";
 import { useAdminSwipe } from "@/components/AdminSwipe";
-import html2pdf from 'html2pdf.js';
+import { jsPDF } from "jspdf";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
